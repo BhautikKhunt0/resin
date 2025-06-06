@@ -116,7 +116,7 @@ export class MemStorage implements IStorage {
         price: "299.99",
         imageUrl: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300",
         categoryId: electronics.id,
-        subcategoryId: undefined,
+        subcategoryId: null,
         stock: 32,
         createdAt: new Date(),
       },
@@ -168,6 +168,7 @@ export class MemStorage implements IStorage {
     const newCategory: Category = {
       ...category,
       id: this.currentCategoryId++,
+      description: category.description || null,
     };
     this.categories.set(newCategory.id, newCategory);
     return newCategory;
@@ -203,6 +204,7 @@ export class MemStorage implements IStorage {
     const newSubcategory: Subcategory = {
       ...subcategory,
       id: this.currentSubcategoryId++,
+      description: subcategory.description || null,
     };
     this.subcategories.set(newSubcategory.id, newSubcategory);
     return newSubcategory;
@@ -243,6 +245,9 @@ export class MemStorage implements IStorage {
       ...product,
       id: this.currentProductId++,
       createdAt: new Date(),
+      imageUrl: product.imageUrl || null,
+      subcategoryId: product.subcategoryId || null,
+      stock: product.stock || 0,
     };
     this.products.set(newProduct.id, newProduct);
     return newProduct;
@@ -275,6 +280,7 @@ export class MemStorage implements IStorage {
       ...order,
       id: this.currentOrderId++,
       createdAt: new Date(),
+      status: order.status || "Processing",
     };
     this.orders.set(newOrder.id, newOrder);
     return newOrder;

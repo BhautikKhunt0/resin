@@ -9,7 +9,7 @@ import { insertProductSchema, insertCategorySchema, insertSubcategorySchema, ins
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
 
 // Email configuration
-const emailTransporter = nodemailer.createTransporter({
+const emailTransporter = nodemailer.createTransport({
   host: process.env.EMAIL_HOST || "smtp.gmail.com",
   port: parseInt(process.env.EMAIL_PORT || "587"),
   secure: false,
