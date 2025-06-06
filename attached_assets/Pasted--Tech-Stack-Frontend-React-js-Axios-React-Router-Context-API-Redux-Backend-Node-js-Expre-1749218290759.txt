@@ -1,0 +1,149 @@
+💻 Tech Stack:
+Frontend: React.js, Axios, React Router, Context API / Redux
+
+Backend: Node.js, Express.js
+
+Database: MongoDB with Mongoose
+
+Authentication:
+
+No user login/register
+
+Only admin login via JWT
+
+Email: Nodemailer (or SendGrid)
+
+Other: Multer (image uploads), Cloudinary/S3, dotenv, CORS
+
+🌐 Core Functionalities
+1. User Side (No Login Required):
+Browse products by category and subcategory
+
+View product details
+
+Add products to cart
+
+Checkout (enter name, email, address, phone)
+
+Place an order without needing to log in
+
+Email confirmation is sent to the user's email with all order details
+
+2. Admin Dashboard (Login Required):
+Login Page at /admin/login
+
+Protected Dashboard at /admin/*
+
+Category/Subcategory Management
+
+Create, update, delete
+
+Product Management
+
+Create, update, delete products
+
+Assign categories/subcategories
+
+Order Management
+
+View all orders
+
+Update status: Processing, Shipped, Canceled
+
+Delete orders
+
+Email Integration
+
+Email sent to customer upon order placement with:
+
+Order summary
+
+Total price
+
+Shipping address
+
+Order status (Processing by default)
+
+📦 Backend API (Node.js with Express)
+🔐 Admin Auth:
+POST /api/admin/login – Admin login
+
+Use JWT middleware for:
+
+/api/admin/*
+
+All POST/PUT/DELETE routes
+
+📁 Categories/Subcategories:
+GET /api/categories
+
+POST /api/admin/categories
+
+PUT /api/admin/categories/:id
+
+DELETE /api/admin/categories/:id
+
+📦 Products:
+GET /api/products
+
+GET /api/products/:id
+
+POST /api/admin/products
+
+PUT /api/admin/products/:id
+
+DELETE /api/admin/products/:id
+
+🧾 Orders:
+POST /api/orders – Public route for order placement
+
+GET /api/admin/orders
+
+PUT /api/admin/orders/:id/status
+
+DELETE /api/admin/orders/:id
+
+🎨 Frontend (React)
+User-Facing Pages:
+Home (Featured products)
+
+Product List (Filter by category/subcategory)
+
+Product Details
+
+Cart
+
+Checkout Form (Name, Email, Address, Phone)
+
+Order Confirmation Page
+
+Admin Panel (only accessible after login):
+Admin Login Page (/admin/login)
+
+Dashboard Overview
+
+Manage Products (CRUD)
+
+Manage Categories/Subcategories (CRUD)
+
+Manage Orders (View, update status)
+
+📧 Email Notification (Nodemailer)
+Triggered on POST /api/orders
+
+Email to user includes:
+
+Customer name
+
+Email and shipping info
+
+Product list + total
+
+Initial order status
+
+🔐 Security
+JWT required for all /api/admin/* routes
+
+Admin-only dashboard using route guards on frontend
+
+Users can browse and order without authentication
