@@ -104,3 +104,25 @@ const adminSchema = new Schema<IAdmin>({
 }, { timestamps: false });
 
 export const AdminModel = model<IAdmin>('Admin', adminSchema);
+
+// Banner Schema
+export interface IBanner extends Document {
+  _id: string;
+  title: string;
+  description?: string;
+  imageUrl?: string;
+  imageBlob?: Buffer;
+  isActive: number;
+  createdAt: Date;
+}
+
+const bannerSchema = new Schema<IBanner>({
+  title: { type: String, required: true },
+  description: { type: String },
+  imageUrl: { type: String },
+  imageBlob: { type: Buffer },
+  isActive: { type: Number, default: 1 },
+  createdAt: { type: Date, default: Date.now }
+}, { timestamps: false });
+
+export const BannerModel = model<IBanner>('Banner', bannerSchema);

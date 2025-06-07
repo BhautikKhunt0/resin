@@ -4,11 +4,13 @@ import {
   type Product,
   type Order,
   type Admin,
+  type Banner,
   type InsertCategory,
   type InsertSubcategory,
   type InsertProduct,
   type InsertOrder,
-  type InsertAdmin
+  type InsertAdmin,
+  type InsertBanner
 } from "@shared/schema";
 import { IStorage } from "./storage";
 import {
@@ -17,11 +19,13 @@ import {
   ProductModel,
   OrderModel,
   AdminModel,
+  BannerModel,
   type ICategory,
   type ISubcategory,
   type IProduct,
   type IOrder,
-  type IAdmin
+  type IAdmin,
+  type IBanner
 } from "@shared/mongodb-schema";
 
 export class MongoDBStorage implements IStorage {
@@ -51,9 +55,11 @@ export class MongoDBStorage implements IStorage {
       description: doc.description,
       price: doc.price,
       imageUrl: doc.imageUrl || null,
+      imageBlob: null,
       categoryId: parseInt(doc.categoryId.slice(-8), 16),
       subcategoryId: doc.subcategoryId ? parseInt(doc.subcategoryId.slice(-8), 16) : null,
       stock: doc.stock,
+      isFeatured: doc.isFeatured,
       createdAt: doc.createdAt
     };
   }
@@ -82,6 +88,18 @@ export class MongoDBStorage implements IStorage {
       id: parseInt(doc._id.toString().slice(-8), 16),
       email: doc.email,
       password: doc.password
+    };
+  }
+
+  private convertBanner(doc: IBanner): Banner {
+    return {
+      id: parseInt(doc._id.toString().slice(-8), 16),
+      title: doc.title,
+      description: doc.description || "",
+      imageUrl: doc.imageUrl || null,
+      imageBlob: doc.imageBlob ? doc.imageBlob.toString() : null,
+      isActive: doc.isActive,
+      createdAt: doc.createdAt
     };
   }
 
@@ -355,5 +373,63 @@ export class MongoDBStorage implements IStorage {
     });
     const saved = await newAdmin.save();
     return this.convertAdmin(saved);
+  }
+
+  // Banners
+  async getBanners(): Promise<Banner[]> {
+    const banners = await BannerModel.find();
+    return banners.map(banner => this.convertBanner(banner));
+  }
+
+  async getActiveBanners(): Promise<Banner[]> {
+    const banners = await BannerModel.find({ isActive: 1 });
+    return banners.map(banner => this.convertBanner(banner));
+  }
+
+  async getBannerById(id: number): Promise<Banner | undefined> {
+    const banners = await BannerModel.find();
+    const banner = banners.find(b => parseInt(b._id.toString().slice(-8), 16) === id);
+    return banner ? this.convertBanner(banner) : undefined;
+  }
+
+  async createBanner(banner: InsertBanner): Promise<Banner> {
+    const newBanner = new BannerModel({
+      title: banner.title,
+      description: banner.description,
+      imageUrl: banner.imageUrl,
+      imageBlob: banner.imageBlob ? Buffer.from(banner.imageBlob, 'base64') : undefined,
+      isActive: banner.isActive || 1
+    });
+    const saved = await newBanner.save();
+    return this.convertBanner(saved);
+  }
+
+  async updateBanner(id: number, banner: Partial<InsertBanner>): Promise<Banner | undefined> {
+    const banners = await BannerModel.find();
+    const existing = banners.find(b => parseInt(b._id.toString().slice(-8), 16) === id);
+    if (!existing) return undefined;
+
+    const updateData: any = {};
+    if (banner.title !== undefined) updateData.title = banner.title;
+    if (banner.description !== undefined) updateData.description = banner.description;
+    if (banner.imageUrl !== undefined) updateData.imageUrl = banner.imageUrl;
+    if (banner.imageBlob !== undefined) updateData.imageBlob = banner.imageBlob ? Buffer.from(banner.imageBlob, 'base64') : null;
+    if (banner.isActive !== undefined) updateData.isActive = banner.isActive;
+
+    const updated = await BannerModel.findByIdAndUpdate(
+      existing._id,
+      updateData,
+      { new: true }
+    );
+    return updated ? this.convertBanner(updated) : undefined;
+  }
+
+  async deleteBanner(id: number): Promise<boolean> {
+    const banners = await BannerModel.find();
+    const existing = banners.find(b => parseInt(b._id.toString().slice(-8), 16) === id);
+    if (!existing) return false;
+
+    await BannerModel.findByIdAndDelete(existing._id);
+    return true;
   }
 }
