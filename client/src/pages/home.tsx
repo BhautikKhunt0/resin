@@ -26,6 +26,29 @@ export default function Home() {
   });
 
   const featuredProducts = products?.slice(0, 4) || [];
+  const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
+
+  // Auto-slide banners every 5 seconds
+  useEffect(() => {
+    if (banners && banners.length > 1) {
+      const interval = setInterval(() => {
+        setCurrentBannerIndex((prev) => (prev + 1) % banners.length);
+      }, 5000);
+      return () => clearInterval(interval);
+    }
+  }, [banners]);
+
+  const nextBanner = () => {
+    if (banners && banners.length > 1) {
+      setCurrentBannerIndex((prev) => (prev + 1) % banners.length);
+    }
+  };
+
+  const prevBanner = () => {
+    if (banners && banners.length > 1) {
+      setCurrentBannerIndex((prev) => (prev - 1 + banners.length) % banners.length);
+    }
+  };
 
   return (
     <div className="min-h-screen">
@@ -36,54 +59,95 @@ export default function Home() {
         </section>
       ) : banners && banners.length > 0 ? (
         <section className="relative">
-          {banners.map((banner) => (
-            <div key={banner.id} className="relative w-full h-96 overflow-hidden">
-              {banner.imageUrl || banner.imageBlob ? (
-                <div className="relative w-full h-full">
-                  <img
-                    src={banner.imageBlob ? `data:image/jpeg;base64,${banner.imageBlob}` : banner.imageUrl}
-                    alt={banner.title}
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
-                    <div className="text-center text-white max-w-4xl px-4">
+          <div className="relative w-full h-96 overflow-hidden">
+            {banners.map((banner, index) => (
+              <div
+                key={banner.id}
+                className={`absolute inset-0 transition-transform duration-500 ease-in-out ${
+                  index === currentBannerIndex ? 'translate-x-0' : 
+                  index < currentBannerIndex ? '-translate-x-full' : 'translate-x-full'
+                }`}
+              >
+                {banner.imageUrl || banner.imageBlob ? (
+                  <div className="relative w-full h-full">
+                    <img
+                      src={banner.imageBlob ? `data:image/jpeg;base64,${banner.imageBlob}` : (banner.imageUrl || '')}
+                      alt={banner.title}
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
+                      <div className="text-center text-white max-w-4xl px-4">
+                        <h1 className="text-4xl md:text-6xl font-bold mb-6">
+                          {banner.title}
+                        </h1>
+                        {banner.description && (
+                          <p className="text-xl md:text-2xl mb-8">
+                            {banner.description}
+                          </p>
+                        )}
+                        <Link href="/products">
+                          <Button size="lg" variant="secondary">
+                            Shop Now
+                          </Button>
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="relative bg-gradient-to-r from-primary to-blue-700 text-white h-full flex items-center justify-center">
+                    <div className="text-center max-w-4xl px-4">
                       <h1 className="text-4xl md:text-6xl font-bold mb-6">
                         {banner.title}
                       </h1>
                       {banner.description && (
-                        <p className="text-xl md:text-2xl mb-8">
+                        <p className="text-xl md:text-2xl mb-8 text-blue-100">
                           {banner.description}
                         </p>
                       )}
                       <Link href="/products">
-                        <Button size="lg" variant="secondary">
+                        <Button size="lg" variant="secondary" className="text-primary">
                           Shop Now
                         </Button>
                       </Link>
                     </div>
                   </div>
-                </div>
-              ) : (
-                <div className="relative bg-gradient-to-r from-primary to-blue-700 text-white h-full flex items-center justify-center">
-                  <div className="text-center max-w-4xl px-4">
-                    <h1 className="text-4xl md:text-6xl font-bold mb-6">
-                      {banner.title}
-                    </h1>
-                    {banner.description && (
-                      <p className="text-xl md:text-2xl mb-8 text-blue-100">
-                        {banner.description}
-                      </p>
-                    )}
-                    <Link href="/products">
-                      <Button size="lg" variant="secondary" className="text-primary">
-                        Shop Now
-                      </Button>
-                    </Link>
-                  </div>
-                </div>
-              )}
-            </div>
-          ))}
+                )}
+              </div>
+            ))}
+            
+            {/* Navigation arrows */}
+            {banners.length > 1 && (
+              <>
+                <button
+                  onClick={prevBanner}
+                  className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-20 hover:bg-opacity-30 text-white p-2 rounded-full transition-all duration-200"
+                >
+                  <ChevronLeft className="w-6 h-6" />
+                </button>
+                <button
+                  onClick={nextBanner}
+                  className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-20 hover:bg-opacity-30 text-white p-2 rounded-full transition-all duration-200"
+                >
+                  <ChevronRight className="w-6 h-6" />
+                </button>
+              </>
+            )}
+
+            {/* Dots indicator */}
+            {banners.length > 1 && (
+              <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
+                {banners.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setCurrentBannerIndex(index)}
+                    className={`w-3 h-3 rounded-full transition-all duration-200 ${
+                      index === currentBannerIndex ? 'bg-white' : 'bg-white bg-opacity-50'
+                    }`}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
         </section>
       ) : (
         <section className="relative bg-gradient-to-r from-primary to-blue-700 text-white py-20">
