@@ -776,27 +776,31 @@ export default function AdminDashboard() {
                             </Button>
                             
                             {/* Image Preview */}
-                            {(productForm.watch('imageBlob') || productForm.watch('imageUrl')) && (
-                              <div className="mt-4">
-                                <p className="text-sm text-green-600 mb-2">
-                                  ✓ Image uploaded successfully
-                                </p>
-                                <div className="border rounded-lg p-2 bg-gray-50">
-                                  <img
-                                    src={
-                                      productForm.watch('imageBlob') 
-                                        ? `data:image/jpeg;base64,${productForm.watch('imageBlob')}` 
-                                        : productForm.watch('imageUrl') || ''
-                                    }
-                                    alt="Product preview"
-                                    className="w-full h-32 object-cover rounded"
-                                    onError={(e) => {
-                                      e.currentTarget.style.display = 'none';
-                                    }}
-                                  />
+                            {(() => {
+                              const imageBlob = productForm.watch('imageBlob');
+                              const imageUrl = productForm.watch('imageUrl');
+                              const hasImage = imageBlob || (imageUrl && imageUrl.trim() !== '');
+                              
+                              if (!hasImage) return null;
+                              
+                              return (
+                                <div className="mt-4">
+                                  <p className="text-sm text-green-600 mb-2">
+                                    ✓ Image {imageBlob ? 'uploaded' : 'loaded'} successfully
+                                  </p>
+                                  <div className="border rounded-lg p-2 bg-gray-50">
+                                    <img
+                                      src={imageBlob ? `data:image/jpeg;base64,${imageBlob}` : imageUrl || ''}
+                                      alt="Product preview"
+                                      className="w-full h-32 object-cover rounded"
+                                      onError={(e) => {
+                                        e.currentTarget.style.display = 'none';
+                                      }}
+                                    />
+                                  </div>
                                 </div>
-                              </div>
-                            )}
+                              );
+                            })()}
                           </div>
                         </div>
 
@@ -1233,27 +1237,31 @@ export default function AdminDashboard() {
                             </Button>
                             
                             {/* Image Preview */}
-                            {(bannerForm.watch('imageBlob') || bannerForm.watch('imageUrl')) && (
-                              <div className="mt-4">
-                                <p className="text-sm text-green-600 mb-2">
-                                  ✓ Image uploaded successfully
-                                </p>
-                                <div className="border rounded-lg p-2 bg-gray-50">
-                                  <img
-                                    src={
-                                      bannerForm.watch('imageBlob') 
-                                        ? `data:image/jpeg;base64,${bannerForm.watch('imageBlob')}` 
-                                        : bannerForm.watch('imageUrl') || ''
-                                    }
-                                    alt="Banner preview"
-                                    className="w-full h-32 object-cover rounded"
-                                    onError={(e) => {
-                                      e.currentTarget.style.display = 'none';
-                                    }}
-                                  />
+                            {(() => {
+                              const imageBlob = bannerForm.watch('imageBlob');
+                              const imageUrl = bannerForm.watch('imageUrl');
+                              const hasImage = imageBlob || (imageUrl && imageUrl.trim() !== '');
+                              
+                              if (!hasImage) return null;
+                              
+                              return (
+                                <div className="mt-4">
+                                  <p className="text-sm text-green-600 mb-2">
+                                    ✓ Image {imageBlob ? 'uploaded' : 'loaded'} successfully
+                                  </p>
+                                  <div className="border rounded-lg p-2 bg-gray-50">
+                                    <img
+                                      src={imageBlob ? `data:image/jpeg;base64,${imageBlob}` : imageUrl || ''}
+                                      alt="Banner preview"
+                                      className="w-full h-32 object-cover rounded"
+                                      onError={(e) => {
+                                        e.currentTarget.style.display = 'none';
+                                      }}
+                                    />
+                                  </div>
                                 </div>
-                              </div>
-                            )}
+                              );
+                            })()}
                           </div>
                         </div>
 
