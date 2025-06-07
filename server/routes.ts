@@ -290,10 +290,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid status" });
       }
 
+      // Get the current order to capture the previous status
+      const currentOrder = await storage.getOrderById(orderId);
+      if (!currentOrder) {
+        return res.status(404).json({ message: "Order not found" });
+      }
+
+      const previousStatus = currentOrder.status;
       const order = await storage.updateOrderStatus(orderId, status);
       
       if (!order) {
         return res.status(404).json({ message: "Order not found" });
+      }
+
+      // Send email notification for status update
+      try {
+        console.log(`Sending status update email for order ${order.id} from ${previousStatus} to ${order.status}`);
+        await sendOrderStatusUpdateEmail(order, previousStatus);
+        console.log(`Status update email sent successfully for order ${order.id}`);
+      } catch (emailError) {
+        console.error("Failed to send status update email:", emailError);
+        // Don't fail the order update if email fails
       }
 
       res.json(order);
