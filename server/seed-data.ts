@@ -1,7 +1,3 @@
-import express, { type Request, Response, NextFunction } from "express";
-import { registerRoutes } from "./routes";
-import { setupVite, serveStatic, log } from "./vite";
-import { connectToMongoDB } from "./mongodb-connection";
 import {
   CategoryModel,
   SubcategoryModel,
@@ -9,8 +5,9 @@ import {
   AdminModel
 } from "@shared/mongodb-schema";
 
-async function seedInitialData() {
+export async function seedInitialData() {
   try {
+    // Check if data already exists
     const existingCategories = await CategoryModel.countDocuments();
     if (existingCategories > 0) {
       console.log('Data already seeded, skipping...');
@@ -19,6 +16,7 @@ async function seedInitialData() {
 
     console.log('Seeding initial data...');
 
+    // Create categories
     const electronics = await CategoryModel.create({
       name: "Electronics",
       description: "Electronic devices and gadgets"
@@ -39,6 +37,7 @@ async function seedInitialData() {
       description: "Sports and fitness equipment"
     });
 
+    // Create subcategories
     const smartphones = await SubcategoryModel.create({
       name: "Smartphones",
       description: "Mobile phones",
@@ -57,6 +56,19 @@ async function seedInitialData() {
       categoryId: electronics._id.toString()
     });
 
+    const menShirts = await SubcategoryModel.create({
+      name: "Men's Shirts",
+      description: "Shirts for men",
+      categoryId: clothing._id.toString()
+    });
+
+    const womenDresses = await SubcategoryModel.create({
+      name: "Women's Dresses",
+      description: "Dresses for women",
+      categoryId: clothing._id.toString()
+    });
+
+    // Create products
     await ProductModel.create([
       {
         name: "Premium Wireless Headphones",
@@ -92,14 +104,50 @@ async function seedInitialData() {
         categoryId: electronics._id.toString(),
         subcategoryId: smartphones._id.toString(),
         stock: 25
+      },
+      {
+        name: "Wireless Gaming Mouse",
+        description: "High-precision gaming mouse with customizable buttons",
+        price: "79.99",
+        imageUrl: "https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300",
+        categoryId: electronics._id.toString(),
+        stock: 67
+      },
+      {
+        name: "Casual Cotton T-Shirt",
+        description: "Comfortable everyday wear in various colors",
+        price: "24.99",
+        imageUrl: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300",
+        categoryId: clothing._id.toString(),
+        subcategoryId: menShirts._id.toString(),
+        stock: 150
+      },
+      {
+        name: "Elegant Summer Dress",
+        description: "Perfect for special occasions and everyday elegance",
+        price: "89.99",
+        imageUrl: "https://images.unsplash.com/photo-1595777457583-95e059d581b8?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300",
+        categoryId: clothing._id.toString(),
+        subcategoryId: womenDresses._id.toString(),
+        stock: 42
+      },
+      {
+        name: "Professional Dress Shirt",
+        description: "Crisp and clean for business and formal occasions",
+        price: "59.99",
+        imageUrl: "https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300",
+        categoryId: clothing._id.toString(),
+        subcategoryId: menShirts._id.toString(),
+        stock: 88
       }
     ]);
 
+    // Create default admin
     const existingAdmin = await AdminModel.findOne({ email: "admin@modernshop.com" });
     if (!existingAdmin) {
       await AdminModel.create({
         email: "admin@modernshop.com",
-        password: "$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi"
+        password: "$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi" // "password" hashed
       });
     }
 
@@ -109,81 +157,3 @@ async function seedInitialData() {
     throw error;
   }
 }
-
-const app = express();
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
-
-app.use((req, res, next) => {
-  const start = Date.now();
-  const path = req.path;
-  let capturedJsonResponse: Record<string, any> | undefined = undefined;
-
-  const originalResJson = res.json;
-  res.json = function (bodyJson, ...args) {
-    capturedJsonResponse = bodyJson;
-    return originalResJson.apply(res, [bodyJson, ...args]);
-  };
-
-  res.on("finish", () => {
-    const duration = Date.now() - start;
-    if (path.startsWith("/api")) {
-      let logLine = `${req.method} ${path} ${res.statusCode} in ${duration}ms`;
-      if (capturedJsonResponse) {
-        logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
-      }
-
-      if (logLine.length > 80) {
-        logLine = logLine.slice(0, 79) + "…";
-      }
-
-      log(logLine);
-    }
-  });
-
-  next();
-});
-
-(async () => {
-  try {
-    // Connect to MongoDB
-    await connectToMongoDB();
-    
-    // Seed initial data
-    await seedInitialData();
-    
-    const server = await registerRoutes(app);
-
-    app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
-      const status = err.status || err.statusCode || 500;
-      const message = err.message || "Internal Server Error";
-
-      res.status(status).json({ message });
-      throw err;
-    });
-
-    // importantly only setup vite in development and after
-    // setting up all the other routes so the catch-all route
-    // doesn't interfere with the other routes
-    if (app.get("env") === "development") {
-      await setupVite(app, server);
-    } else {
-      serveStatic(app);
-    }
-
-    // ALWAYS serve the app on port 5000
-    // this serves both the API and the client.
-    // It is the only port that is not firewalled.
-    const port = 5000;
-    server.listen({
-      port,
-      host: "0.0.0.0",
-      reusePort: true,
-    }, () => {
-      log(`serving on port ${port}`);
-    });
-  } catch (error) {
-    console.error('Failed to start server:', error);
-    process.exit(1);
-  }
-})();
