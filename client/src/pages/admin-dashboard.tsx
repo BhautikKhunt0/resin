@@ -1126,7 +1126,254 @@ export default function AdminDashboard() {
               </Card>
             </div>
           )}
+
+          {activeTab === "banners" && (
+            <div className="space-y-6">
+              <div className="flex justify-between items-center">
+                <h2 className="text-2xl font-bold text-gray-900">Banner Management</h2>
+                <Dialog open={bannerDialogOpen} onOpenChange={setBannerDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button onClick={handleAddBanner}>
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add Banner
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-md">
+                    <DialogHeader>
+                      <DialogTitle>
+                        {editingBanner ? "Edit Banner" : "Add New Banner"}
+                      </DialogTitle>
+                    </DialogHeader>
+                    <Form {...bannerForm}>
+                      <form onSubmit={bannerForm.handleSubmit(handleBannerSubmit)} className="space-y-4">
+                        <FormField
+                          control={bannerForm.control}
+                          name="title"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Title</FormLabel>
+                              <FormControl>
+                                <Input placeholder="Banner title" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={bannerForm.control}
+                          name="description"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Description</FormLabel>
+                              <FormControl>
+                                <Textarea placeholder="Banner description (optional)" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <div className="space-y-4">
+                          <FormField
+                            control={bannerForm.control}
+                            name="imageUrl"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Image URL</FormLabel>
+                                <FormControl>
+                                  <Input placeholder="https://example.com/image.jpg" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          
+                          <div className="text-center">
+                            <p className="text-sm text-gray-500 mb-2">Or upload an image</p>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              onClick={() => handleImageUpload('banner')}
+                            >
+                              Upload Image
+                            </Button>
+                          </div>
+                        </div>
+
+                        <FormField
+                          control={bannerForm.control}
+                          name="isActive"
+                          render={({ field }) => (
+                            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                              <div className="space-y-0.5">
+                                <FormLabel className="text-base">Active Banner</FormLabel>
+                                <div className="text-sm text-muted-foreground">
+                                  Show this banner on the homepage
+                                </div>
+                              </div>
+                              <FormControl>
+                                <Switch
+                                  checked={field.value}
+                                  onCheckedChange={field.onChange}
+                                />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+
+                        <div className="flex space-x-2">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => setBannerDialogOpen(false)}
+                            className="flex-1"
+                          >
+                            Cancel
+                          </Button>
+                          <Button
+                            type="submit"
+                            className="flex-1"
+                            disabled={createBannerMutation.isPending || updateBannerMutation.isPending}
+                          >
+                            {editingBanner ? "Update" : "Create"}
+                          </Button>
+                        </div>
+                      </form>
+                    </Form>
+                  </DialogContent>
+                </Dialog>
+              </div>
+
+              <Card>
+                <CardContent>
+                  {bannersLoading ? (
+                    <div className="space-y-3 p-6">
+                      {[...Array(3)].map((_, i) => (
+                        <Skeleton key={i} className="h-24 w-full" />
+                      ))}
+                    </div>
+                  ) : (
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Preview</TableHead>
+                          <TableHead>Title</TableHead>
+                          <TableHead>Description</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead>Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {banners?.map((banner) => (
+                          <TableRow key={banner.id}>
+                            <TableCell>
+                              {banner.imageUrl || banner.imageBlob ? (
+                                <img
+                                  src={banner.imageBlob ? `data:image/jpeg;base64,${banner.imageBlob}` : banner.imageUrl || ''}
+                                  alt={banner.title}
+                                  className="w-16 h-12 object-cover rounded"
+                                />
+                              ) : (
+                                <div className="w-16 h-12 bg-gray-200 rounded flex items-center justify-center">
+                                  <Eye className="h-6 w-6 text-gray-400" />
+                                </div>
+                              )}
+                            </TableCell>
+                            <TableCell className="font-medium">{banner.title}</TableCell>
+                            <TableCell className="max-w-xs truncate">
+                              {banner.description || "No description"}
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant={banner.isActive ? "default" : "secondary"}>
+                                {banner.isActive ? "Active" : "Inactive"}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex space-x-2">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleEditBanner(banner)}
+                                >
+                                  <Edit className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => deleteBannerMutation.mutate(banner.id)}
+                                  className="text-red-600 hover:text-red-700"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          )}
         </main>
+
+        {/* Image Upload Dialog */}
+        <Dialog open={imageUploadDialogOpen} onOpenChange={setImageUploadDialogOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Upload Image</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="text-center">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      const reader = new FileReader();
+                      reader.onload = () => {
+                        const base64 = (reader.result as string).split(',')[1];
+                        uploadImageMutation.mutate({ 
+                          imageData: base64, 
+                          filename: file.name 
+                        });
+                      };
+                      reader.readAsDataURL(file);
+                    }
+                  }}
+                  className="hidden"
+                  id="image-upload"
+                />
+                <label
+                  htmlFor="image-upload"
+                  className="cursor-pointer block w-full p-6 border-2 border-dashed border-gray-300 rounded-lg hover:border-gray-400 transition-colors"
+                >
+                  <div className="text-center">
+                    <Plus className="mx-auto h-12 w-12 text-gray-400" />
+                    <div className="mt-2">
+                      <p className="text-sm font-medium text-gray-900">
+                        Click to upload image
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        PNG, JPG, GIF up to 10MB
+                      </p>
+                    </div>
+                  </div>
+                </label>
+              </div>
+              <Button
+                variant="outline"
+                onClick={() => setImageUploadDialogOpen(false)}
+                className="w-full"
+              >
+                Cancel
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
