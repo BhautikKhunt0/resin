@@ -3,21 +3,12 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
-import nodemailer from "nodemailer";
 import { insertProductSchema, insertCategorySchema, insertSubcategorySchema, insertOrderSchema } from "@shared/schema";
+import { sendOrderConfirmationEmail, sendOrderStatusUpdateEmail } from "./email-service";
 
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
 
-// Email configuration
-const emailTransporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST || "smtp.gmail.com",
-  port: parseInt(process.env.EMAIL_PORT || "587"),
-  secure: false,
-  auth: {
-    user: process.env.EMAIL_USER || "admin@modernshop.com",
-    pass: process.env.EMAIL_PASS || "your-email-password"
-  }
-});
+
 
 // JWT middleware for admin routes
 const authenticateAdmin = (req: any, res: any, next: any) => {
@@ -101,32 +92,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Send email confirmation
       try {
-        const orderItems = Array.isArray(orderData.orderItems) ? orderData.orderItems : [];
-        const itemsList = orderItems.map((item: any) => 
-          `${item.name} - Quantity: ${item.quantity} - Price: $${item.price}`
-        ).join('\n');
-
-        const emailHTML = `
-          <h2>Order Confirmation</h2>
-          <p>Dear ${orderData.customerName},</p>
-          <p>Thank you for your order! Here are your order details:</p>
-          <h3>Order #${order.id}</h3>
-          <p><strong>Items:</strong></p>
-          <pre>${itemsList}</pre>
-          <p><strong>Total Amount:</strong> $${orderData.totalAmount}</p>
-          <p><strong>Status:</strong> ${order.status}</p>
-          <p><strong>Shipping Address:</strong></p>
-          <p>${orderData.shippingAddress}</p>
-          <p>We will notify you when your order ships.</p>
-          <p>Best regards,<br>ModernShop Team</p>
-        `;
-
-        await emailTransporter.sendMail({
-          from: process.env.EMAIL_USER || "admin@modernshop.com",
-          to: orderData.customerEmail,
-          subject: `Order Confirmation #${order.id}`,
-          html: emailHTML
-        });
+        await sendOrderConfirmationEmail(order);
       } catch (emailError) {
         console.error("Failed to send email:", emailError);
         // Don't fail the order if email fails
