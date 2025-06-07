@@ -294,15 +294,20 @@ export default function AdminDashboard() {
   });
 
   const updateBannerMutation = useMutation({
-    mutationFn: ({ id, data }: { id: number; data: any }) => api.updateBanner(token, id, data),
+    mutationFn: ({ id, data }: { id: number; data: any }) => {
+      console.log('Updating banner with data:', data); // Debug log
+      return api.updateBanner(token, id, data);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/banners"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/banners"] }); // Also invalidate public banners
       setBannerDialogOpen(false);
       bannerForm.reset();
       setEditingBanner(null);
       toast({ title: "Banner updated successfully" });
     },
-    onError: () => {
+    onError: (error) => {
+      console.error('Banner update error:', error); // Debug log
       toast({ title: "Failed to update banner", variant: "destructive" });
     },
   });
@@ -323,18 +328,21 @@ export default function AdminDashboard() {
     mutationFn: ({ imageData, filename }: { imageData: string; filename?: string }) => 
       api.uploadImage(token, imageData, filename),
     onSuccess: (data) => {
+      console.log('Upload success:', data); // Debug log
       if (currentImageField === 'product') {
         productForm.setValue('imageBlob', data.imageBlob);
         productForm.setValue('imageUrl', ''); // Clear URL when using blob
       } else if (currentImageField === 'banner') {
         bannerForm.setValue('imageBlob', data.imageBlob);
         bannerForm.setValue('imageUrl', ''); // Clear URL when using blob
+        console.log('Banner form updated with blob:', data.imageBlob); // Debug log
       }
       setImageUploadDialogOpen(false);
       setCurrentImageField(null);
       toast({ title: "Image uploaded successfully" });
     },
-    onError: () => {
+    onError: (error) => {
+      console.error('Upload error:', error); // Debug log
       toast({ title: "Failed to upload image", variant: "destructive" });
     },
   });
@@ -360,12 +368,14 @@ export default function AdminDashboard() {
   };
 
   const handleBannerSubmit = (data: BannerFormData) => {
+    console.log('Banner form data:', data); // Debug log
     const bannerData = {
       ...data,
       imageUrl: data.imageUrl || undefined,
       imageBlob: data.imageBlob || undefined,
       isActive: data.isActive ? 1 : 0,
     };
+    console.log('Banner data to submit:', bannerData); // Debug log
 
     if (editingBanner) {
       updateBannerMutation.mutate({ id: editingBanner.id, data: bannerData });
@@ -1198,8 +1208,26 @@ export default function AdminDashboard() {
                             >
                               Upload Image
                             </Button>
+                            {bannerForm.watch('imageBlob') && (
+                              <p className="text-sm text-green-600 mt-2">
+                                ✓ Image uploaded successfully
+                              </p>
+                            )}
                           </div>
                         </div>
+
+                        {/* Hidden field for imageBlob */}
+                        <FormField
+                          control={bannerForm.control}
+                          name="imageBlob"
+                          render={({ field }) => (
+                            <FormItem style={{ display: 'none' }}>
+                              <FormControl>
+                                <Input type="hidden" {...field} />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
 
                         <FormField
                           control={bannerForm.control}
