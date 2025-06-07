@@ -100,4 +100,51 @@ export const api = {
         'Authorization': `Bearer ${token}`,
       },
     }),
+
+  // Banners
+  getBanners: () => fetch('/api/banners').then(res => res.json()),
+
+  // Admin - Banners
+  getAdminBanners: (token: string) =>
+    fetch('/api/admin/banners', {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    }).then(res => res.json()),
+  createBanner: (token: string, data: any) =>
+    fetch('/api/admin/banners', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify(data),
+    }),
+  updateBanner: (token: string, id: number, data: any) =>
+    fetch(`/api/admin/banners/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify(data),
+    }),
+  deleteBanner: (token: string, id: number) =>
+    fetch(`/api/admin/banners/${id}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    }),
+
+  // Image Upload
+  uploadImage: (token: string, imageData: string, filename?: string) =>
+    fetch('/api/admin/upload-image', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify({ imageData, filename }),
+    }).then(res => res.json()),
 };

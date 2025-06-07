@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
-import { insertProductSchema, insertCategorySchema, insertSubcategorySchema, insertOrderSchema } from "@shared/schema";
+import { insertProductSchema, insertCategorySchema, insertSubcategorySchema, insertOrderSchema, insertBannerSchema } from "@shared/schema";
 import { sendOrderConfirmationEmail, sendOrderStatusUpdateEmail } from "./email-service";
 
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
@@ -331,6 +331,86 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(204).send();
     } catch (error) {
       res.status(500).json({ message: "Failed to delete order" });
+    }
+  });
+
+  // Public routes - Banners
+  app.get("/api/banners", async (req, res) => {
+    try {
+      const banners = await storage.getActiveBanners();
+      res.json(banners);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch banners" });
+    }
+  });
+
+  // Admin routes - Banners
+  app.get("/api/admin/banners", authenticateAdmin, async (req, res) => {
+    try {
+      const banners = await storage.getBanners();
+      res.json(banners);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch banners" });
+    }
+  });
+
+  app.post("/api/admin/banners", authenticateAdmin, async (req, res) => {
+    try {
+      const bannerData = insertBannerSchema.parse(req.body);
+      const banner = await storage.createBanner(bannerData);
+      res.status(201).json(banner);
+    } catch (error) {
+      res.status(400).json({ message: "Failed to create banner" });
+    }
+  });
+
+  app.put("/api/admin/banners/:id", authenticateAdmin, async (req, res) => {
+    try {
+      const bannerId = parseInt(req.params.id);
+      const bannerData = insertBannerSchema.partial().parse(req.body);
+      const banner = await storage.updateBanner(bannerId, bannerData);
+      
+      if (!banner) {
+        return res.status(404).json({ message: "Banner not found" });
+      }
+
+      res.json(banner);
+    } catch (error) {
+      res.status(400).json({ message: "Failed to update banner" });
+    }
+  });
+
+  app.delete("/api/admin/banners/:id", authenticateAdmin, async (req, res) => {
+    try {
+      const bannerId = parseInt(req.params.id);
+      const deleted = await storage.deleteBanner(bannerId);
+      
+      if (!deleted) {
+        return res.status(404).json({ message: "Banner not found" });
+      }
+
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete banner" });
+    }
+  });
+
+  // Image upload utility route
+  app.post("/api/admin/upload-image", authenticateAdmin, async (req, res) => {
+    try {
+      const { imageData, filename } = req.body;
+      
+      if (!imageData) {
+        return res.status(400).json({ message: "No image data provided" });
+      }
+
+      // Return the base64 data for blob storage
+      res.json({ 
+        imageBlob: imageData,
+        filename: filename || 'uploaded-image'
+      });
+    } catch (error) {
+      res.status(400).json({ message: "Failed to process image" });
     }
   });
 
