@@ -1361,13 +1361,47 @@ export default function AdminDashboard() {
                   onChange={(e) => {
                     const file = e.target.files?.[0];
                     if (file) {
-                      const reader = new FileReader();
-                      reader.onload = () => {
-                        const base64 = (reader.result as string).split(',')[1];
+                      // Compress image before upload
+                      const canvas = document.createElement('canvas');
+                      const ctx = canvas.getContext('2d');
+                      const img = new Image();
+                      
+                      img.onload = () => {
+                        // Set maximum dimensions
+                        const maxWidth = 1200;
+                        const maxHeight = 800;
+                        let { width, height } = img;
+                        
+                        // Calculate new dimensions
+                        if (width > height) {
+                          if (width > maxWidth) {
+                            height = (height * maxWidth) / width;
+                            width = maxWidth;
+                          }
+                        } else {
+                          if (height > maxHeight) {
+                            width = (width * maxHeight) / height;
+                            height = maxHeight;
+                          }
+                        }
+                        
+                        canvas.width = width;
+                        canvas.height = height;
+                        
+                        // Draw and compress
+                        ctx?.drawImage(img, 0, 0, width, height);
+                        const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.8);
+                        const base64 = compressedDataUrl.split(',')[1];
+                        
                         uploadImageMutation.mutate({ 
                           imageData: base64, 
                           filename: file.name 
                         });
+                      };
+                      
+                      const reader = new FileReader();
+                      reader.onload = () => {
+                        img.src = reader.result as string;
                       };
                       reader.readAsDataURL(file);
                     }
