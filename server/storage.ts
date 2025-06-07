@@ -176,6 +176,21 @@ export class MemStorage implements IStorage {
       password: "$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi", // "password" hashed
     };
     this.admins.set(defaultAdmin.id, defaultAdmin);
+
+    // Seed banners
+    const banners: Banner[] = [
+      {
+        id: this.currentBannerId++,
+        title: "Summer Sale - Up to 50% Off",
+        description: "Don't miss out on our biggest sale of the year!",
+        imageUrl: "https://images.unsplash.com/photo-1607083206869-4c7672e72a8a?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&h=400",
+        imageBlob: null,
+        isActive: 1,
+        createdAt: new Date(),
+      },
+    ];
+
+    banners.forEach(banner => this.banners.set(banner.id, banner));
   }
 
   // Categories
@@ -269,8 +284,10 @@ export class MemStorage implements IStorage {
       id: this.currentProductId++,
       createdAt: new Date(),
       imageUrl: product.imageUrl || null,
+      imageBlob: product.imageBlob || null,
       subcategoryId: product.subcategoryId || null,
       stock: product.stock || 0,
+      isFeatured: product.isFeatured || 0,
     };
     this.products.set(newProduct.id, newProduct);
     return newProduct;
@@ -335,8 +352,51 @@ export class MemStorage implements IStorage {
     this.admins.set(newAdmin.id, newAdmin);
     return newAdmin;
   }
+
+  // Banners
+  async getBanners(): Promise<Banner[]> {
+    return Array.from(this.banners.values());
+  }
+
+  async getActiveBanners(): Promise<Banner[]> {
+    return Array.from(this.banners.values()).filter(banner => banner.isActive === 1);
+  }
+
+  async getBannerById(id: number): Promise<Banner | undefined> {
+    return this.banners.get(id);
+  }
+
+  async createBanner(banner: InsertBanner): Promise<Banner> {
+    const newBanner: Banner = {
+      ...banner,
+      id: this.currentBannerId++,
+      description: banner.description || null,
+      imageUrl: banner.imageUrl || null,
+      imageBlob: banner.imageBlob || null,
+      isActive: banner.isActive || 1,
+      createdAt: new Date(),
+    };
+    this.banners.set(newBanner.id, newBanner);
+    return newBanner;
+  }
+
+  async updateBanner(id: number, banner: Partial<InsertBanner>): Promise<Banner | undefined> {
+    const existingBanner = this.banners.get(id);
+    if (!existingBanner) return undefined;
+
+    const updatedBanner: Banner = {
+      ...existingBanner,
+      ...banner,
+    };
+    this.banners.set(id, updatedBanner);
+    return updatedBanner;
+  }
+
+  async deleteBanner(id: number): Promise<boolean> {
+    return this.banners.delete(id);
+  }
 }
 
-import { MongoDBStorage } from "./mongodb-storage";
+import { DatabaseStorage } from "./db-storage";
 
-export const storage = new MongoDBStorage();
+export const storage = new DatabaseStorage();
