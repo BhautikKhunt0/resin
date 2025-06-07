@@ -68,12 +68,25 @@ const productSchema = z.object({
   name: z.string().min(1, "Product name is required"),
   description: z.string().min(1, "Description is required"),
   price: z.string().min(1, "Price is required"),
-  imageUrl: z.string().url("Invalid URL").optional().or(z.literal("")),
+  imageUrl: z.string().optional(),
   imageBlob: z.string().optional(),
   categoryId: z.string().min(1, "Category is required"),
   subcategoryId: z.string().optional(),
   stock: z.string().min(0, "Stock must be 0 or greater"),
   isFeatured: z.boolean().optional(),
+}).refine((data) => {
+  if (data.imageUrl && data.imageUrl.trim() !== '') {
+    try {
+      new URL(data.imageUrl);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+  return true;
+}, {
+  message: "Please enter a valid URL",
+  path: ["imageUrl"]
 });
 
 const categorySchema = z.object({
@@ -84,9 +97,22 @@ const categorySchema = z.object({
 const bannerSchema = z.object({
   title: z.string().min(1, "Banner title is required"),
   description: z.string().optional(),
-  imageUrl: z.string().url("Invalid URL").optional().or(z.literal("")),
+  imageUrl: z.string().optional(),
   imageBlob: z.string().optional(),
   isActive: z.boolean().optional(),
+}).refine((data) => {
+  if (data.imageUrl && data.imageUrl.trim() !== '') {
+    try {
+      new URL(data.imageUrl);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+  return true;
+}, {
+  message: "Please enter a valid URL",
+  path: ["imageUrl"]
 });
 
 type ProductFormData = z.infer<typeof productSchema>;
@@ -346,6 +372,19 @@ export default function AdminDashboard() {
       toast({ title: "Failed to upload image", variant: "destructive" });
     },
   });
+
+  // Clear blob when URL is changed
+  const handleProductImageUrlChange = (value: string) => {
+    if (value && value.trim() !== '') {
+      productForm.setValue('imageBlob', '');
+    }
+  };
+
+  const handleBannerImageUrlChange = (value: string) => {
+    if (value && value.trim() !== '') {
+      bannerForm.setValue('imageBlob', '');
+    }
+  };
 
   // Handlers
   const handleProductSubmit = (data: ProductFormData) => {
@@ -758,7 +797,14 @@ export default function AdminDashboard() {
                               <FormItem>
                                 <FormLabel>Image URL</FormLabel>
                                 <FormControl>
-                                  <Input placeholder="https://example.com/image.jpg" {...field} />
+                                  <Input 
+                                    placeholder="https://example.com/image.jpg" 
+                                    {...field}
+                                    onChange={(e) => {
+                                      field.onChange(e);
+                                      handleProductImageUrlChange(e.target.value);
+                                    }}
+                                  />
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
@@ -1219,7 +1265,14 @@ export default function AdminDashboard() {
                               <FormItem>
                                 <FormLabel>Image URL</FormLabel>
                                 <FormControl>
-                                  <Input placeholder="https://example.com/image.jpg" {...field} />
+                                  <Input 
+                                    placeholder="https://example.com/image.jpg" 
+                                    {...field}
+                                    onChange={(e) => {
+                                      field.onChange(e);
+                                      handleBannerImageUrlChange(e.target.value);
+                                    }}
+                                  />
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
