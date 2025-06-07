@@ -191,6 +191,52 @@ export class MemStorage implements IStorage {
     ];
 
     banners.forEach(banner => this.banners.set(banner.id, banner));
+
+    // Seed sample orders
+    const sampleOrders: Order[] = [
+      {
+        id: this.currentOrderId++,
+        customerName: "John Smith",
+        customerEmail: "john.smith@email.com",
+        customerPhone: "+1-555-0123",
+        shippingAddress: "123 Main St, New York, NY 10001",
+        orderItems: [
+          { productId: 1, name: "Premium Wireless Headphones", price: 199.99, quantity: 1 },
+          { productId: 4, name: "Premium Smartphone", price: 899.99, quantity: 1 }
+        ],
+        totalAmount: "1099.98",
+        status: "processing",
+        createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 days ago
+      },
+      {
+        id: this.currentOrderId++,
+        customerName: "Sarah Johnson",
+        customerEmail: "sarah.j@email.com",
+        customerPhone: "+1-555-0456",
+        shippingAddress: "456 Oak Ave, Los Angeles, CA 90210",
+        orderItems: [
+          { productId: 3, name: "Ultra-thin Laptop", price: 1299.99, quantity: 1 }
+        ],
+        totalAmount: "1299.99",
+        status: "shipped",
+        createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000), // 1 day ago
+      },
+      {
+        id: this.currentOrderId++,
+        customerName: "Mike Wilson",
+        customerEmail: "mike.wilson@email.com",
+        customerPhone: "+1-555-0789",
+        shippingAddress: "789 Pine St, Chicago, IL 60601",
+        orderItems: [
+          { productId: 2, name: "Smart Watch Pro", price: 299.99, quantity: 2 }
+        ],
+        totalAmount: "599.98",
+        status: "delivered",
+        createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000), // 3 days ago
+      }
+    ];
+
+    sampleOrders.forEach(order => this.orders.set(order.id, order));
   }
 
   // Categories
