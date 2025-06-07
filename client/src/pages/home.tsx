@@ -1,11 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { api } from "@/lib/api";
 import ProductCard from "@/components/product-card";
-import type { Category, Product } from "@shared/schema";
+import type { Category, Product, Banner } from "@shared/schema";
 
 export default function Home() {
   const { data: categories, isLoading: categoriesLoading } = useQuery<Category[]>({
@@ -18,26 +20,88 @@ export default function Home() {
     queryFn: () => api.getProducts(),
   });
 
+  const { data: banners, isLoading: bannersLoading } = useQuery<Banner[]>({
+    queryKey: ["/api/banners"],
+    queryFn: api.getBanners,
+  });
+
   const featuredProducts = products?.slice(0, 4) || [];
 
   return (
     <div className="min-h-screen">
-      {/* Hero Section */}
-      <section className="relative bg-gradient-to-r from-primary to-blue-700 text-white py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-4xl md:text-6xl font-bold mb-6">
-            Discover Amazing Products
-          </h1>
-          <p className="text-xl md:text-2xl mb-8 text-blue-100">
-            Shop the latest trends with fast, secure delivery
-          </p>
-          <Link href="/products">
-            <Button size="lg" variant="secondary" className="text-primary">
-              Shop Now
-            </Button>
-          </Link>
-        </div>
-      </section>
+      {/* Banner Section */}
+      {bannersLoading ? (
+        <section className="relative">
+          <Skeleton className="w-full h-96" />
+        </section>
+      ) : banners && banners.length > 0 ? (
+        <section className="relative">
+          {banners.map((banner) => (
+            <div key={banner.id} className="relative w-full h-96 overflow-hidden">
+              {banner.imageUrl || banner.imageBlob ? (
+                <div className="relative w-full h-full">
+                  <img
+                    src={banner.imageBlob ? `data:image/jpeg;base64,${banner.imageBlob}` : banner.imageUrl}
+                    alt={banner.title}
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
+                    <div className="text-center text-white max-w-4xl px-4">
+                      <h1 className="text-4xl md:text-6xl font-bold mb-6">
+                        {banner.title}
+                      </h1>
+                      {banner.description && (
+                        <p className="text-xl md:text-2xl mb-8">
+                          {banner.description}
+                        </p>
+                      )}
+                      <Link href="/products">
+                        <Button size="lg" variant="secondary">
+                          Shop Now
+                        </Button>
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="relative bg-gradient-to-r from-primary to-blue-700 text-white h-full flex items-center justify-center">
+                  <div className="text-center max-w-4xl px-4">
+                    <h1 className="text-4xl md:text-6xl font-bold mb-6">
+                      {banner.title}
+                    </h1>
+                    {banner.description && (
+                      <p className="text-xl md:text-2xl mb-8 text-blue-100">
+                        {banner.description}
+                      </p>
+                    )}
+                    <Link href="/products">
+                      <Button size="lg" variant="secondary" className="text-primary">
+                        Shop Now
+                      </Button>
+                    </Link>
+                  </div>
+                </div>
+              )}
+            </div>
+          ))}
+        </section>
+      ) : (
+        <section className="relative bg-gradient-to-r from-primary to-blue-700 text-white py-20">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h1 className="text-4xl md:text-6xl font-bold mb-6">
+              Discover Amazing Products
+            </h1>
+            <p className="text-xl md:text-2xl mb-8 text-blue-100">
+              Shop the latest trends with fast, secure delivery
+            </p>
+            <Link href="/products">
+              <Button size="lg" variant="secondary" className="text-primary">
+                Shop Now
+              </Button>
+            </Link>
+          </div>
+        </section>
+      )}
 
       {/* Featured Categories */}
       <section className="py-16 bg-white">

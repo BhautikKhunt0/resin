@@ -19,6 +19,9 @@ export const api = {
   // Orders
   createOrder: (orderData: any) => apiRequest('POST', '/api/orders', orderData),
 
+  // Banners
+  getBanners: () => fetch('/api/banners').then(res => res.json()),
+
   // Admin Auth
   adminLogin: (credentials: { email: string; password: string }) =>
     apiRequest('POST', '/api/admin/login', credentials),
@@ -100,9 +103,6 @@ export const api = {
         'Authorization': `Bearer ${token}`,
       },
     }),
-
-  // Banners
-  getBanners: () => fetch('/api/banners').then(res => res.json()),
 
   // Admin - Banners
   getAdminBanners: (token: string) =>

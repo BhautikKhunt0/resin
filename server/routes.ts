@@ -84,6 +84,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Public routes - Banners
+  app.get("/api/banners", async (req, res) => {
+    try {
+      const banners = await storage.getActiveBanners();
+      res.json(banners);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch banners" });
+    }
+  });
+
   // Public route - Place order
   app.post("/api/orders", async (req, res) => {
     try {
