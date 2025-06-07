@@ -21,6 +21,7 @@ export const products = pgTable("products", {
   description: text("description").notNull(),
   price: decimal("price", { precision: 10, scale: 2 }).notNull(),
   imageUrl: text("image_url"),
+  imageBlob: text("image_blob"), // Base64 encoded image data
   categoryId: integer("category_id").notNull(),
   subcategoryId: integer("subcategory_id"),
   stock: integer("stock").default(0).notNull(),
@@ -50,7 +51,8 @@ export const banners = pgTable("banners", {
   id: serial("id").primaryKey(),
   title: text("title").notNull(),
   description: text("description"),
-  imageUrl: text("image_url").notNull(),
+  imageUrl: text("image_url"),
+  imageBlob: text("image_blob"), // Base64 encoded image data
   isActive: integer("is_active").default(1).notNull(), // 0 = false, 1 = true
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });

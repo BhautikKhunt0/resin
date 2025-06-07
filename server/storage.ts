@@ -4,16 +4,19 @@ import {
   products, 
   orders, 
   admins,
+  banners,
   type Category,
   type Subcategory,
   type Product,
   type Order,
   type Admin,
+  type Banner,
   type InsertCategory,
   type InsertSubcategory,
   type InsertProduct,
   type InsertOrder,
-  type InsertAdmin
+  type InsertAdmin,
+  type InsertBanner
 } from "@shared/schema";
 
 export interface IStorage {
@@ -51,6 +54,14 @@ export interface IStorage {
   // Admins
   getAdminByEmail(email: string): Promise<Admin | undefined>;
   createAdmin(admin: InsertAdmin): Promise<Admin>;
+
+  // Banners
+  getBanners(): Promise<Banner[]>;
+  getActiveBanners(): Promise<Banner[]>;
+  getBannerById(id: number): Promise<Banner | undefined>;
+  createBanner(banner: InsertBanner): Promise<Banner>;
+  updateBanner(id: number, banner: Partial<InsertBanner>): Promise<Banner | undefined>;
+  deleteBanner(id: number): Promise<boolean>;
 }
 
 export class MemStorage implements IStorage {
@@ -59,11 +70,13 @@ export class MemStorage implements IStorage {
   private products: Map<number, Product>;
   private orders: Map<number, Order>;
   private admins: Map<number, Admin>;
+  private banners: Map<number, Banner>;
   private currentCategoryId: number;
   private currentSubcategoryId: number;
   private currentProductId: number;
   private currentOrderId: number;
   private currentAdminId: number;
+  private currentBannerId: number;
 
   constructor() {
     this.categories = new Map();
@@ -71,11 +84,13 @@ export class MemStorage implements IStorage {
     this.products = new Map();
     this.orders = new Map();
     this.admins = new Map();
+    this.banners = new Map();
     this.currentCategoryId = 1;
     this.currentSubcategoryId = 1;
     this.currentProductId = 1;
     this.currentOrderId = 1;
     this.currentAdminId = 1;
+    this.currentBannerId = 1;
 
     this.seedData();
   }
@@ -104,9 +119,11 @@ export class MemStorage implements IStorage {
         description: "High-quality sound with noise cancellation technology",
         price: "199.99",
         imageUrl: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300",
+        imageBlob: null,
         categoryId: electronics.id,
         subcategoryId: headphones.id,
         stock: 45,
+        isFeatured: 1,
         createdAt: new Date(),
       },
       {
@@ -115,9 +132,11 @@ export class MemStorage implements IStorage {
         description: "Advanced fitness tracking and smart notifications",
         price: "299.99",
         imageUrl: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300",
+        imageBlob: null,
         categoryId: electronics.id,
         subcategoryId: null,
         stock: 32,
+        isFeatured: 0,
         createdAt: new Date(),
       },
       {
@@ -126,9 +145,11 @@ export class MemStorage implements IStorage {
         description: "Powerful performance in a portable design",
         price: "1299.99",
         imageUrl: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300",
+        imageBlob: null,
         categoryId: electronics.id,
         subcategoryId: laptops.id,
         stock: 18,
+        isFeatured: 1,
         createdAt: new Date(),
       },
       {
@@ -137,9 +158,11 @@ export class MemStorage implements IStorage {
         description: "Latest flagship model with advanced camera system",
         price: "899.99",
         imageUrl: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300",
+        imageBlob: null,
         categoryId: electronics.id,
         subcategoryId: smartphones.id,
         stock: 67,
+        isFeatured: 1,
         createdAt: new Date(),
       },
     ];
