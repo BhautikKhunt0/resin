@@ -774,6 +774,29 @@ export default function AdminDashboard() {
                             >
                               Upload Image
                             </Button>
+                            
+                            {/* Image Preview */}
+                            {(productForm.watch('imageBlob') || productForm.watch('imageUrl')) && (
+                              <div className="mt-4">
+                                <p className="text-sm text-green-600 mb-2">
+                                  ✓ Image uploaded successfully
+                                </p>
+                                <div className="border rounded-lg p-2 bg-gray-50">
+                                  <img
+                                    src={
+                                      productForm.watch('imageBlob') 
+                                        ? `data:image/jpeg;base64,${productForm.watch('imageBlob')}` 
+                                        : productForm.watch('imageUrl') || ''
+                                    }
+                                    alt="Product preview"
+                                    className="w-full h-32 object-cover rounded"
+                                    onError={(e) => {
+                                      e.currentTarget.style.display = 'none';
+                                    }}
+                                  />
+                                </div>
+                              </div>
+                            )}
                           </div>
                         </div>
 
@@ -1208,10 +1231,28 @@ export default function AdminDashboard() {
                             >
                               Upload Image
                             </Button>
-                            {bannerForm.watch('imageBlob') && (
-                              <p className="text-sm text-green-600 mt-2">
-                                ✓ Image uploaded successfully
-                              </p>
+                            
+                            {/* Image Preview */}
+                            {(bannerForm.watch('imageBlob') || bannerForm.watch('imageUrl')) && (
+                              <div className="mt-4">
+                                <p className="text-sm text-green-600 mb-2">
+                                  ✓ Image uploaded successfully
+                                </p>
+                                <div className="border rounded-lg p-2 bg-gray-50">
+                                  <img
+                                    src={
+                                      bannerForm.watch('imageBlob') 
+                                        ? `data:image/jpeg;base64,${bannerForm.watch('imageBlob')}` 
+                                        : bannerForm.watch('imageUrl') || ''
+                                    }
+                                    alt="Banner preview"
+                                    className="w-full h-32 object-cover rounded"
+                                    onError={(e) => {
+                                      e.currentTarget.style.display = 'none';
+                                    }}
+                                  />
+                                </div>
+                              </div>
                             )}
                           </div>
                         </div>
