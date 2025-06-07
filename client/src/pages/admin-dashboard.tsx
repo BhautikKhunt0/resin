@@ -894,6 +894,11 @@ export default function AdminDashboard() {
                             <TableCell>${parseFloat(product.price).toFixed(2)}</TableCell>
                             <TableCell>{product.stock}</TableCell>
                             <TableCell>
+                              <Badge variant={product.isFeatured ? "default" : "secondary"}>
+                                {product.isFeatured ? "Featured" : "Standard"}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
                               <div className="flex space-x-2">
                                 <Button
                                   variant="ghost"
