@@ -60,7 +60,7 @@ import { useToast } from "@/hooks/use-toast";
 import { api } from "@/lib/api";
 import { queryClient } from "@/lib/queryClient";
 import { useLocation } from "wouter";
-import type { Product, Category, Order } from "@shared/schema";
+import type { Product, Category, Order, Banner } from "@shared/schema";
 
 // Form schemas
 const productSchema = z.object({
@@ -68,9 +68,11 @@ const productSchema = z.object({
   description: z.string().min(1, "Description is required"),
   price: z.string().min(1, "Price is required"),
   imageUrl: z.string().url("Invalid URL").optional().or(z.literal("")),
+  imageBlob: z.string().optional(),
   categoryId: z.string().min(1, "Category is required"),
   subcategoryId: z.string().optional(),
   stock: z.string().min(0, "Stock must be 0 or greater"),
+  isFeatured: z.boolean().optional(),
 });
 
 const categorySchema = z.object({
@@ -78,16 +80,29 @@ const categorySchema = z.object({
   description: z.string().optional(),
 });
 
+const bannerSchema = z.object({
+  title: z.string().min(1, "Banner title is required"),
+  description: z.string().optional(),
+  imageUrl: z.string().url("Invalid URL").optional().or(z.literal("")),
+  imageBlob: z.string().optional(),
+  isActive: z.boolean().optional(),
+});
+
 type ProductFormData = z.infer<typeof productSchema>;
 type CategoryFormData = z.infer<typeof categorySchema>;
+type BannerFormData = z.infer<typeof bannerSchema>;
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
+  const [editingBanner, setEditingBanner] = useState<Banner | null>(null);
   const [productDialogOpen, setProductDialogOpen] = useState(false);
   const [categoryDialogOpen, setCategoryDialogOpen] = useState(false);
+  const [bannerDialogOpen, setBannerDialogOpen] = useState(false);
+  const [imageUploadDialogOpen, setImageUploadDialogOpen] = useState(false);
+  const [currentImageField, setCurrentImageField] = useState<string | null>(null);
 
   const { admin, token, logout, isAuthenticated } = useAuth();
   const { toast } = useToast();
@@ -120,6 +135,11 @@ export default function AdminDashboard() {
     queryFn: () => api.getOrders(token),
   });
 
+  const { data: banners, isLoading: bannersLoading } = useQuery<Banner[]>({
+    queryKey: ["/api/admin/banners"],
+    queryFn: () => api.getAdminBanners(token),
+  });
+
   // Forms
   const productForm = useForm<ProductFormData>({
     resolver: zodResolver(productSchema),
@@ -128,9 +148,22 @@ export default function AdminDashboard() {
       description: "",
       price: "",
       imageUrl: "",
+      imageBlob: "",
       categoryId: "",
       subcategoryId: "",
       stock: "0",
+      isFeatured: false,
+    },
+  });
+
+  const bannerForm = useForm<BannerFormData>({
+    resolver: zodResolver(bannerSchema),
+    defaultValues: {
+      title: "",
+      description: "",
+      imageUrl: "",
+      imageBlob: "",
+      isActive: true,
     },
   });
 
@@ -241,6 +274,67 @@ export default function AdminDashboard() {
     },
     onError: () => {
       toast({ title: "Failed to delete order", variant: "destructive" });
+    },
+  });
+
+  // Banner mutations
+  const createBannerMutation = useMutation({
+    mutationFn: (data: any) => api.createBanner(token, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/banners"] });
+      setBannerDialogOpen(false);
+      bannerForm.reset();
+      setEditingBanner(null);
+      toast({ title: "Banner created successfully" });
+    },
+    onError: () => {
+      toast({ title: "Failed to create banner", variant: "destructive" });
+    },
+  });
+
+  const updateBannerMutation = useMutation({
+    mutationFn: ({ id, data }: { id: number; data: any }) => api.updateBanner(token, id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/banners"] });
+      setBannerDialogOpen(false);
+      bannerForm.reset();
+      setEditingBanner(null);
+      toast({ title: "Banner updated successfully" });
+    },
+    onError: () => {
+      toast({ title: "Failed to update banner", variant: "destructive" });
+    },
+  });
+
+  const deleteBannerMutation = useMutation({
+    mutationFn: (id: number) => api.deleteBanner(token, id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/banners"] });
+      toast({ title: "Banner deleted successfully" });
+    },
+    onError: () => {
+      toast({ title: "Failed to delete banner", variant: "destructive" });
+    },
+  });
+
+  // Image upload mutation
+  const uploadImageMutation = useMutation({
+    mutationFn: ({ imageData, filename }: { imageData: string; filename?: string }) => 
+      api.uploadImage(token, imageData, filename),
+    onSuccess: (data) => {
+      if (currentImageField === 'product') {
+        productForm.setValue('imageBlob', data.imageBlob);
+        productForm.setValue('imageUrl', ''); // Clear URL when using blob
+      } else if (currentImageField === 'banner') {
+        bannerForm.setValue('imageBlob', data.imageBlob);
+        bannerForm.setValue('imageUrl', ''); // Clear URL when using blob
+      }
+      setImageUploadDialogOpen(false);
+      setCurrentImageField(null);
+      toast({ title: "Image uploaded successfully" });
+    },
+    onError: () => {
+      toast({ title: "Failed to upload image", variant: "destructive" });
     },
   });
 
