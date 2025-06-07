@@ -24,6 +24,7 @@ export const products = pgTable("products", {
   categoryId: integer("category_id").notNull(),
   subcategoryId: integer("subcategory_id"),
   stock: integer("stock").default(0).notNull(),
+  isFeatured: integer("is_featured").default(0).notNull(), // 0 = false, 1 = true
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -43,6 +44,15 @@ export const admins = pgTable("admins", {
   id: serial("id").primaryKey(),
   email: text("email").notNull().unique(),
   password: text("password").notNull(), // Hashed password
+});
+
+export const banners = pgTable("banners", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  description: text("description"),
+  imageUrl: text("image_url").notNull(),
+  isActive: integer("is_active").default(1).notNull(), // 0 = false, 1 = true
+  createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
 // Insert schemas
@@ -68,6 +78,11 @@ export const insertAdminSchema = createInsertSchema(admins).omit({
   id: true,
 });
 
+export const insertBannerSchema = createInsertSchema(banners).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Types
 export type Category = typeof categories.$inferSelect;
 export type InsertCategory = z.infer<typeof insertCategorySchema>;
@@ -83,6 +98,9 @@ export type InsertOrder = z.infer<typeof insertOrderSchema>;
 
 export type Admin = typeof admins.$inferSelect;
 export type InsertAdmin = z.infer<typeof insertAdminSchema>;
+
+export type Banner = typeof banners.$inferSelect;
+export type InsertBanner = z.infer<typeof insertBannerSchema>;
 
 // Extended types for frontend
 export type CartItem = {
