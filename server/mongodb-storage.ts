@@ -55,7 +55,7 @@ export class MongoDBStorage implements IStorage {
       description: doc.description,
       price: doc.price,
       imageUrl: doc.imageUrl || null,
-      imageBlob: null,
+      imageBlob: doc.imageBlob ? doc.imageBlob.toString('base64') : null,
       categoryId: parseInt(doc.categoryId.slice(-8), 16),
       subcategoryId: doc.subcategoryId ? parseInt(doc.subcategoryId.slice(-8), 16) : null,
       stock: doc.stock,
@@ -97,7 +97,7 @@ export class MongoDBStorage implements IStorage {
       title: doc.title,
       description: doc.description || "",
       imageUrl: doc.imageUrl || null,
-      imageBlob: doc.imageBlob ? doc.imageBlob.toString() : null,
+      imageBlob: doc.imageBlob ? doc.imageBlob.toString('base64') : null,
       isActive: doc.isActive,
       createdAt: doc.createdAt
     };
@@ -264,9 +264,11 @@ export class MongoDBStorage implements IStorage {
       description: product.description,
       price: product.price,
       imageUrl: product.imageUrl,
+      imageBlob: product.imageBlob ? Buffer.from(product.imageBlob, 'base64') : undefined,
       categoryId: category._id.toString(),
       subcategoryId: subcategoryId,
-      stock: product.stock || 0
+      stock: product.stock || 0,
+      isFeatured: product.isFeatured || 0
     });
     const saved = await newProduct.save();
     return this.convertProduct(saved);
@@ -277,7 +279,14 @@ export class MongoDBStorage implements IStorage {
     const existing = products.find(prod => parseInt(prod._id.toString().slice(-8), 16) === id);
     if (!existing) return undefined;
 
-    let updateData: any = { ...product };
+    const updateData: any = {};
+    if (product.name !== undefined) updateData.name = product.name;
+    if (product.description !== undefined) updateData.description = product.description;
+    if (product.price !== undefined) updateData.price = product.price;
+    if (product.imageUrl !== undefined) updateData.imageUrl = product.imageUrl;
+    if (product.imageBlob !== undefined) updateData.imageBlob = product.imageBlob ? Buffer.from(product.imageBlob, 'base64') : null;
+    if (product.stock !== undefined) updateData.stock = product.stock;
+    if (product.isFeatured !== undefined) updateData.isFeatured = product.isFeatured;
     
     if (product.categoryId) {
       const categories = await CategoryModel.find();
