@@ -40,6 +40,7 @@ export interface IProduct extends Document {
   categoryId: string;
   subcategoryId?: string;
   stock: number;
+  isFeatured: number;
   createdAt: Date;
 }
 
