@@ -25,6 +25,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Switch } from "@/components/ui/switch";
 import {
   Select,
   SelectContent,
@@ -347,12 +348,29 @@ export default function AdminDashboard() {
       subcategoryId: data.subcategoryId ? parseInt(data.subcategoryId) : undefined,
       stock: parseInt(data.stock),
       imageUrl: data.imageUrl || undefined,
+      imageBlob: data.imageBlob || undefined,
+      isFeatured: data.isFeatured ? 1 : 0,
     };
 
     if (editingProduct) {
       updateProductMutation.mutate({ id: editingProduct.id, data: productData });
     } else {
       createProductMutation.mutate(productData);
+    }
+  };
+
+  const handleBannerSubmit = (data: BannerFormData) => {
+    const bannerData = {
+      ...data,
+      imageUrl: data.imageUrl || undefined,
+      imageBlob: data.imageBlob || undefined,
+      isActive: data.isActive ? 1 : 0,
+    };
+
+    if (editingBanner) {
+      updateBannerMutation.mutate({ id: editingBanner.id, data: bannerData });
+    } else {
+      createBannerMutation.mutate(bannerData);
     }
   };
 
@@ -371,11 +389,51 @@ export default function AdminDashboard() {
       description: product.description,
       price: product.price,
       imageUrl: product.imageUrl || "",
+      imageBlob: product.imageBlob || "",
       categoryId: product.categoryId.toString(),
       subcategoryId: product.subcategoryId?.toString() || "",
       stock: product.stock?.toString() || "0",
+      isFeatured: Boolean(product.isFeatured),
     });
     setProductDialogOpen(true);
+  };
+
+  const handleEditBanner = (banner: Banner) => {
+    setEditingBanner(banner);
+    bannerForm.reset({
+      title: banner.title,
+      description: banner.description || "",
+      imageUrl: banner.imageUrl || "",
+      imageBlob: banner.imageBlob || "",
+      isActive: Boolean(banner.isActive),
+    });
+    setBannerDialogOpen(true);
+  };
+
+  const handleAddBanner = () => {
+    setEditingBanner(null);
+    bannerForm.reset();
+    setBannerDialogOpen(true);
+  };
+
+  const handleImageUpload = (fieldType: string) => {
+    setCurrentImageField(fieldType);
+    setImageUploadDialogOpen(true);
+  };
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const imageData = e.target?.result as string;
+        uploadImageMutation.mutate({ 
+          imageData, 
+          filename: file.name 
+        });
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const handleEditCategory = (category: Category) => {
@@ -414,6 +472,7 @@ export default function AdminDashboard() {
     { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
     { id: "products", label: "Products", icon: Package },
     { id: "categories", label: "Categories", icon: Tags },
+    { id: "banners", label: "Banners", icon: Eye },
     { id: "orders", label: "Orders", icon: ShoppingBag },
   ];
 
@@ -681,19 +740,32 @@ export default function AdminDashboard() {
                           )}
                         />
 
-                        <FormField
-                          control={productForm.control}
-                          name="imageUrl"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Image URL</FormLabel>
-                              <FormControl>
-                                <Input placeholder="https://example.com/image.jpg" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
+                        <div className="space-y-4">
+                          <FormField
+                            control={productForm.control}
+                            name="imageUrl"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Image URL</FormLabel>
+                                <FormControl>
+                                  <Input placeholder="https://example.com/image.jpg" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          
+                          <div className="text-center">
+                            <p className="text-sm text-gray-500 mb-2">Or upload an image</p>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              onClick={() => handleImageUpload('product')}
+                            >
+                              Upload Image
+                            </Button>
+                          </div>
+                        </div>
 
                         <FormField
                           control={productForm.control}
@@ -730,6 +802,27 @@ export default function AdminDashboard() {
                                 <Input type="number" min="0" placeholder="0" {...field} />
                               </FormControl>
                               <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={productForm.control}
+                          name="isFeatured"
+                          render={({ field }) => (
+                            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                              <div className="space-y-0.5">
+                                <FormLabel className="text-base">Featured Product</FormLabel>
+                                <div className="text-sm text-muted-foreground">
+                                  Mark this product as featured to show it prominently on the homepage
+                                </div>
+                              </div>
+                              <FormControl>
+                                <Switch
+                                  checked={field.value}
+                                  onCheckedChange={field.onChange}
+                                />
+                              </FormControl>
                             </FormItem>
                           )}
                         />
@@ -774,6 +867,7 @@ export default function AdminDashboard() {
                           <TableHead>Category</TableHead>
                           <TableHead>Price</TableHead>
                           <TableHead>Stock</TableHead>
+                          <TableHead>Featured</TableHead>
                           <TableHead>Actions</TableHead>
                         </TableRow>
                       </TableHeader>
