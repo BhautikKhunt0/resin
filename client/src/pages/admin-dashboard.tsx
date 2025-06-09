@@ -94,6 +94,12 @@ const categorySchema = z.object({
   description: z.string().optional(),
 });
 
+const subcategorySchema = z.object({
+  name: z.string().min(1, "Subcategory name is required"),
+  description: z.string().optional(),
+  categoryId: z.string().min(1, "Category is required"),
+});
+
 const bannerSchema = z.object({
   title: z.string().min(1, "Banner title is required"),
   description: z.string().optional(),
@@ -117,6 +123,7 @@ const bannerSchema = z.object({
 
 type ProductFormData = z.infer<typeof productSchema>;
 type CategoryFormData = z.infer<typeof categorySchema>;
+type SubcategoryFormData = z.infer<typeof subcategorySchema>;
 type BannerFormData = z.infer<typeof bannerSchema>;
 
 export default function AdminDashboard() {
@@ -124,9 +131,11 @@ export default function AdminDashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
+  const [editingSubcategory, setEditingSubcategory] = useState<any>(null);
   const [editingBanner, setEditingBanner] = useState<Banner | null>(null);
   const [productDialogOpen, setProductDialogOpen] = useState(false);
   const [categoryDialogOpen, setCategoryDialogOpen] = useState(false);
+  const [subcategoryDialogOpen, setSubcategoryDialogOpen] = useState(false);
   const [bannerDialogOpen, setBannerDialogOpen] = useState(false);
   const [imageUploadDialogOpen, setImageUploadDialogOpen] = useState(false);
   const [currentImageField, setCurrentImageField] = useState<string | null>(null);
@@ -155,6 +164,11 @@ export default function AdminDashboard() {
   const { data: categories, isLoading: categoriesLoading } = useQuery<Category[]>({
     queryKey: ["/api/categories"],
     queryFn: api.getCategories,
+  });
+
+  const { data: subcategories, isLoading: subcategoriesLoading } = useQuery<any[]>({
+    queryKey: ["/api/admin/subcategories"],
+    queryFn: () => api.getAdminSubcategories(token),
   });
 
   const { data: orders, isLoading: ordersLoading } = useQuery<Order[]>({
@@ -199,6 +213,15 @@ export default function AdminDashboard() {
     defaultValues: {
       name: "",
       description: "",
+    },
+  });
+
+  const subcategoryForm = useForm<SubcategoryFormData>({
+    resolver: zodResolver(subcategorySchema),
+    defaultValues: {
+      name: "",
+      description: "",
+      categoryId: "",
     },
   });
 
@@ -278,6 +301,46 @@ export default function AdminDashboard() {
     },
     onError: () => {
       toast({ title: "Failed to delete category", variant: "destructive" });
+    },
+  });
+
+  // Subcategory mutations
+  const createSubcategoryMutation = useMutation({
+    mutationFn: (data: any) => api.createSubcategory(token, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/subcategories"] });
+      setSubcategoryDialogOpen(false);
+      subcategoryForm.reset();
+      setEditingSubcategory(null);
+      toast({ title: "Subcategory created successfully" });
+    },
+    onError: () => {
+      toast({ title: "Failed to create subcategory", variant: "destructive" });
+    },
+  });
+
+  const updateSubcategoryMutation = useMutation({
+    mutationFn: ({ id, data }: { id: number; data: any }) => api.updateSubcategory(token, id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/subcategories"] });
+      setSubcategoryDialogOpen(false);
+      subcategoryForm.reset();
+      setEditingSubcategory(null);
+      toast({ title: "Subcategory updated successfully" });
+    },
+    onError: () => {
+      toast({ title: "Failed to update subcategory", variant: "destructive" });
+    },
+  });
+
+  const deleteSubcategoryMutation = useMutation({
+    mutationFn: (id: number) => api.deleteSubcategory(token, id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/subcategories"] });
+      toast({ title: "Subcategory deleted successfully" });
+    },
+    onError: () => {
+      toast({ title: "Failed to delete subcategory", variant: "destructive" });
     },
   });
 
@@ -506,6 +569,22 @@ export default function AdminDashboard() {
     setCategoryDialogOpen(true);
   };
 
+  const handleEditSubcategory = (subcategory: any) => {
+    setEditingSubcategory(subcategory);
+    subcategoryForm.reset({
+      name: subcategory.name,
+      description: subcategory.description || "",
+      categoryId: subcategory.categoryId.toString(),
+    });
+    setSubcategoryDialogOpen(true);
+  };
+
+  const handleAddSubcategory = () => {
+    setEditingSubcategory(null);
+    subcategoryForm.reset();
+    setSubcategoryDialogOpen(true);
+  };
+
   const handleLogout = () => {
     logout();
     setLocation("/admin/login");
@@ -521,6 +600,7 @@ export default function AdminDashboard() {
     { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
     { id: "products", label: "Products", icon: Package },
     { id: "categories", label: "Categories", icon: Tags },
+    { id: "subcategories", label: "Subcategories", icon: Tags },
     { id: "banners", label: "Banners", icon: Eye },
     { id: "orders", label: "Orders", icon: ShoppingBag },
   ];
