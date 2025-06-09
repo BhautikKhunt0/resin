@@ -73,7 +73,7 @@ export default function Categories() {
 {(() => {
                   const imageUrl = subcategory.imageBlob ? `data:image/jpeg;base64,${subcategory.imageBlob}` : subcategory.imageUrl;
                   return imageUrl ? (
-                    <div className="relative h-48 w-full overflow-hidden">
+                    <div className="relative aspect-square w-full overflow-hidden">
                       <img
                         src={imageUrl}
                         alt={subcategory.name}
@@ -82,7 +82,7 @@ export default function Categories() {
                       <div className="absolute inset-0 bg-black bg-opacity-20 group-hover:bg-opacity-30 transition-all duration-300"></div>
                     </div>
                   ) : (
-                    <div className="h-48 w-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                    <div className="aspect-square w-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
                       <Grid3X3 className="h-16 w-16 text-white group-hover:scale-110 transition-transform duration-300" />
                     </div>
                   );

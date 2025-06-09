@@ -138,37 +138,37 @@ export default function Home() {
           </div>
           
           {categoriesLoading ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-              {[...Array(6)].map((_, i) => (
-                <div key={i} className="space-y-2">
-                  <Skeleton className="aspect-square rounded-lg" />
-                  <Skeleton className="h-4 w-3/4 mx-auto" />
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8">
+              {[...Array(5)].map((_, i) => (
+                <div key={i} className="space-y-4">
+                  <Skeleton className="aspect-square rounded-xl w-full h-32 md:h-40" />
+                  <Skeleton className="h-5 w-3/4 mx-auto" />
                 </div>
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8">
               {/* Display Categories Only */}
               {categories?.map((category) => (
                 <Link key={`category-${category.id}`} href={`/category/${category.id}`}>
                   <div className="group cursor-pointer">
-                    <div className="aspect-square rounded-lg overflow-hidden bg-gray-100 mb-3 group-hover:shadow-lg transition-all duration-300">
+                    <div className="aspect-square rounded-xl overflow-hidden bg-gray-100 mb-4 group-hover:shadow-xl transition-all duration-300 h-32 md:h-40">
                       {(() => {
                         const imageUrl = category.imageBlob ? `data:image/jpeg;base64,${category.imageBlob}` : category.imageUrl;
                         return imageUrl ? (
                           <img
                             src={imageUrl}
                             alt={category.name}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                           />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-100 to-purple-100">
-                            <Grid3X3 className="w-12 h-12 text-gray-400" />
+                            <Grid3X3 className="w-16 h-16 text-gray-400" />
                           </div>
                         );
                       })()}
                     </div>
-                    <h3 className="text-sm font-medium text-gray-900 text-center group-hover:text-blue-600 transition-colors">
+                    <h3 className="text-base font-semibold text-gray-900 text-center group-hover:text-blue-600 transition-colors">
                       {category.name}
                     </h3>
                   </div>
