@@ -209,60 +209,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Best Selling Products */}
-      <section className="py-16 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Best Selling Products</h2>
-            <p className="text-gray-600 max-w-2xl mx-auto">
-              Discover our most popular items that customers love and recommend
-            </p>
-          </div>
 
-          {productsLoading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {[...Array(8)].map((_, i) => (
-                <Card key={i}>
-                  <CardContent className="p-0">
-                    <Skeleton className="w-full h-48 rounded-t-lg" />
-                    <div className="p-4">
-                      <Skeleton className="h-6 mb-2" />
-                      <Skeleton className="h-4 mb-4" />
-                      <div className="flex justify-between items-center">
-                        <Skeleton className="h-6 w-20" />
-                        <Skeleton className="h-9 w-24" />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {bestSellingProducts.map((product, index) => (
-                <div key={product.id} className="relative">
-                  {index < 3 && (
-                    <Badge className="absolute -top-2 -right-2 z-10 bg-gradient-to-r from-yellow-400 to-orange-500 text-white">
-                      <Star className="h-3 w-3 mr-1" />
-                      Best Seller
-                    </Badge>
-                  )}
-                  <ProductCard product={product} />
-                </div>
-              ))}
-            </div>
-          )}
-
-          <div className="text-center mt-12">
-            <Link href="/products">
-              <Button size="lg" className="gap-2">
-                <ShoppingBag className="h-5 w-5" />
-                Shop All Products
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </section>
 
       {/* Services Section */}
       <section className="py-16 bg-gray-50">
