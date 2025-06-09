@@ -23,7 +23,7 @@ export default function ProductCard({ product }: ProductCardProps) {
       name: product.name,
       price: parseFloat(product.price),
       quantity: 1,
-      imageUrl: product.imageUrl || undefined,
+      imageUrl: product.imageBlob ? `data:image/jpeg;base64,${product.imageBlob}` : product.imageUrl || undefined,
     });
 
     toast({
@@ -37,9 +37,9 @@ export default function ProductCard({ product }: ProductCardProps) {
       <Card className="group cursor-pointer hover:shadow-lg transition-shadow duration-300">
         <CardContent className="p-0">
           <div className="relative overflow-hidden rounded-t-lg">
-            {product.imageUrl ? (
+            {product.imageUrl || product.imageBlob ? (
               <img
-                src={product.imageUrl}
+                src={product.imageBlob ? `data:image/jpeg;base64,${product.imageBlob}` : product.imageUrl || ''}
                 alt={product.name}
                 className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
               />
