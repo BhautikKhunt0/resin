@@ -129,21 +129,21 @@ export default function Home() {
           </div>
           
           {categoriesLoading ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8">
+            <div className="grid grid-cols-3 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-8">
               {[...Array(5)].map((_, i) => (
                 <div key={i} className="space-y-4">
-                  <Skeleton className="aspect-square rounded-xl w-full h-32 md:h-40" />
-                  <Skeleton className="h-5 w-3/4 mx-auto" />
+                  <Skeleton className="aspect-square rounded-xl w-full h-24 md:h-40" />
+                  <Skeleton className="h-4 w-3/4 mx-auto" />
                 </div>
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8">
+            <div className="grid grid-cols-3 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-8">
               {/* Display Categories Only */}
               {categories?.map((category) => (
                 <Link key={`category-${category.id}`} href={`/category/${category.id}`} className="block">
                   <div className="group cursor-pointer w-full flex flex-col items-center">
-                    <div className="aspect-square rounded-xl overflow-hidden bg-gray-100 mb-4 group-hover:shadow-xl transition-all duration-300 h-32 md:h-40">
+                    <div className="aspect-square rounded-xl overflow-hidden bg-gray-100 mb-2 md:mb-4 group-hover:shadow-xl transition-all duration-300 h-24 md:h-40">
                       {(() => {
                         const imageUrl = category.imageBlob ? `data:image/jpeg;base64,${category.imageBlob}` : category.imageUrl;
                         return imageUrl ? (
@@ -159,7 +159,7 @@ export default function Home() {
                         );
                       })()}
                     </div>
-                    <h3 className="text-base font-semibold text-gray-900 group-hover:text-blue-600 transition-colors text-center w-full">
+                    <h3 className="text-xs md:text-base font-semibold text-gray-900 group-hover:text-blue-600 transition-colors text-center w-full">
                       {category.name}
                     </h3>
                   </div>
@@ -183,17 +183,17 @@ export default function Home() {
           </div>
 
           {productsLoading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
               {[...Array(4)].map((_, i) => (
                 <Card key={i}>
                   <CardContent className="p-0">
-                    <Skeleton className="w-full h-48 rounded-t-lg" />
-                    <div className="p-4">
-                      <Skeleton className="h-6 mb-2" />
-                      <Skeleton className="h-4 mb-4" />
+                    <Skeleton className="w-full h-32 md:h-48 rounded-t-lg" />
+                    <div className="p-2 md:p-4">
+                      <Skeleton className="h-4 md:h-6 mb-2" />
+                      <Skeleton className="h-3 md:h-4 mb-4" />
                       <div className="flex justify-between items-center">
-                        <Skeleton className="h-6 w-20" />
-                        <Skeleton className="h-9 w-24" />
+                        <Skeleton className="h-4 md:h-6 w-16 md:w-20" />
+                        <Skeleton className="h-6 md:h-9 w-16 md:w-24" />
                       </div>
                     </div>
                   </CardContent>
@@ -201,7 +201,7 @@ export default function Home() {
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
               {featuredProducts.map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}
