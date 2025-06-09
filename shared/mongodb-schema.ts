@@ -48,7 +48,6 @@ export interface IProduct extends Document {
   imageBlob?: Buffer;
   categoryId: string;
   subcategoryId?: string;
-  stock: number;
   isFeatured: number;
   createdAt: Date;
 }
@@ -61,7 +60,6 @@ const productSchema = new Schema<IProduct>({
   imageBlob: { type: Buffer },
   categoryId: { type: String, required: true },
   subcategoryId: { type: String },
-  stock: { type: Number, default: 0 },
   isFeatured: { type: Number, default: 0 }
 }, { timestamps: true });
 

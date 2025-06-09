@@ -93,7 +93,6 @@ export class MongoDBStorage implements IStorage {
       imageBlob: doc.imageBlob ? doc.imageBlob.toString('base64') : null,
       categoryId: parseInt(doc.categoryId.slice(-8), 16),
       subcategoryId: doc.subcategoryId ? parseInt(doc.subcategoryId.slice(-8), 16) : null,
-      stock: doc.stock,
       isFeatured: doc.isFeatured,
       createdAt: doc.createdAt
     };
@@ -386,7 +385,6 @@ export class MongoDBStorage implements IStorage {
         imageBlob: product.imageBlob ? Buffer.from(product.imageBlob, 'base64') : undefined,
         categoryId: category._id.toString(),
         subcategoryId: subcategoryId,
-        stock: product.stock || 0,
         isFeatured: product.isFeatured || 0
       });
       const saved = await newProduct.save();
@@ -412,7 +410,7 @@ export class MongoDBStorage implements IStorage {
       updateData.imageBlob = product.imageBlob ? Buffer.from(product.imageBlob, 'base64') : null;
       console.log(`Updating product ${id} with imageBlob: ${!!product.imageBlob}`);
     }
-    if (product.stock !== undefined) updateData.stock = product.stock;
+
     if (product.isFeatured !== undefined) updateData.isFeatured = product.isFeatured;
     
     // Handle categoryId - always update if provided

@@ -75,7 +75,6 @@ const productSchema = z.object({
   imageBlob: z.string().optional(),
   categoryId: z.string().min(1, "Category is required"),
   subcategoryId: z.string().optional(),
-  stock: z.string().min(0, "Stock must be 0 or greater"),
   isFeatured: z.boolean().optional(),
 }).refine((data) => {
   if (data.imageUrl && data.imageUrl.trim() !== '') {
@@ -508,7 +507,6 @@ export default function AdminDashboard() {
       price: data.price,
       categoryId: parseInt(data.categoryId),
       subcategoryId: data.subcategoryId && data.subcategoryId.trim() !== "" ? parseInt(data.subcategoryId) : null,
-      stock: parseInt(data.stock),
       imageUrl: data.imageUrl || undefined,
       imageBlob: data.imageBlob || undefined,
       isFeatured: data.isFeatured ? 1 : 0,

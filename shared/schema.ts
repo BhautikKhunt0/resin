@@ -28,7 +28,6 @@ export const products = pgTable("products", {
   imageBlob: text("image_blob"), // Base64 encoded image data
   categoryId: integer("category_id").notNull(),
   subcategoryId: integer("subcategory_id"),
-  stock: integer("stock").default(0).notNull(),
   isFeatured: integer("is_featured").default(0).notNull(), // 0 = false, 1 = true
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
