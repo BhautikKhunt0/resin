@@ -226,7 +226,6 @@ export default function AdminDashboard() {
       imageBlob: "",
       categoryId: "",
       subcategoryId: "",
-      stock: "0",
       isFeatured: false,
     },
   });
@@ -1121,27 +1120,6 @@ export default function AdminDashboard() {
                                 )}
                               />
 
-                              <FormField
-                                control={productForm.control}
-                                name="stock"
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <FormLabel className="text-sm font-medium text-gray-700">
-                                      Stock Quantity <span className="text-red-500">*</span>
-                                    </FormLabel>
-                                    <FormControl>
-                                      <Input 
-                                        type="number" 
-                                        min="0" 
-                                        placeholder="100"
-                                        className="h-11 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200" 
-                                        {...field} 
-                                      />
-                                    </FormControl>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
-                              />
                             </div>
 
                             <FormField
@@ -1253,7 +1231,6 @@ export default function AdminDashboard() {
                               {categories?.find(c => c.id === product.categoryId)?.name}
                             </TableCell>
                             <TableCell>${parseFloat(product.price).toFixed(2)}</TableCell>
-                            <TableCell>{product.stock}</TableCell>
                             <TableCell>
                               <Badge variant={product.isFeatured ? "default" : "secondary"}>
                                 {product.isFeatured ? "Featured" : "Standard"}
