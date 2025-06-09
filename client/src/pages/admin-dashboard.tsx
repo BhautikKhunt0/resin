@@ -1215,6 +1215,178 @@ export default function AdminDashboard() {
             </div>
           )}
 
+          {activeTab === "subcategories" && (
+            <div className="space-y-6">
+              <div className="flex justify-between items-center">
+                <h2 className="text-2xl font-bold text-gray-900">Subcategory Management</h2>
+                <Dialog open={subcategoryDialogOpen} onOpenChange={setSubcategoryDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button onClick={handleAddSubcategory}>
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add Subcategory
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-md">
+                    <DialogHeader>
+                      <DialogTitle>
+                        {editingSubcategory ? "Edit Subcategory" : "Add New Subcategory"}
+                      </DialogTitle>
+                    </DialogHeader>
+                    <Form {...subcategoryForm}>
+                      <form onSubmit={subcategoryForm.handleSubmit((data) => {
+                        if (editingSubcategory) {
+                          updateSubcategoryMutation.mutate({
+                            id: editingSubcategory.id,
+                            data: {
+                              ...data,
+                              categoryId: parseInt(data.categoryId),
+                            },
+                          });
+                        } else {
+                          createSubcategoryMutation.mutate({
+                            ...data,
+                            categoryId: parseInt(data.categoryId),
+                          });
+                        }
+                      })} className="space-y-4">
+                        <FormField
+                          control={subcategoryForm.control}
+                          name="name"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Subcategory Name</FormLabel>
+                              <FormControl>
+                                <Input placeholder="Enter subcategory name" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={subcategoryForm.control}
+                          name="description"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Description</FormLabel>
+                              <FormControl>
+                                <Textarea placeholder="Enter subcategory description" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={subcategoryForm.control}
+                          name="categoryId"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Parent Category</FormLabel>
+                              <Select onValueChange={field.onChange} value={field.value}>
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Select parent category" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  {categories?.map((category) => (
+                                    <SelectItem key={category.id} value={category.id.toString()}>
+                                      {category.name}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <div className="flex space-x-2">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => setSubcategoryDialogOpen(false)}
+                            className="flex-1"
+                          >
+                            Cancel
+                          </Button>
+                          <Button
+                            type="submit"
+                            className="flex-1"
+                            disabled={createSubcategoryMutation.isPending || updateSubcategoryMutation.isPending}
+                          >
+                            {editingSubcategory ? "Update" : "Create"}
+                          </Button>
+                        </div>
+                      </form>
+                    </Form>
+                  </DialogContent>
+                </Dialog>
+              </div>
+
+              <Card>
+                <CardContent>
+                  {subcategoriesLoading ? (
+                    <div className="space-y-3 p-6">
+                      {[...Array(5)].map((_, i) => (
+                        <Skeleton key={i} className="h-16 w-full" />
+                      ))}
+                    </div>
+                  ) : (
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Name</TableHead>
+                          <TableHead>Description</TableHead>
+                          <TableHead>Parent Category</TableHead>
+                          <TableHead>Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {subcategories?.map((subcategory) => {
+                          const parentCategory = categories?.find(cat => cat.id.toString() === subcategory.categoryId.toString());
+                          return (
+                            <TableRow key={subcategory.id}>
+                              <TableCell className="font-medium">{subcategory.name}</TableCell>
+                              <TableCell className="text-gray-600">
+                                {subcategory.description || "No description"}
+                              </TableCell>
+                              <TableCell>
+                                <Badge variant="secondary">
+                                  {parentCategory?.name || "Unknown Category"}
+                                </Badge>
+                              </TableCell>
+                              <TableCell>
+                                <div className="flex space-x-2">
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => handleEditSubcategory(subcategory)}
+                                  >
+                                    <Edit className="h-4 w-4" />
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => deleteSubcategoryMutation.mutate(subcategory.id)}
+                                    className="text-red-600 hover:text-red-700"
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          );
+                        })}
+                      </TableBody>
+                    </Table>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
           {activeTab === "orders" && (
             <div className="space-y-6">
               <h2 className="text-2xl font-bold text-gray-900">Order Management</h2>
