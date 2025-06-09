@@ -64,11 +64,16 @@ export const insertCategorySchema = createInsertSchema(categories).omit({
 
 export const insertSubcategorySchema = createInsertSchema(subcategories).omit({
   id: true,
+}).extend({
+  categoryId: z.number().int().min(1).max(Number.MAX_SAFE_INTEGER),
 });
 
 export const insertProductSchema = createInsertSchema(products).omit({
   id: true,
   createdAt: true,
+}).extend({
+  categoryId: z.number().int().min(1).max(Number.MAX_SAFE_INTEGER),
+  subcategoryId: z.number().int().min(1).max(Number.MAX_SAFE_INTEGER).optional().nullable(),
 });
 
 export const insertOrderSchema = createInsertSchema(orders).omit({
