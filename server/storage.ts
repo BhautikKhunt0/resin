@@ -508,6 +508,9 @@ import { MongoDBStorage } from "./mongodb-storage";
 // Using MongoDB storage to access existing orders data
 export const storage = new MongoDBStorage();
 
+// Force database reset to implement new product features
+const shouldForceReset = true;
+
 // Initialize and verify image storage
 export async function initializeStorage(): Promise<void> {
   try {
