@@ -69,7 +69,7 @@ export default function ProductCard({ product }: ProductCardProps) {
             </p>
             <div className="flex justify-between items-center">
               <span className="text-xl font-bold text-primary">
-                ${parseFloat(product.price).toFixed(2)}
+                ₹{parseFloat(product.price).toFixed(2)}
               </span>
               <Button
                 size="sm"

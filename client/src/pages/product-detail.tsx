@@ -115,7 +115,7 @@ export default function ProductDetail() {
               </h1>
               <div className="flex items-center space-x-4 mb-4">
                 <span className="text-3xl font-bold text-primary">
-                  ${parseFloat(product.price).toFixed(2)}
+                  ₹{parseFloat(product.price).toFixed(2)}
                 </span>
               </div>
             </div>

@@ -787,7 +787,7 @@ export default function AdminDashboard() {
                       </div>
                       <div className="ml-4">
                         <p className="text-sm text-gray-600">Revenue</p>
-                        <p className="text-2xl font-bold text-gray-900">${totalRevenue.toFixed(2)}</p>
+                        <p className="text-2xl font-bold text-gray-900">₹{totalRevenue.toFixed(2)}</p>
                       </div>
                     </div>
                   </CardContent>
@@ -933,7 +933,7 @@ export default function AdminDashboard() {
                                     </FormLabel>
                                     <FormControl>
                                       <div className="relative">
-                                        <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium">$</span>
+                                        <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium">₹</span>
                                         <Input 
                                           type="number" 
                                           step="0.01" 
@@ -1230,7 +1230,7 @@ export default function AdminDashboard() {
                             <TableCell>
                               {categories?.find(c => c.id === product.categoryId)?.name}
                             </TableCell>
-                            <TableCell>${parseFloat(product.price).toFixed(2)}</TableCell>
+                            <TableCell>₹{parseFloat(product.price).toFixed(2)}</TableCell>
                             <TableCell>
                               <Badge variant={product.isFeatured ? "default" : "secondary"}>
                                 {product.isFeatured ? "Featured" : "Standard"}
@@ -2298,7 +2298,7 @@ export default function AdminDashboard() {
                   <CardContent className="space-y-3">
                     <div className="flex justify-between">
                       <span className="text-gray-600">Total Amount</span>
-                      <span className="font-semibold text-lg">${parseFloat(selectedOrder.totalAmount).toFixed(2)}</span>
+                      <span className="font-semibold text-lg">₹{parseFloat(selectedOrder.totalAmount).toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600">Status</span>
@@ -2350,12 +2350,12 @@ export default function AdminDashboard() {
                                 <div className="text-sm text-gray-500">Product ID: {item.productId}</div>
                               </div>
                             </TableCell>
-                            <TableCell>${parseFloat(item.price.toString()).toFixed(2)}</TableCell>
+                            <TableCell>₹{parseFloat(item.price.toString()).toFixed(2)}</TableCell>
                             <TableCell>
                               <Badge variant="outline">{item.quantity}</Badge>
                             </TableCell>
                             <TableCell className="font-medium">
-                              ${(parseFloat(item.price.toString()) * item.quantity).toFixed(2)}
+                              ₹{(parseFloat(item.price.toString()) * item.quantity).toFixed(2)}
                             </TableCell>
                           </TableRow>
                         ))}
