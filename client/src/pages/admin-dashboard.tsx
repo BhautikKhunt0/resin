@@ -248,6 +248,8 @@ export default function AdminDashboard() {
     defaultValues: {
       name: "",
       description: "",
+      imageUrl: "",
+      imageBlob: "",
     },
   });
 
@@ -257,6 +259,8 @@ export default function AdminDashboard() {
       name: "",
       description: "",
       categoryId: "",
+      imageUrl: "",
+      imageBlob: "",
     },
   });
 
@@ -456,6 +460,12 @@ export default function AdminDashboard() {
       } else if (currentImageField === 'banner') {
         bannerForm.setValue('imageBlob', data.imageBlob);
         bannerForm.setValue('imageUrl', '');
+      } else if (currentImageField === 'category') {
+        categoryForm.setValue('imageBlob', data.imageBlob);
+        categoryForm.setValue('imageUrl', '');
+      } else if (currentImageField === 'subcategory') {
+        subcategoryForm.setValue('imageBlob', data.imageBlob);
+        subcategoryForm.setValue('imageUrl', '');
       }
       setImageUploadDialogOpen(false);
       setCurrentImageField(null);
@@ -476,6 +486,18 @@ export default function AdminDashboard() {
   const handleBannerImageUrlChange = (value: string) => {
     if (value && value.trim() !== '') {
       bannerForm.setValue('imageBlob', '');
+    }
+  };
+
+  const handleCategoryImageUrlChange = (value: string) => {
+    if (value && value.trim() !== '') {
+      categoryForm.setValue('imageBlob', '');
+    }
+  };
+
+  const handleSubcategoryImageUrlChange = (value: string) => {
+    if (value && value.trim() !== '') {
+      subcategoryForm.setValue('imageBlob', '');
     }
   };
 
@@ -1333,6 +1355,87 @@ export default function AdminDashboard() {
                             )}
                           />
 
+                          {/* Image Upload Section */}
+                          <div className="space-y-4">
+                            <div className="flex items-center justify-between">
+                              <h3 className="text-sm font-medium text-gray-700">Category Image</h3>
+                              <div className="flex space-x-2">
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => {
+                                    setCurrentImageField('category');
+                                    setImageUploadDialogOpen(true);
+                                  }}
+                                  className="h-9 px-3"
+                                >
+                                  <Upload className="h-4 w-4 mr-2" />
+                                  Upload
+                                </Button>
+                              </div>
+                            </div>
+
+                            <FormField
+                              control={categoryForm.control}
+                              name="imageUrl"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel className="text-sm font-medium text-gray-700">Image URL (Optional)</FormLabel>
+                                  <FormControl>
+                                    <Input
+                                      placeholder="https://example.com/image.jpg"
+                                      className="h-11 border-gray-200 focus:border-green-500 focus:ring-2 focus:ring-green-200"
+                                      {...field}
+                                      onChange={(e) => {
+                                        field.onChange(e.target.value);
+                                        handleCategoryImageUrlChange(e.target.value);
+                                      }}
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+
+                            <div className="space-y-2">
+                              {(() => {
+                                const imageUrl = categoryForm.watch('imageUrl');
+                                const imageBlob = categoryForm.watch('imageBlob');
+                                
+                                if (!imageUrl && !imageBlob) {
+                                  return (
+                                    <div className="text-center py-6 border-2 border-dashed border-gray-200 rounded-lg">
+                                      <ImageIcon className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                                      <p className="text-sm text-gray-500">No image selected</p>
+                                    </div>
+                                  );
+                                }
+                                
+                                return (
+                                  <div className="space-y-2">
+                                    <div className="flex items-center space-x-2">
+                                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                                      <span className="text-sm font-medium text-green-700">
+                                        Image {imageBlob ? 'uploaded' : 'loaded'} successfully
+                                      </span>
+                                    </div>
+                                    <div className="relative overflow-hidden rounded-lg bg-gray-100">
+                                      <img
+                                        src={imageBlob ? `data:image/jpeg;base64,${imageBlob}` : imageUrl || ''}
+                                        alt="Category preview"
+                                        className="w-full h-48 object-cover"
+                                        onError={(e) => {
+                                          e.currentTarget.style.display = 'none';
+                                        }}
+                                      />
+                                    </div>
+                                  </div>
+                                );
+                              })()}
+                            </div>
+                          </div>
+
                           <div className="flex items-center justify-end space-x-4 pt-6 border-t border-gray-100">
                             <Button
                               type="button"
@@ -1522,6 +1625,87 @@ export default function AdminDashboard() {
                               </FormItem>
                             )}
                           />
+
+                          {/* Image Upload Section */}
+                          <div className="space-y-4">
+                            <div className="flex items-center justify-between">
+                              <h3 className="text-sm font-medium text-gray-700">Subcategory Image</h3>
+                              <div className="flex space-x-2">
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => {
+                                    setCurrentImageField('subcategory');
+                                    setImageUploadDialogOpen(true);
+                                  }}
+                                  className="h-9 px-3"
+                                >
+                                  <Upload className="h-4 w-4 mr-2" />
+                                  Upload
+                                </Button>
+                              </div>
+                            </div>
+
+                            <FormField
+                              control={subcategoryForm.control}
+                              name="imageUrl"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel className="text-sm font-medium text-gray-700">Image URL (Optional)</FormLabel>
+                                  <FormControl>
+                                    <Input
+                                      placeholder="https://example.com/image.jpg"
+                                      className="h-11 border-gray-200 focus:border-purple-500 focus:ring-2 focus:ring-purple-200"
+                                      {...field}
+                                      onChange={(e) => {
+                                        field.onChange(e.target.value);
+                                        handleSubcategoryImageUrlChange(e.target.value);
+                                      }}
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+
+                            <div className="space-y-2">
+                              {(() => {
+                                const imageUrl = subcategoryForm.watch('imageUrl');
+                                const imageBlob = subcategoryForm.watch('imageBlob');
+                                
+                                if (!imageUrl && !imageBlob) {
+                                  return (
+                                    <div className="text-center py-6 border-2 border-dashed border-gray-200 rounded-lg">
+                                      <ImageIcon className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                                      <p className="text-sm text-gray-500">No image selected</p>
+                                    </div>
+                                  );
+                                }
+                                
+                                return (
+                                  <div className="space-y-2">
+                                    <div className="flex items-center space-x-2">
+                                      <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                                      <span className="text-sm font-medium text-purple-700">
+                                        Image {imageBlob ? 'uploaded' : 'loaded'} successfully
+                                      </span>
+                                    </div>
+                                    <div className="relative overflow-hidden rounded-lg bg-gray-100">
+                                      <img
+                                        src={imageBlob ? `data:image/jpeg;base64,${imageBlob}` : imageUrl || ''}
+                                        alt="Subcategory preview"
+                                        className="w-full h-48 object-cover"
+                                        onError={(e) => {
+                                          e.currentTarget.style.display = 'none';
+                                        }}
+                                      />
+                                    </div>
+                                  </div>
+                                );
+                              })()}
+                            </div>
+                          </div>
 
                           <div className="flex items-center justify-end space-x-4 pt-6 border-t border-gray-100">
                             <Button
