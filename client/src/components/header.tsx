@@ -1,6 +1,6 @@
 import { Link, useLocation } from "wouter";
 import { ShoppingCart, Menu, X, ChevronDown, Grid3X3, Package, Star } from "lucide-react";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/lib/cart-context";
 import {
@@ -20,8 +20,11 @@ import type { Category, Subcategory } from "@shared/schema";
 export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isCollectionsOpen, setIsCollectionsOpen] = useState(false);
+  const [activeCategory, setActiveCategory] = useState<number | null>(null);
   const { toggleCart, getTotalItems } = useCart();
   const [location] = useLocation();
+  const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const categoryTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const totalItems = getTotalItems();
 
@@ -44,12 +47,53 @@ export default function Header() {
     return subcategories.filter(sub => sub.categoryId === categoryId);
   };
 
-  // Collections dropdown component with hover functionality
+  // Cleanup timeouts on unmount
+  useEffect(() => {
+    return () => {
+      if (hoverTimeoutRef.current) {
+        clearTimeout(hoverTimeoutRef.current);
+      }
+      if (categoryTimeoutRef.current) {
+        clearTimeout(categoryTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  // Handle collections dropdown hover
+  const handleCollectionsEnter = () => {
+    if (hoverTimeoutRef.current) {
+      clearTimeout(hoverTimeoutRef.current);
+    }
+    setIsCollectionsOpen(true);
+  };
+
+  const handleCollectionsLeave = () => {
+    hoverTimeoutRef.current = setTimeout(() => {
+      setIsCollectionsOpen(false);
+      setActiveCategory(null);
+    }, 150);
+  };
+
+  // Handle category hover
+  const handleCategoryEnter = (categoryId: number) => {
+    if (categoryTimeoutRef.current) {
+      clearTimeout(categoryTimeoutRef.current);
+    }
+    setActiveCategory(categoryId);
+  };
+
+  const handleCategoryLeave = () => {
+    categoryTimeoutRef.current = setTimeout(() => {
+      setActiveCategory(null);
+    }, 100);
+  };
+
+  // Collections dropdown component with stable hover functionality
   const CollectionsDropdown = () => (
     <div 
       className="relative"
-      onMouseEnter={() => setIsCollectionsOpen(true)}
-      onMouseLeave={() => setIsCollectionsOpen(false)}
+      onMouseEnter={handleCollectionsEnter}
+      onMouseLeave={handleCollectionsLeave}
     >
       <Button 
         variant="ghost" 
@@ -61,7 +105,11 @@ export default function Header() {
       </Button>
       
       {isCollectionsOpen && (
-        <div className="absolute top-full left-0 mt-1 w-72 bg-white rounded-md shadow-lg border border-gray-200 p-2 z-50">
+        <div 
+          className="absolute top-full left-0 mt-1 w-72 bg-white rounded-md shadow-lg border border-gray-200 p-2 z-50"
+          onMouseEnter={handleCollectionsEnter}
+          onMouseLeave={handleCollectionsLeave}
+        >
           <div className="flex items-center gap-2 px-2 py-3 text-base font-semibold">
             <Package className="h-5 w-5 text-primary" />
             Shop by Category
@@ -74,7 +122,12 @@ export default function Header() {
               
               if (categorySubcategories.length > 0) {
                 return (
-                  <div key={category.id} className="group/category relative">
+                  <div 
+                    key={category.id} 
+                    className="relative"
+                    onMouseEnter={() => handleCategoryEnter(category.id)}
+                    onMouseLeave={handleCategoryLeave}
+                  >
                     <div className="flex items-center gap-3 px-2 py-3 cursor-pointer hover:bg-gray-50 rounded-md">
                       <div className="w-8 h-8 bg-gradient-to-br from-primary/20 to-primary/10 rounded-full flex items-center justify-center">
                         <Package className="h-4 w-4 text-primary" />
@@ -86,33 +139,44 @@ export default function Header() {
                       <ChevronDown className="h-3 w-3 -rotate-90 text-gray-400" />
                     </div>
                     
-                    {/* Subcategory submenu */}
-                    <div className="absolute left-full top-0 ml-2 w-64 bg-white rounded-md shadow-lg border border-gray-200 p-2 opacity-0 invisible group-hover/category:opacity-100 group-hover/category:visible transition-all duration-200 z-50">
-                      <div className="px-2 py-2 text-sm font-semibold text-primary">
-                        {category.name} Collections
-                      </div>
-                      <div className="h-px bg-gray-200 my-1"></div>
-                      {categorySubcategories.map((subcategory) => (
-                        <Link key={subcategory.id} href={`/subcategory/${subcategory.id}/products`}>
-                          <div className="flex items-center gap-3 px-2 py-3 cursor-pointer hover:bg-gray-50 rounded-md">
-                            <div className="w-6 h-6 bg-gradient-to-br from-gray-100 to-gray-50 rounded-md flex items-center justify-center">
-                              <Package className="h-3 w-3 text-gray-600" />
+                    {/* Subcategory submenu with improved hover zone */}
+                    {activeCategory === category.id && (
+                      <div 
+                        className="absolute left-full top-0 ml-1 w-64 bg-white rounded-md shadow-lg border border-gray-200 p-2 z-50"
+                        onMouseEnter={() => handleCategoryEnter(category.id)}
+                        onMouseLeave={handleCategoryLeave}
+                      >
+                        <div className="px-2 py-2 text-sm font-semibold text-primary">
+                          {category.name} Collections
+                        </div>
+                        <div className="h-px bg-gray-200 my-1"></div>
+                        {categorySubcategories.map((subcategory) => (
+                          <Link key={subcategory.id} href={`/subcategory/${subcategory.id}/products`}>
+                            <div className="flex items-center gap-3 px-2 py-3 cursor-pointer hover:bg-gray-50 rounded-md">
+                              <div className="w-6 h-6 bg-gradient-to-br from-gray-100 to-gray-50 rounded-md flex items-center justify-center">
+                                <Package className="h-3 w-3 text-gray-600" />
+                              </div>
+                              <div className="flex-1">
+                                <div className="font-medium text-sm">{subcategory.name}</div>
+                                <div className="text-xs text-gray-500">{subcategory.description}</div>
+                              </div>
                             </div>
-                            <div className="flex-1">
-                              <div className="font-medium text-sm">{subcategory.name}</div>
-                              <div className="text-xs text-gray-500">{subcategory.description}</div>
-                            </div>
+                          </Link>
+                        ))}
+                        <div className="h-px bg-gray-200 my-1"></div>
+                        <Link href={`/category/${category.id}`}>
+                          <div className="flex items-center gap-2 px-2 py-2 cursor-pointer hover:bg-gray-50 rounded-md text-primary font-medium">
+                            <Package className="h-4 w-4" />
+                            View all {category.name}
                           </div>
                         </Link>
-                      ))}
-                      <div className="h-px bg-gray-200 my-1"></div>
-                      <Link href={`/category/${category.id}`}>
-                        <div className="flex items-center gap-2 px-2 py-2 cursor-pointer hover:bg-gray-50 rounded-md text-primary font-medium">
-                          <Package className="h-4 w-4" />
-                          View all {category.name}
-                        </div>
-                      </Link>
-                    </div>
+                      </div>
+                    )}
+                    
+                    {/* Invisible bridge to prevent menu from closing */}
+                    {activeCategory === category.id && (
+                      <div className="absolute left-full top-0 w-1 h-full bg-transparent"></div>
+                    )}
                   </div>
                 );
               } else {
