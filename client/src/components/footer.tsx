@@ -88,18 +88,29 @@ export default function Footer() {
           </div>
 
           <div className="space-y-4">
-            <h4 className="text-lg font-semibold">Newsletter</h4>
-            <p className="text-gray-400">Subscribe for updates and special offers</p>
-            <div className="flex">
-              <input
-                type="email"
-                placeholder="Your email"
-                className="flex-1 px-4 py-2 bg-gray-800 border border-gray-700 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-primary"
-              />
-              <button className="bg-primary hover:bg-primary-600 px-4 py-2 rounded-r-lg transition-colors">
-                <i className="fas fa-paper-plane"></i>
-              </button>
-            </div>
+            <h4 className="text-lg font-semibold">Support</h4>
+            <ul className="space-y-2 text-gray-400">
+              <li>
+                <a href="#" className="hover:text-white transition-colors">
+                  Customer Service
+                </a>
+              </li>
+              <li>
+                <a href="#" className="hover:text-white transition-colors">
+                  Return Policy
+                </a>
+              </li>
+              <li>
+                <a href="#" className="hover:text-white transition-colors">
+                  Terms of Service
+                </a>
+              </li>
+              <li>
+                <a href="#" className="hover:text-white transition-colors">
+                  Privacy Policy
+                </a>
+              </li>
+            </ul>
           </div>
         </div>
 
