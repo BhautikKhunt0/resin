@@ -1404,7 +1404,7 @@ export default function AdminDashboard() {
                                       <img
                                         src={imageBlob ? `data:image/jpeg;base64,${imageBlob}` : imageUrl || ''}
                                         alt="Category preview"
-                                        className="w-full h-48 object-cover"
+                                        className="w-full h-32 object-cover"
                                         onError={(e) => {
                                           e.currentTarget.style.display = 'none';
                                         }}
@@ -1568,7 +1568,7 @@ export default function AdminDashboard() {
                                   <FormControl>
                                     <Input 
                                       placeholder="e.g., Smartphones, Laptops" 
-                                      className="h-11 border-gray-200 focus:border-purple-500 focus:ring-2 focus:ring-purple-200"
+                                      className="h-9 border-gray-200 focus:border-purple-500 focus:ring-2 focus:ring-purple-200"
                                       {...field} 
                                     />
                                   </FormControl>
@@ -1587,7 +1587,7 @@ export default function AdminDashboard() {
                                   </FormLabel>
                                   <Select onValueChange={field.onChange} value={field.value}>
                                     <FormControl>
-                                      <SelectTrigger className="h-11 border-gray-200 focus:border-purple-500 focus:ring-2 focus:ring-purple-200">
+                                      <SelectTrigger className="h-9 border-gray-200 focus:border-purple-500 focus:ring-2 focus:ring-purple-200">
                                         <SelectValue placeholder="Choose parent category" />
                                       </SelectTrigger>
                                     </FormControl>
@@ -1614,7 +1614,7 @@ export default function AdminDashboard() {
                                 <FormControl>
                                   <Textarea 
                                     placeholder="Describe this subcategory and what products it contains..."
-                                    className="min-h-[100px] border-gray-200 focus:border-purple-500 focus:ring-2 focus:ring-purple-200"
+                                    className="min-h-[60px] border-gray-200 focus:border-purple-500 focus:ring-2 focus:ring-purple-200"
                                     {...field} 
                                   />
                                 </FormControl>
@@ -1692,7 +1692,7 @@ export default function AdminDashboard() {
                                       <img
                                         src={imageBlob ? `data:image/jpeg;base64,${imageBlob}` : imageUrl || ''}
                                         alt="Subcategory preview"
-                                        className="w-full h-48 object-cover"
+                                        className="w-full h-32 object-cover"
                                         onError={(e) => {
                                           e.currentTarget.style.display = 'none';
                                         }}
