@@ -1233,9 +1233,9 @@ export default function AdminDashboard() {
                         {products?.map((product) => (
                           <TableRow key={product.id}>
                             <TableCell>
-                              {product.imageUrl ? (
+                              {product.imageUrl || product.imageBlob ? (
                                 <img
-                                  src={product.imageUrl}
+                                  src={product.imageBlob ? `data:image/jpeg;base64,${product.imageBlob}` : product.imageUrl || ''}
                                   alt={product.name}
                                   className="w-12 h-12 object-cover rounded"
                                 />
@@ -1482,6 +1482,7 @@ export default function AdminDashboard() {
                     <Table>
                       <TableHeader>
                         <TableRow>
+                          <TableHead>Image</TableHead>
                           <TableHead>Name</TableHead>
                           <TableHead>Description</TableHead>
                           <TableHead>Products</TableHead>
@@ -1491,6 +1492,19 @@ export default function AdminDashboard() {
                       <TableBody>
                         {categories?.map((category) => (
                           <TableRow key={category.id}>
+                            <TableCell>
+                              {category.imageUrl || category.imageBlob ? (
+                                <img
+                                  src={category.imageBlob ? `data:image/jpeg;base64,${category.imageBlob}` : category.imageUrl || ''}
+                                  alt={category.name}
+                                  className="w-16 h-12 object-cover rounded"
+                                />
+                              ) : (
+                                <div className="w-16 h-12 bg-gray-200 rounded flex items-center justify-center">
+                                  <Tags className="h-6 w-6 text-gray-400" />
+                                </div>
+                              )}
+                            </TableCell>
                             <TableCell className="font-medium">{category.name}</TableCell>
                             <TableCell className="text-gray-600">{category.description || "No description"}</TableCell>
                             <TableCell>
@@ -1753,6 +1767,7 @@ export default function AdminDashboard() {
                     <Table>
                       <TableHeader>
                         <TableRow>
+                          <TableHead>Image</TableHead>
                           <TableHead>Name</TableHead>
                           <TableHead>Parent Category</TableHead>
                           <TableHead>Description</TableHead>
@@ -1762,6 +1777,19 @@ export default function AdminDashboard() {
                       <TableBody>
                         {subcategories?.map((subcategory) => (
                           <TableRow key={subcategory.id}>
+                            <TableCell>
+                              {subcategory.imageUrl || subcategory.imageBlob ? (
+                                <img
+                                  src={subcategory.imageBlob ? `data:image/jpeg;base64,${subcategory.imageBlob}` : subcategory.imageUrl || ''}
+                                  alt={subcategory.name}
+                                  className="w-16 h-12 object-cover rounded"
+                                />
+                              ) : (
+                                <div className="w-16 h-12 bg-gray-200 rounded flex items-center justify-center">
+                                  <Tags className="h-6 w-6 text-gray-400" />
+                                </div>
+                              )}
+                            </TableCell>
                             <TableCell className="font-medium">{subcategory.name}</TableCell>
                             <TableCell>
                               <Badge variant="outline">

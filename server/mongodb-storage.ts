@@ -202,6 +202,10 @@ export class MongoDBStorage implements IStorage {
     let updateData: any = {};
     if (subcategory.name) updateData.name = subcategory.name;
     if (subcategory.description !== undefined) updateData.description = subcategory.description;
+    if (subcategory.imageUrl !== undefined) updateData.imageUrl = subcategory.imageUrl;
+    if (subcategory.imageBlob !== undefined) {
+      updateData.imageBlob = subcategory.imageBlob ? Buffer.from(subcategory.imageBlob, 'base64') : null;
+    }
     
     if (subcategory.categoryId) {
       const categories = await CategoryModel.find();
