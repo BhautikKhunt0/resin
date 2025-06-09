@@ -18,8 +18,6 @@ import {
   TrendingUp,
   Menu,
   X,
-  Upload,
-  Image as ImageIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -386,17 +384,19 @@ export default function AdminDashboard() {
 
   const updateBannerMutation = useMutation({
     mutationFn: ({ id, data }: { id: number; data: any }) => {
+      console.log('Updating banner with data:', data); // Debug log
       return api.updateBanner(token, id, data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/banners"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/banners"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/banners"] }); // Also invalidate public banners
       setBannerDialogOpen(false);
       bannerForm.reset();
       setEditingBanner(null);
       toast({ title: "Banner updated successfully" });
     },
     onError: (error) => {
+      console.error('Banner update error:', error); // Debug log
       toast({ title: "Failed to update banner", variant: "destructive" });
     },
   });
@@ -417,18 +417,21 @@ export default function AdminDashboard() {
     mutationFn: ({ imageData, filename }: { imageData: string; filename?: string }) => 
       api.uploadImage(token, imageData, filename),
     onSuccess: (data) => {
+      console.log('Upload success:', data); // Debug log
       if (currentImageField === 'product') {
         productForm.setValue('imageBlob', data.imageBlob);
-        productForm.setValue('imageUrl', '');
+        productForm.setValue('imageUrl', ''); // Clear URL when using blob
       } else if (currentImageField === 'banner') {
         bannerForm.setValue('imageBlob', data.imageBlob);
-        bannerForm.setValue('imageUrl', '');
+        bannerForm.setValue('imageUrl', ''); // Clear URL when using blob
+        console.log('Banner form updated with blob:', data.imageBlob); // Debug log
       }
       setImageUploadDialogOpen(false);
       setCurrentImageField(null);
       toast({ title: "Image uploaded successfully" });
     },
     onError: (error) => {
+      console.error('Upload error:', error); // Debug log
       toast({ title: "Failed to upload image", variant: "destructive" });
     },
   });
@@ -467,12 +470,14 @@ export default function AdminDashboard() {
   };
 
   const handleBannerSubmit = (data: BannerFormData) => {
+    console.log('Banner form data:', data); // Debug log
     const bannerData = {
       ...data,
       imageUrl: data.imageUrl || undefined,
       imageBlob: data.imageBlob || undefined,
       isActive: data.isActive ? 1 : 0,
     };
+    console.log('Banner data to submit:', bannerData); // Debug log
 
     if (editingBanner) {
       updateBannerMutation.mutate({ id: editingBanner.id, data: bannerData });
@@ -486,19 +491,6 @@ export default function AdminDashboard() {
       updateCategoryMutation.mutate({ id: editingCategory.id, data });
     } else {
       createCategoryMutation.mutate(data);
-    }
-  };
-
-  const handleSubcategorySubmit = (data: SubcategoryFormData) => {
-    const subcategoryData = {
-      ...data,
-      categoryId: parseInt(data.categoryId),
-    };
-
-    if (editingSubcategory) {
-      updateSubcategoryMutation.mutate({ id: editingSubcategory.id, data: subcategoryData });
-    } else {
-      createSubcategoryMutation.mutate(subcategoryData);
     }
   };
 
@@ -530,12 +522,50 @@ export default function AdminDashboard() {
     setBannerDialogOpen(true);
   };
 
+  const handleAddBanner = () => {
+    setEditingBanner(null);
+    bannerForm.reset();
+    setBannerDialogOpen(true);
+  };
+
+  const handleImageUpload = (fieldType: string) => {
+    setCurrentImageField(fieldType);
+    setImageUploadDialogOpen(true);
+  };
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const imageData = e.target?.result as string;
+        uploadImageMutation.mutate({ 
+          imageData, 
+          filename: file.name 
+        });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleEditCategory = (category: Category) => {
     setEditingCategory(category);
     categoryForm.reset({
       name: category.name,
       description: category.description || "",
     });
+    setCategoryDialogOpen(true);
+  };
+
+  const handleAddProduct = () => {
+    setEditingProduct(null);
+    productForm.reset();
+    setProductDialogOpen(true);
+  };
+
+  const handleAddCategory = () => {
+    setEditingCategory(null);
+    categoryForm.reset();
     setCategoryDialogOpen(true);
   };
 
@@ -549,33 +579,10 @@ export default function AdminDashboard() {
     setSubcategoryDialogOpen(true);
   };
 
-  const handleAddProduct = () => {
-    setEditingProduct(null);
-    productForm.reset();
-    setProductDialogOpen(true);
-  };
-
-  const handleAddBanner = () => {
-    setEditingBanner(null);
-    bannerForm.reset();
-    setBannerDialogOpen(true);
-  };
-
-  const handleAddCategory = () => {
-    setEditingCategory(null);
-    categoryForm.reset();
-    setCategoryDialogOpen(true);
-  };
-
   const handleAddSubcategory = () => {
     setEditingSubcategory(null);
     subcategoryForm.reset();
     setSubcategoryDialogOpen(true);
-  };
-
-  const handleImageUpload = (fieldType: string) => {
-    setCurrentImageField(fieldType);
-    setImageUploadDialogOpen(true);
   };
 
   const handleLogout = () => {
@@ -583,7 +590,7 @@ export default function AdminDashboard() {
     setLocation("/admin/login");
   };
 
-  // Statistics
+  // Calculate stats
   const totalProducts = products?.length || 0;
   const totalOrders = orders?.length || 0;
   const totalRevenue = orders?.reduce((sum, order) => sum + parseFloat(order.totalAmount), 0) || 0;
@@ -801,60 +808,51 @@ export default function AdminDashboard() {
             </div>
           )}
 
-          {/* Products Tab */}
           {activeTab === "products" && (
             <div className="space-y-6">
               <div className="flex justify-between items-center">
                 <h2 className="text-2xl font-bold text-gray-900">Product Management</h2>
                 <Dialog open={productDialogOpen} onOpenChange={setProductDialogOpen}>
                   <DialogTrigger asChild>
-                    <Button onClick={handleAddProduct} className="bg-blue-600 hover:bg-blue-700">
+                    <Button onClick={handleAddProduct}>
                       <Plus className="h-4 w-4 mr-2" />
                       Add Product
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-                    <DialogHeader className="pb-6 border-b border-gray-100">
-                      <div className="flex items-center space-x-3">
-                        <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                          <Package className="h-6 w-6 text-blue-600" />
-                        </div>
-                        <div>
-                          <DialogTitle className="text-2xl font-bold text-gray-900">
-                            {editingProduct ? "Edit Product" : "Add New Product"}
-                          </DialogTitle>
-                          <p className="text-sm text-gray-500 mt-1">
-                            {editingProduct ? "Update product details below" : "Fill in the details to create a new product"}
-                          </p>
-                        </div>
-                      </div>
+                  <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                    <DialogHeader className="pb-6 border-b">
+                      <DialogTitle className="text-2xl font-bold text-gray-900 flex items-center">
+                        <Package className="h-6 w-6 mr-3 text-blue-600" />
+                        {editingProduct ? "Edit Product" : "Add New Product"}
+                      </DialogTitle>
+                      <p className="text-sm text-gray-500 mt-2">
+                        {editingProduct ? "Update product details below" : "Fill in the details to create a new product"}
+                      </p>
                     </DialogHeader>
                     
                     <div className="py-6">
                       <Form {...productForm}>
-                        <form onSubmit={productForm.handleSubmit(handleProductSubmit)} className="space-y-8">
+                        <form onSubmit={productForm.handleSubmit(handleProductSubmit)} className="space-y-6">
                           {/* Basic Information Section */}
-                          <div className="space-y-6">
-                            <div className="flex items-center space-x-3 pb-4 border-b border-gray-100">
-                              <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                          <div className="space-y-4">
+                            <div className="flex items-center mb-4">
+                              <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-3">
                                 <span className="text-blue-600 font-semibold text-sm">1</span>
                               </div>
                               <h3 className="text-lg font-semibold text-gray-900">Basic Information</h3>
                             </div>
                             
-                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                               <FormField
                                 control={productForm.control}
                                 name="name"
                                 render={({ field }) => (
                                   <FormItem>
-                                    <FormLabel className="text-sm font-medium text-gray-700">
-                                      Product Name <span className="text-red-500">*</span>
-                                    </FormLabel>
+                                    <FormLabel className="text-sm font-medium text-gray-700">Product Name *</FormLabel>
                                     <FormControl>
                                       <Input 
                                         placeholder="e.g., iPhone 15 Pro Max" 
-                                        className="h-11 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                                        className="h-11 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
                                         {...field} 
                                       />
                                     </FormControl>
@@ -868,17 +866,15 @@ export default function AdminDashboard() {
                                 name="price"
                                 render={({ field }) => (
                                   <FormItem>
-                                    <FormLabel className="text-sm font-medium text-gray-700">
-                                      Price <span className="text-red-500">*</span>
-                                    </FormLabel>
+                                    <FormLabel className="text-sm font-medium text-gray-700">Price *</FormLabel>
                                     <FormControl>
                                       <div className="relative">
-                                        <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium">$</span>
+                                        <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">$</span>
                                         <Input 
                                           type="number" 
                                           step="0.01" 
                                           placeholder="999.99" 
-                                          className="h-11 pl-8 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                                          className="h-11 pl-8 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
                                           {...field} 
                                         />
                                       </div>
@@ -894,13 +890,11 @@ export default function AdminDashboard() {
                               name="description"
                               render={({ field }) => (
                                 <FormItem>
-                                  <FormLabel className="text-sm font-medium text-gray-700">
-                                    Description <span className="text-red-500">*</span>
-                                  </FormLabel>
+                                  <FormLabel className="text-sm font-medium text-gray-700">Description *</FormLabel>
                                   <FormControl>
                                     <Textarea 
                                       placeholder="Describe your product features, specifications, and benefits..."
-                                      className="min-h-[120px] border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                                      className="min-h-[100px] border-gray-200 focus:border-blue-500 focus:ring-blue-500"
                                       {...field} 
                                     />
                                   </FormControl>
@@ -911,15 +905,15 @@ export default function AdminDashboard() {
                           </div>
 
                           {/* Product Image Section */}
-                          <div className="space-y-6">
-                            <div className="flex items-center space-x-3 pb-4 border-b border-gray-100">
-                              <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                          <div className="space-y-4">
+                            <div className="flex items-center mb-4">
+                              <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mr-3">
                                 <span className="text-green-600 font-semibold text-sm">2</span>
                               </div>
                               <h3 className="text-lg font-semibold text-gray-900">Product Image</h3>
                             </div>
                             
-                            <div className="bg-gray-50 rounded-xl p-6 border-2 border-dashed border-gray-200">
+                            <div className="bg-gray-50 rounded-lg p-6 border-2 border-dashed border-gray-200">
                               <FormField
                                 control={productForm.control}
                                 name="imageUrl"
@@ -929,7 +923,7 @@ export default function AdminDashboard() {
                                     <FormControl>
                                       <Input 
                                         placeholder="https://images.unsplash.com/photo-..." 
-                                        className="h-11 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                                        className="h-11 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
                                         {...field}
                                         onChange={(e) => {
                                           field.onChange(e);
@@ -942,24 +936,24 @@ export default function AdminDashboard() {
                                 )}
                               />
                               
-                              <div className="flex items-center my-6">
-                                <div className="flex-1 border-t border-gray-300"></div>
-                                <span className="px-4 text-sm text-gray-500 bg-gray-50 font-medium">OR</span>
-                                <div className="flex-1 border-t border-gray-300"></div>
+                              <div className="flex items-center my-4">
+                                <div className="flex-1 border-t border-gray-200"></div>
+                                <span className="px-3 text-sm text-gray-500 bg-gray-50">OR</span>
+                                <div className="flex-1 border-t border-gray-200"></div>
                               </div>
                               
                               <div className="text-center">
                                 <Button
                                   type="button"
                                   variant="outline"
-                                  className="h-12 px-8 border-2 border-gray-200 hover:border-blue-500 hover:text-blue-600 hover:bg-blue-50"
+                                  className="h-11 px-8 border-gray-200 hover:border-blue-500 hover:text-blue-600"
                                   onClick={() => handleImageUpload('product')}
                                 >
-                                  <Upload className="h-5 w-5 mr-2" />
+                                  <Plus className="h-4 w-4 mr-2" />
                                   Upload Image File
                                 </Button>
-                                <p className="text-xs text-gray-500 mt-3">
-                                  Supports JPG, PNG, WebP up to 5MB
+                                <p className="text-xs text-gray-500 mt-2">
+                                  Supports JPG, PNG up to 5MB
                                 </p>
                               </div>
                               
@@ -972,18 +966,18 @@ export default function AdminDashboard() {
                                 if (!hasImage) return null;
                                 
                                 return (
-                                  <div className="mt-6 p-4 bg-white rounded-lg border border-gray-200 shadow-sm">
+                                  <div className="mt-6 p-4 bg-white rounded-lg border border-gray-200">
                                     <div className="flex items-center mb-3">
                                       <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
                                       <span className="text-sm font-medium text-green-700">
                                         Image {imageBlob ? 'uploaded' : 'loaded'} successfully
                                       </span>
                                     </div>
-                                    <div className="relative overflow-hidden rounded-lg bg-gray-100">
+                                    <div className="relative overflow-hidden rounded-lg">
                                       <img
                                         src={imageBlob ? `data:image/jpeg;base64,${imageBlob}` : imageUrl || ''}
                                         alt="Product preview"
-                                        className="w-full h-56 object-cover"
+                                        className="w-full h-48 object-cover"
                                         onError={(e) => {
                                           e.currentTarget.style.display = 'none';
                                         }}
@@ -996,26 +990,24 @@ export default function AdminDashboard() {
                           </div>
 
                           {/* Category & Inventory Section */}
-                          <div className="space-y-6">
-                            <div className="flex items-center space-x-3 pb-4 border-b border-gray-100">
-                              <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+                          <div className="space-y-4">
+                            <div className="flex items-center mb-4">
+                              <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center mr-3">
                                 <span className="text-purple-600 font-semibold text-sm">3</span>
                               </div>
                               <h3 className="text-lg font-semibold text-gray-900">Category & Inventory</h3>
                             </div>
                             
-                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                               <FormField
                                 control={productForm.control}
                                 name="categoryId"
                                 render={({ field }) => (
                                   <FormItem>
-                                    <FormLabel className="text-sm font-medium text-gray-700">
-                                      Category <span className="text-red-500">*</span>
-                                    </FormLabel>
+                                    <FormLabel className="text-sm font-medium text-gray-700">Category *</FormLabel>
                                     <Select onValueChange={field.onChange} value={field.value}>
                                       <FormControl>
-                                        <SelectTrigger className="h-11 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200">
+                                        <SelectTrigger className="h-11 border-gray-200 focus:border-blue-500 focus:ring-blue-500">
                                           <SelectValue placeholder="Choose a category" />
                                         </SelectTrigger>
                                       </FormControl>
@@ -1040,7 +1032,7 @@ export default function AdminDashboard() {
                                     <FormLabel className="text-sm font-medium text-gray-700">Subcategory</FormLabel>
                                     <Select onValueChange={field.onChange} value={field.value}>
                                       <FormControl>
-                                        <SelectTrigger className="h-11 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200">
+                                        <SelectTrigger className="h-11 border-gray-200 focus:border-blue-500 focus:ring-blue-500">
                                           <SelectValue placeholder="Choose a subcategory (optional)" />
                                         </SelectTrigger>
                                       </FormControl>
@@ -1059,44 +1051,42 @@ export default function AdminDashboard() {
                                   </FormItem>
                                 )}
                               />
-
-                              <FormField
-                                control={productForm.control}
-                                name="stock"
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <FormLabel className="text-sm font-medium text-gray-700">
-                                      Stock Quantity <span className="text-red-500">*</span>
-                                    </FormLabel>
-                                    <FormControl>
-                                      <Input 
-                                        type="number" 
-                                        min="0" 
-                                        placeholder="100"
-                                        className="h-11 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200" 
-                                        {...field} 
-                                      />
-                                    </FormControl>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
-                              />
                             </div>
+
+                            <FormField
+                              control={productForm.control}
+                              name="stock"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel className="text-sm font-medium text-gray-700">Stock Quantity *</FormLabel>
+                                  <FormControl>
+                                    <Input 
+                                      type="number" 
+                                      min="0" 
+                                      placeholder="100"
+                                      className="h-11 border-gray-200 focus:border-blue-500 focus:ring-blue-500" 
+                                      {...field} 
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
 
                             <FormField
                               control={productForm.control}
                               name="isFeatured"
                               render={({ field }) => (
                                 <FormItem>
-                                  <div className="flex items-center justify-between p-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-200">
-                                    <div className="flex items-center space-x-4">
-                                      <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
-                                        <TrendingUp className="h-6 w-6 text-blue-600" />
+                                  <div className="flex items-center justify-between p-4 bg-blue-50 rounded-lg border border-blue-200">
+                                    <div className="flex items-center space-x-3">
+                                      <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                                        <TrendingUp className="h-5 w-5 text-blue-600" />
                                       </div>
                                       <div>
-                                        <FormLabel className="text-base font-semibold text-gray-900">Featured Product</FormLabel>
+                                        <FormLabel className="text-base font-medium text-gray-900">Featured Product</FormLabel>
                                         <p className="text-sm text-gray-600 mt-1">
-                                          Featured products appear prominently on the homepage and get more visibility
+                                          Featured products appear prominently on the homepage
                                         </p>
                                       </div>
                                     </div>
@@ -1114,18 +1104,18 @@ export default function AdminDashboard() {
                           </div>
 
                           {/* Action Buttons */}
-                          <div className="flex items-center justify-end space-x-4 pt-8 border-t border-gray-100">
+                          <div className="flex items-center justify-end space-x-4 pt-6 border-t border-gray-200">
                             <Button
                               type="button"
                               variant="outline"
                               onClick={() => setProductDialogOpen(false)}
-                              className="px-8 h-11 border-gray-200 hover:bg-gray-50"
+                              className="px-6 h-11"
                             >
                               Cancel
                             </Button>
                             <Button
                               type="submit"
-                              className="px-10 h-11 bg-blue-600 hover:bg-blue-700 shadow-lg"
+                              className="px-8 h-11 bg-blue-600 hover:bg-blue-700"
                               disabled={createProductMutation.isPending || updateProductMutation.isPending}
                             >
                               {createProductMutation.isPending || updateProductMutation.isPending ? (
@@ -1134,10 +1124,7 @@ export default function AdminDashboard() {
                                   {editingProduct ? "Updating..." : "Creating..."}
                                 </div>
                               ) : (
-                                <div className="flex items-center">
-                                  <Package className="h-4 w-4 mr-2" />
-                                  {editingProduct ? "Update Product" : "Create Product"}
-                                </div>
+                                editingProduct ? "Update Product" : "Create Product"
                               )}
                             </Button>
                           </div>
@@ -1149,9 +1136,9 @@ export default function AdminDashboard() {
               </div>
 
               <Card>
-                <CardContent className="p-0">
+                <CardContent>
                   {productsLoading ? (
-                    <div className="p-6 space-y-3">
+                    <div className="space-y-3 p-6">
                       {[...Array(5)].map((_, i) => (
                         <Skeleton key={i} className="h-16 w-full" />
                       ))}
@@ -1225,115 +1212,81 @@ export default function AdminDashboard() {
             </div>
           )}
 
-          {/* Categories Tab */}
           {activeTab === "categories" && (
             <div className="space-y-6">
               <div className="flex justify-between items-center">
                 <h2 className="text-2xl font-bold text-gray-900">Category Management</h2>
                 <Dialog open={categoryDialogOpen} onOpenChange={setCategoryDialogOpen}>
                   <DialogTrigger asChild>
-                    <Button onClick={handleAddCategory} className="bg-green-600 hover:bg-green-700">
+                    <Button onClick={handleAddCategory}>
                       <Plus className="h-4 w-4 mr-2" />
                       Add Category
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className="max-w-2xl">
-                    <DialogHeader className="pb-6 border-b border-gray-100">
-                      <div className="flex items-center space-x-3">
-                        <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                          <Tags className="h-6 w-6 text-green-600" />
-                        </div>
-                        <div>
-                          <DialogTitle className="text-2xl font-bold text-gray-900">
-                            {editingCategory ? "Edit Category" : "Add New Category"}
-                          </DialogTitle>
-                          <p className="text-sm text-gray-500 mt-1">
-                            {editingCategory ? "Update category details" : "Create a new product category"}
-                          </p>
-                        </div>
-                      </div>
+                  <DialogContent className="max-w-md">
+                    <DialogHeader>
+                      <DialogTitle>
+                        {editingCategory ? "Edit Category" : "Add New Category"}
+                      </DialogTitle>
                     </DialogHeader>
-                    
-                    <div className="py-6">
-                      <Form {...categoryForm}>
-                        <form onSubmit={categoryForm.handleSubmit(handleCategorySubmit)} className="space-y-6">
-                          <FormField
-                            control={categoryForm.control}
-                            name="name"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel className="text-sm font-medium text-gray-700">
-                                  Category Name <span className="text-red-500">*</span>
-                                </FormLabel>
-                                <FormControl>
-                                  <Input 
-                                    placeholder="e.g., Electronics, Clothing, Books" 
-                                    className="h-11 border-gray-200 focus:border-green-500 focus:ring-2 focus:ring-green-200"
-                                    {...field} 
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
+                    <Form {...categoryForm}>
+                      <form onSubmit={categoryForm.handleSubmit(handleCategorySubmit)} className="space-y-4">
+                        <FormField
+                          control={categoryForm.control}
+                          name="name"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Category Name</FormLabel>
+                              <FormControl>
+                                <Input placeholder="Enter category name" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
 
-                          <FormField
-                            control={categoryForm.control}
-                            name="description"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel className="text-sm font-medium text-gray-700">Description</FormLabel>
-                                <FormControl>
-                                  <Textarea 
-                                    placeholder="Describe this category and what products it contains..."
-                                    className="min-h-[100px] border-gray-200 focus:border-green-500 focus:ring-2 focus:ring-green-200"
-                                    {...field} 
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
+                        <FormField
+                          control={categoryForm.control}
+                          name="description"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Description</FormLabel>
+                              <FormControl>
+                                <Textarea placeholder="Enter category description" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
 
-                          <div className="flex items-center justify-end space-x-4 pt-6 border-t border-gray-100">
-                            <Button
-                              type="button"
-                              variant="outline"
-                              onClick={() => setCategoryDialogOpen(false)}
-                              className="px-6 h-11"
-                            >
-                              Cancel
-                            </Button>
-                            <Button
-                              type="submit"
-                              className="px-8 h-11 bg-green-600 hover:bg-green-700"
-                              disabled={createCategoryMutation.isPending || updateCategoryMutation.isPending}
-                            >
-                              {createCategoryMutation.isPending || updateCategoryMutation.isPending ? (
-                                <div className="flex items-center">
-                                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-                                  {editingCategory ? "Updating..." : "Creating..."}
-                                </div>
-                              ) : (
-                                <div className="flex items-center">
-                                  <Tags className="h-4 w-4 mr-2" />
-                                  {editingCategory ? "Update Category" : "Create Category"}
-                                </div>
-                              )}
-                            </Button>
-                          </div>
-                        </form>
-                      </Form>
-                    </div>
+                        <div className="flex space-x-2">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => setCategoryDialogOpen(false)}
+                            className="flex-1"
+                          >
+                            Cancel
+                          </Button>
+                          <Button
+                            type="submit"
+                            className="flex-1"
+                            disabled={createCategoryMutation.isPending || updateCategoryMutation.isPending}
+                          >
+                            {editingCategory ? "Update" : "Create"}
+                          </Button>
+                        </div>
+                      </form>
+                    </Form>
                   </DialogContent>
                 </Dialog>
               </div>
 
               <Card>
-                <CardContent className="p-0">
+                <CardContent>
                   {categoriesLoading ? (
-                    <div className="p-6 space-y-3">
-                      {[...Array(5)].map((_, i) => (
+                    <div className="space-y-3 p-6">
+                      {[...Array(4)].map((_, i) => (
                         <Skeleton key={i} className="h-16 w-full" />
                       ))}
                     </div>
@@ -1351,11 +1304,9 @@ export default function AdminDashboard() {
                         {categories?.map((category) => (
                           <TableRow key={category.id}>
                             <TableCell className="font-medium">{category.name}</TableCell>
-                            <TableCell className="text-gray-600">{category.description || "No description"}</TableCell>
+                            <TableCell>{category.description || "No description"}</TableCell>
                             <TableCell>
-                              <Badge variant="secondary">
-                                {products?.filter(p => p.categoryId === category.id).length || 0} products
-                              </Badge>
+                              {products?.filter(p => p.categoryId === category.id).length || 0}
                             </TableCell>
                             <TableCell>
                               <div className="flex space-x-2">
@@ -1386,143 +1337,120 @@ export default function AdminDashboard() {
             </div>
           )}
 
-          {/* Subcategories Tab */}
           {activeTab === "subcategories" && (
             <div className="space-y-6">
               <div className="flex justify-between items-center">
                 <h2 className="text-2xl font-bold text-gray-900">Subcategory Management</h2>
                 <Dialog open={subcategoryDialogOpen} onOpenChange={setSubcategoryDialogOpen}>
                   <DialogTrigger asChild>
-                    <Button onClick={handleAddSubcategory} className="bg-purple-600 hover:bg-purple-700">
+                    <Button onClick={handleAddSubcategory}>
                       <Plus className="h-4 w-4 mr-2" />
                       Add Subcategory
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className="max-w-2xl">
-                    <DialogHeader className="pb-6 border-b border-gray-100">
-                      <div className="flex items-center space-x-3">
-                        <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                          <Tags className="h-6 w-6 text-purple-600" />
-                        </div>
-                        <div>
-                          <DialogTitle className="text-2xl font-bold text-gray-900">
-                            {editingSubcategory ? "Edit Subcategory" : "Add New Subcategory"}
-                          </DialogTitle>
-                          <p className="text-sm text-gray-500 mt-1">
-                            {editingSubcategory ? "Update subcategory details" : "Create a new product subcategory"}
-                          </p>
-                        </div>
-                      </div>
+                  <DialogContent className="max-w-md">
+                    <DialogHeader>
+                      <DialogTitle>
+                        {editingSubcategory ? "Edit Subcategory" : "Add New Subcategory"}
+                      </DialogTitle>
                     </DialogHeader>
-                    
-                    <div className="py-6">
-                      <Form {...subcategoryForm}>
-                        <form onSubmit={subcategoryForm.handleSubmit(handleSubcategorySubmit)} className="space-y-6">
-                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                            <FormField
-                              control={subcategoryForm.control}
-                              name="name"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel className="text-sm font-medium text-gray-700">
-                                    Subcategory Name <span className="text-red-500">*</span>
-                                  </FormLabel>
-                                  <FormControl>
-                                    <Input 
-                                      placeholder="e.g., Smartphones, Laptops" 
-                                      className="h-11 border-gray-200 focus:border-purple-500 focus:ring-2 focus:ring-purple-200"
-                                      {...field} 
-                                    />
-                                  </FormControl>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
+                    <Form {...subcategoryForm}>
+                      <form onSubmit={subcategoryForm.handleSubmit((data) => {
+                        if (editingSubcategory) {
+                          updateSubcategoryMutation.mutate({
+                            id: editingSubcategory.id,
+                            data: {
+                              ...data,
+                              categoryId: parseInt(data.categoryId),
+                            },
+                          });
+                        } else {
+                          createSubcategoryMutation.mutate({
+                            ...data,
+                            categoryId: parseInt(data.categoryId),
+                          });
+                        }
+                      })} className="space-y-4">
+                        <FormField
+                          control={subcategoryForm.control}
+                          name="name"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Subcategory Name</FormLabel>
+                              <FormControl>
+                                <Input placeholder="Enter subcategory name" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
 
-                            <FormField
-                              control={subcategoryForm.control}
-                              name="categoryId"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel className="text-sm font-medium text-gray-700">
-                                    Parent Category <span className="text-red-500">*</span>
-                                  </FormLabel>
-                                  <Select onValueChange={field.onChange} value={field.value}>
-                                    <FormControl>
-                                      <SelectTrigger className="h-11 border-gray-200 focus:border-purple-500 focus:ring-2 focus:ring-purple-200">
-                                        <SelectValue placeholder="Choose parent category" />
-                                      </SelectTrigger>
-                                    </FormControl>
-                                    <SelectContent>
-                                      {categories?.map((category) => (
-                                        <SelectItem key={category.id} value={category.id.toString()}>
-                                          {category.name}
-                                        </SelectItem>
-                                      ))}
-                                    </SelectContent>
-                                  </Select>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-                          </div>
+                        <FormField
+                          control={subcategoryForm.control}
+                          name="description"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Description</FormLabel>
+                              <FormControl>
+                                <Textarea placeholder="Enter subcategory description" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
 
-                          <FormField
-                            control={subcategoryForm.control}
-                            name="description"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel className="text-sm font-medium text-gray-700">Description</FormLabel>
+                        <FormField
+                          control={subcategoryForm.control}
+                          name="categoryId"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Parent Category</FormLabel>
+                              <Select onValueChange={field.onChange} value={field.value}>
                                 <FormControl>
-                                  <Textarea 
-                                    placeholder="Describe this subcategory and what products it contains..."
-                                    className="min-h-[100px] border-gray-200 focus:border-purple-500 focus:ring-2 focus:ring-purple-200"
-                                    {...field} 
-                                  />
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Select parent category" />
+                                  </SelectTrigger>
                                 </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
+                                <SelectContent>
+                                  {categories?.map((category) => (
+                                    <SelectItem key={category.id} value={category.id.toString()}>
+                                      {category.name}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
 
-                          <div className="flex items-center justify-end space-x-4 pt-6 border-t border-gray-100">
-                            <Button
-                              type="button"
-                              variant="outline"
-                              onClick={() => setSubcategoryDialogOpen(false)}
-                              className="px-6 h-11"
-                            >
-                              Cancel
-                            </Button>
-                            <Button
-                              type="submit"
-                              className="px-8 h-11 bg-purple-600 hover:bg-purple-700"
-                              disabled={createSubcategoryMutation.isPending || updateSubcategoryMutation.isPending}
-                            >
-                              {createSubcategoryMutation.isPending || updateSubcategoryMutation.isPending ? (
-                                <div className="flex items-center">
-                                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-                                  {editingSubcategory ? "Updating..." : "Creating..."}
-                                </div>
-                              ) : (
-                                <div className="flex items-center">
-                                  <Tags className="h-4 w-4 mr-2" />
-                                  {editingSubcategory ? "Update Subcategory" : "Create Subcategory"}
-                                </div>
-                              )}
-                            </Button>
-                          </div>
-                        </form>
-                      </Form>
-                    </div>
+                        <div className="flex space-x-2">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => setSubcategoryDialogOpen(false)}
+                            className="flex-1"
+                          >
+                            Cancel
+                          </Button>
+                          <Button
+                            type="submit"
+                            className="flex-1"
+                            disabled={createSubcategoryMutation.isPending || updateSubcategoryMutation.isPending}
+                          >
+                            {editingSubcategory ? "Update" : "Create"}
+                          </Button>
+                        </div>
+                      </form>
+                    </Form>
                   </DialogContent>
                 </Dialog>
               </div>
 
               <Card>
-                <CardContent className="p-0">
+                <CardContent>
                   {subcategoriesLoading ? (
-                    <div className="p-6 space-y-3">
+                    <div className="space-y-3 p-6">
                       {[...Array(5)].map((_, i) => (
                         <Skeleton key={i} className="h-16 w-full" />
                       ))}
@@ -1532,34 +1460,114 @@ export default function AdminDashboard() {
                       <TableHeader>
                         <TableRow>
                           <TableHead>Name</TableHead>
-                          <TableHead>Parent Category</TableHead>
                           <TableHead>Description</TableHead>
+                          <TableHead>Parent Category</TableHead>
                           <TableHead>Actions</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {subcategories?.map((subcategory) => (
-                          <TableRow key={subcategory.id}>
-                            <TableCell className="font-medium">{subcategory.name}</TableCell>
+                        {subcategories?.map((subcategory) => {
+                          const parentCategory = categories?.find(cat => cat.id.toString() === subcategory.categoryId.toString());
+                          return (
+                            <TableRow key={subcategory.id}>
+                              <TableCell className="font-medium">{subcategory.name}</TableCell>
+                              <TableCell className="text-gray-600">
+                                {subcategory.description || "No description"}
+                              </TableCell>
+                              <TableCell>
+                                <Badge variant="secondary">
+                                  {parentCategory?.name || "Unknown Category"}
+                                </Badge>
+                              </TableCell>
+                              <TableCell>
+                                <div className="flex space-x-2">
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => handleEditSubcategory(subcategory)}
+                                  >
+                                    <Edit className="h-4 w-4" />
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => deleteSubcategoryMutation.mutate(subcategory.id)}
+                                    className="text-red-600 hover:text-red-700"
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          );
+                        })}
+                      </TableBody>
+                    </Table>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {activeTab === "orders" && (
+            <div className="space-y-6">
+              <h2 className="text-2xl font-bold text-gray-900">Order Management</h2>
+
+              <Card>
+                <CardContent>
+                  {ordersLoading ? (
+                    <div className="space-y-3 p-6">
+                      {[...Array(5)].map((_, i) => (
+                        <Skeleton key={i} className="h-16 w-full" />
+                      ))}
+                    </div>
+                  ) : (
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Order ID</TableHead>
+                          <TableHead>Customer</TableHead>
+                          <TableHead>Email</TableHead>
+                          <TableHead>Total</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead>Date</TableHead>
+                          <TableHead>Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {orders?.map((order) => (
+                          <TableRow key={order.id}>
+                            <TableCell className="font-medium">#ORD-{order.id}</TableCell>
+                            <TableCell>{order.customerName}</TableCell>
+                            <TableCell>{order.customerEmail}</TableCell>
+                            <TableCell>${parseFloat(order.totalAmount).toFixed(2)}</TableCell>
                             <TableCell>
-                              <Badge variant="outline">
-                                {categories?.find(cat => cat.id === subcategory.categoryId)?.name || "Unknown"}
-                              </Badge>
+                              <Select
+                                value={order.status}
+                                onValueChange={(status) =>
+                                  updateOrderStatusMutation.mutate({ id: order.id, status })
+                                }
+                              >
+                                <SelectTrigger className="w-32">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="Processing">Processing</SelectItem>
+                                  <SelectItem value="Shipped">Shipped</SelectItem>
+                                  <SelectItem value="Canceled">Canceled</SelectItem>
+                                </SelectContent>
+                              </Select>
                             </TableCell>
-                            <TableCell className="text-gray-600">{subcategory.description || "No description"}</TableCell>
+                            <TableCell>{new Date(order.createdAt).toLocaleDateString()}</TableCell>
                             <TableCell>
                               <div className="flex space-x-2">
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => handleEditSubcategory(subcategory)}
-                                >
-                                  <Edit className="h-4 w-4" />
+                                <Button variant="ghost" size="sm">
+                                  <Eye className="h-4 w-4" />
                                 </Button>
                                 <Button
                                   variant="ghost"
                                   size="sm"
-                                  onClick={() => deleteSubcategoryMutation.mutate(subcategory.id)}
+                                  onClick={() => deleteOrderMutation.mutate(order.id)}
                                   className="text-red-600 hover:text-red-700"
                                 >
                                   <Trash2 className="h-4 w-4" />
@@ -1576,225 +1584,175 @@ export default function AdminDashboard() {
             </div>
           )}
 
-          {/* Banners Tab */}
           {activeTab === "banners" && (
             <div className="space-y-6">
               <div className="flex justify-between items-center">
                 <h2 className="text-2xl font-bold text-gray-900">Banner Management</h2>
                 <Dialog open={bannerDialogOpen} onOpenChange={setBannerDialogOpen}>
                   <DialogTrigger asChild>
-                    <Button onClick={handleAddBanner} className="bg-orange-600 hover:bg-orange-700">
+                    <Button onClick={handleAddBanner}>
                       <Plus className="h-4 w-4 mr-2" />
                       Add Banner
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-                    <DialogHeader className="pb-6 border-b border-gray-100">
-                      <div className="flex items-center space-x-3">
-                        <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
-                          <Eye className="h-6 w-6 text-orange-600" />
-                        </div>
-                        <div>
-                          <DialogTitle className="text-2xl font-bold text-gray-900">
-                            {editingBanner ? "Edit Banner" : "Add New Banner"}
-                          </DialogTitle>
-                          <p className="text-sm text-gray-500 mt-1">
-                            {editingBanner ? "Update banner details" : "Create a new promotional banner"}
-                          </p>
-                        </div>
-                      </div>
+                  <DialogContent className="max-w-md">
+                    <DialogHeader>
+                      <DialogTitle>
+                        {editingBanner ? "Edit Banner" : "Add New Banner"}
+                      </DialogTitle>
                     </DialogHeader>
-                    
-                    <div className="py-6">
-                      <Form {...bannerForm}>
-                        <form onSubmit={bannerForm.handleSubmit(handleBannerSubmit)} className="space-y-6">
-                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                            <FormField
-                              control={bannerForm.control}
-                              name="title"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel className="text-sm font-medium text-gray-700">
-                                    Banner Title <span className="text-red-500">*</span>
-                                  </FormLabel>
-                                  <FormControl>
-                                    <Input 
-                                      placeholder="e.g., Summer Sale - Up to 50% Off" 
-                                      className="h-11 border-gray-200 focus:border-orange-500 focus:ring-2 focus:ring-orange-200"
-                                      {...field} 
-                                    />
-                                  </FormControl>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
+                    <Form {...bannerForm}>
+                      <form onSubmit={bannerForm.handleSubmit(handleBannerSubmit)} className="space-y-4">
+                        <FormField
+                          control={bannerForm.control}
+                          name="title"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Title</FormLabel>
+                              <FormControl>
+                                <Input placeholder="Banner title" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
 
-                            <FormField
-                              control={bannerForm.control}
-                              name="isActive"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <div className="flex items-center justify-between p-4 bg-orange-50 rounded-lg border border-orange-200">
-                                    <div>
-                                      <FormLabel className="text-base font-medium text-gray-900">Active Banner</FormLabel>
-                                      <p className="text-sm text-gray-600 mt-1">
-                                        Show this banner on the website
-                                      </p>
-                                    </div>
-                                    <FormControl>
-                                      <Switch
-                                        checked={field.value}
-                                        onCheckedChange={field.onChange}
-                                        className="data-[state=checked]:bg-orange-600"
-                                      />
-                                    </FormControl>
-                                  </div>
-                                </FormItem>
-                              )}
-                            />
-                          </div>
+                        <FormField
+                          control={bannerForm.control}
+                          name="description"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Description</FormLabel>
+                              <FormControl>
+                                <Textarea placeholder="Banner description (optional)" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
 
+                        <div className="space-y-4">
                           <FormField
                             control={bannerForm.control}
-                            name="description"
+                            name="imageUrl"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel className="text-sm font-medium text-gray-700">Description</FormLabel>
+                                <FormLabel>Image URL</FormLabel>
                                 <FormControl>
-                                  <Textarea 
-                                    placeholder="Describe the promotion or message for this banner..."
-                                    className="min-h-[100px] border-gray-200 focus:border-orange-500 focus:ring-2 focus:ring-orange-200"
-                                    {...field} 
+                                  <Input 
+                                    placeholder="https://example.com/image.jpg" 
+                                    {...field}
+                                    onChange={(e) => {
+                                      field.onChange(e);
+                                      handleBannerImageUrlChange(e.target.value);
+                                    }}
                                   />
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
                             )}
                           />
-
-                          {/* Banner Image Section */}
-                          <div className="space-y-4">
-                            <div className="flex items-center space-x-3 pb-4 border-b border-gray-100">
-                              <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center">
-                                <ImageIcon className="h-4 w-4 text-orange-600" />
-                              </div>
-                              <h3 className="text-lg font-semibold text-gray-900">Banner Image</h3>
-                            </div>
-                            
-                            <div className="bg-gray-50 rounded-xl p-6 border-2 border-dashed border-gray-200">
-                              <FormField
-                                control={bannerForm.control}
-                                name="imageUrl"
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <FormLabel className="text-sm font-medium text-gray-700">Image URL</FormLabel>
-                                    <FormControl>
-                                      <Input 
-                                        placeholder="https://images.unsplash.com/photo-..." 
-                                        className="h-11 border-gray-200 focus:border-orange-500 focus:ring-2 focus:ring-orange-200"
-                                        {...field}
-                                        onChange={(e) => {
-                                          field.onChange(e);
-                                          handleBannerImageUrlChange(e.target.value);
-                                        }}
-                                      />
-                                    </FormControl>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
-                              />
-                              
-                              <div className="flex items-center my-6">
-                                <div className="flex-1 border-t border-gray-300"></div>
-                                <span className="px-4 text-sm text-gray-500 bg-gray-50 font-medium">OR</span>
-                                <div className="flex-1 border-t border-gray-300"></div>
-                              </div>
-                              
-                              <div className="text-center">
-                                <Button
-                                  type="button"
-                                  variant="outline"
-                                  className="h-12 px-8 border-2 border-gray-200 hover:border-orange-500 hover:text-orange-600 hover:bg-orange-50"
-                                  onClick={() => handleImageUpload('banner')}
-                                >
-                                  <Upload className="h-5 w-5 mr-2" />
-                                  Upload Banner Image
-                                </Button>
-                                <p className="text-xs text-gray-500 mt-3">
-                                  Recommended: 1200x400px, JPG or PNG up to 5MB
-                                </p>
-                              </div>
-                              
-                              {/* Image Preview */}
-                              {(() => {
-                                const imageBlob = bannerForm.watch('imageBlob');
-                                const imageUrl = bannerForm.watch('imageUrl');
-                                const hasImage = imageBlob || (imageUrl && imageUrl.trim() !== '');
-                                
-                                if (!hasImage) return null;
-                                
-                                return (
-                                  <div className="mt-6 p-4 bg-white rounded-lg border border-gray-200 shadow-sm">
-                                    <div className="flex items-center mb-3">
-                                      <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
-                                      <span className="text-sm font-medium text-green-700">
-                                        Image {imageBlob ? 'uploaded' : 'loaded'} successfully
-                                      </span>
-                                    </div>
-                                    <div className="relative overflow-hidden rounded-lg bg-gray-100">
-                                      <img
-                                        src={imageBlob ? `data:image/jpeg;base64,${imageBlob}` : imageUrl || ''}
-                                        alt="Banner preview"
-                                        className="w-full h-48 object-cover"
-                                        onError={(e) => {
-                                          e.currentTarget.style.display = 'none';
-                                        }}
-                                      />
-                                    </div>
-                                  </div>
-                                );
-                              })()}
-                            </div>
-                          </div>
-
-                          <div className="flex items-center justify-end space-x-4 pt-6 border-t border-gray-100">
+                          
+                          <div className="text-center">
+                            <p className="text-sm text-gray-500 mb-2">Or upload an image</p>
                             <Button
                               type="button"
                               variant="outline"
-                              onClick={() => setBannerDialogOpen(false)}
-                              className="px-6 h-11"
+                              onClick={() => handleImageUpload('banner')}
                             >
-                              Cancel
+                              Upload Image
                             </Button>
-                            <Button
-                              type="submit"
-                              className="px-8 h-11 bg-orange-600 hover:bg-orange-700"
-                              disabled={createBannerMutation.isPending || updateBannerMutation.isPending}
-                            >
-                              {createBannerMutation.isPending || updateBannerMutation.isPending ? (
-                                <div className="flex items-center">
-                                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-                                  {editingBanner ? "Updating..." : "Creating..."}
+                            
+                            {/* Image Preview */}
+                            {(() => {
+                              const imageBlob = bannerForm.watch('imageBlob');
+                              const imageUrl = bannerForm.watch('imageUrl');
+                              const hasImage = imageBlob || (imageUrl && imageUrl.trim() !== '');
+                              
+                              if (!hasImage) return null;
+                              
+                              return (
+                                <div className="mt-4">
+                                  <p className="text-sm text-green-600 mb-2">
+                                    ✓ Image {imageBlob ? 'uploaded' : 'loaded'} successfully
+                                  </p>
+                                  <div className="border rounded-lg p-2 bg-gray-50">
+                                    <img
+                                      src={imageBlob ? `data:image/jpeg;base64,${imageBlob}` : imageUrl || ''}
+                                      alt="Banner preview"
+                                      className="w-full h-32 object-cover rounded"
+                                      onError={(e) => {
+                                        e.currentTarget.style.display = 'none';
+                                      }}
+                                    />
+                                  </div>
                                 </div>
-                              ) : (
-                                <div className="flex items-center">
-                                  <Eye className="h-4 w-4 mr-2" />
-                                  {editingBanner ? "Update Banner" : "Create Banner"}
-                                </div>
-                              )}
-                            </Button>
+                              );
+                            })()}
                           </div>
-                        </form>
-                      </Form>
-                    </div>
+                        </div>
+
+                        {/* Hidden field for imageBlob */}
+                        <FormField
+                          control={bannerForm.control}
+                          name="imageBlob"
+                          render={({ field }) => (
+                            <FormItem style={{ display: 'none' }}>
+                              <FormControl>
+                                <Input type="hidden" {...field} />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={bannerForm.control}
+                          name="isActive"
+                          render={({ field }) => (
+                            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                              <div className="space-y-0.5">
+                                <FormLabel className="text-base">Active Banner</FormLabel>
+                                <div className="text-sm text-muted-foreground">
+                                  Show this banner on the homepage
+                                </div>
+                              </div>
+                              <FormControl>
+                                <Switch
+                                  checked={field.value}
+                                  onCheckedChange={field.onChange}
+                                />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+
+                        <div className="flex space-x-2">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => setBannerDialogOpen(false)}
+                            className="flex-1"
+                          >
+                            Cancel
+                          </Button>
+                          <Button
+                            type="submit"
+                            className="flex-1"
+                            disabled={createBannerMutation.isPending || updateBannerMutation.isPending}
+                          >
+                            {editingBanner ? "Update" : "Create"}
+                          </Button>
+                        </div>
+                      </form>
+                    </Form>
                   </DialogContent>
                 </Dialog>
               </div>
 
               <Card>
-                <CardContent className="p-0">
+                <CardContent>
                   {bannersLoading ? (
-                    <div className="p-6 space-y-3">
+                    <div className="space-y-3 p-6">
                       {[...Array(3)].map((_, i) => (
                         <Skeleton key={i} className="h-24 w-full" />
                       ))}
@@ -1803,11 +1761,10 @@ export default function AdminDashboard() {
                     <Table>
                       <TableHeader>
                         <TableRow>
-                          <TableHead>Image</TableHead>
+                          <TableHead>Preview</TableHead>
                           <TableHead>Title</TableHead>
                           <TableHead>Description</TableHead>
                           <TableHead>Status</TableHead>
-                          <TableHead>Created</TableHead>
                           <TableHead>Actions</TableHead>
                         </TableRow>
                       </TableHeader>
@@ -1828,7 +1785,7 @@ export default function AdminDashboard() {
                               )}
                             </TableCell>
                             <TableCell className="font-medium">{banner.title}</TableCell>
-                            <TableCell className="text-gray-600 max-w-xs truncate">
+                            <TableCell className="max-w-xs truncate">
                               {banner.description || "No description"}
                             </TableCell>
                             <TableCell>
@@ -1836,7 +1793,6 @@ export default function AdminDashboard() {
                                 {banner.isActive ? "Active" : "Inactive"}
                               </Badge>
                             </TableCell>
-                            <TableCell>{new Date(banner.createdAt).toLocaleDateString()}</TableCell>
                             <TableCell>
                               <div className="flex space-x-2">
                                 <Button
@@ -1865,171 +1821,98 @@ export default function AdminDashboard() {
               </Card>
             </div>
           )}
-
-          {/* Orders Tab */}
-          {activeTab === "orders" && (
-            <div className="space-y-6">
-              <div className="flex justify-between items-center">
-                <h2 className="text-2xl font-bold text-gray-900">Order Management</h2>
-              </div>
-
-              <Card>
-                <CardContent className="p-0">
-                  {ordersLoading ? (
-                    <div className="p-6 space-y-3">
-                      {[...Array(5)].map((_, i) => (
-                        <Skeleton key={i} className="h-16 w-full" />
-                      ))}
-                    </div>
-                  ) : (
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Order ID</TableHead>
-                          <TableHead>Customer</TableHead>
-                          <TableHead>Email</TableHead>
-                          <TableHead>Total</TableHead>
-                          <TableHead>Status</TableHead>
-                          <TableHead>Date</TableHead>
-                          <TableHead>Actions</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {orders?.map((order) => (
-                          <TableRow key={order.id}>
-                            <TableCell className="font-medium">#ORD-{order.id}</TableCell>
-                            <TableCell>{order.customerName}</TableCell>
-                            <TableCell className="text-gray-600">{order.customerEmail}</TableCell>
-                            <TableCell className="font-medium">${parseFloat(order.totalAmount).toFixed(2)}</TableCell>
-                            <TableCell>
-                              <Select
-                                value={order.status}
-                                onValueChange={(status) => 
-                                  updateOrderStatusMutation.mutate({ id: order.id, status })
-                                }
-                              >
-                                <SelectTrigger className="w-32">
-                                  <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="Processing">Processing</SelectItem>
-                                  <SelectItem value="Shipped">Shipped</SelectItem>
-                                  <SelectItem value="Delivered">Delivered</SelectItem>
-                                  <SelectItem value="Cancelled">Cancelled</SelectItem>
-                                </SelectContent>
-                              </Select>
-                            </TableCell>
-                            <TableCell>{new Date(order.createdAt).toLocaleDateString()}</TableCell>
-                            <TableCell>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => deleteOrderMutation.mutate(order.id)}
-                                className="text-red-600 hover:text-red-700"
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  )}
-                </CardContent>
-              </Card>
-            </div>
-          )}
-
         </main>
-      </div>
 
-      {/* Image Upload Dialog */}
-      <Dialog open={imageUploadDialogOpen} onOpenChange={setImageUploadDialogOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Upload Image</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) {
-                  // Create canvas for image compression
-                  const canvas = document.createElement('canvas');
-                  const ctx = canvas.getContext('2d');
-                  const img = new Image();
-                  
-                  img.onload = () => {
-                    // Set maximum dimensions
-                    const maxWidth = 1200;
-                    const maxHeight = 800;
-                    let { width, height } = img;
-                    
-                    // Calculate new dimensions
-                    if (width > height) {
-                      if (width > maxWidth) {
-                        height = (height * maxWidth) / width;
-                        width = maxWidth;
-                      }
-                    } else {
-                      if (height > maxHeight) {
-                        width = (width * maxHeight) / height;
-                        height = maxHeight;
-                      }
-                    }
-                    
-                    canvas.width = width;
-                    canvas.height = height;
-                    
-                    // Draw and compress
-                    ctx?.drawImage(img, 0, 0, width, height);
-                    const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.8);
-                    const base64 = compressedDataUrl.split(',')[1];
-                    
-                    uploadImageMutation.mutate({ 
-                      imageData: base64, 
-                      filename: file.name 
-                    });
-                  };
-                  
-                  const reader = new FileReader();
-                  reader.onload = () => {
-                    img.src = reader.result as string;
-                  };
-                  reader.readAsDataURL(file);
-                }
-              }}
-              className="hidden"
-              id="image-upload"
-            />
-            <label
-              htmlFor="image-upload"
-              className="cursor-pointer block w-full p-6 border-2 border-dashed border-gray-300 rounded-lg hover:border-gray-400 transition-colors"
-            >
+        {/* Image Upload Dialog */}
+        <Dialog open={imageUploadDialogOpen} onOpenChange={setImageUploadDialogOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Upload Image</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
               <div className="text-center">
-                <Plus className="mx-auto h-12 w-12 text-gray-400" />
-                <div className="mt-2">
-                  <p className="text-sm font-medium text-gray-900">
-                    Click to upload image
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    PNG, JPG, GIF up to 10MB
-                  </p>
-                </div>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      // Compress image before upload
+                      const canvas = document.createElement('canvas');
+                      const ctx = canvas.getContext('2d');
+                      const img = new Image();
+                      
+                      img.onload = () => {
+                        // Set maximum dimensions
+                        const maxWidth = 1200;
+                        const maxHeight = 800;
+                        let { width, height } = img;
+                        
+                        // Calculate new dimensions
+                        if (width > height) {
+                          if (width > maxWidth) {
+                            height = (height * maxWidth) / width;
+                            width = maxWidth;
+                          }
+                        } else {
+                          if (height > maxHeight) {
+                            width = (width * maxHeight) / height;
+                            height = maxHeight;
+                          }
+                        }
+                        
+                        canvas.width = width;
+                        canvas.height = height;
+                        
+                        // Draw and compress
+                        ctx?.drawImage(img, 0, 0, width, height);
+                        const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.8);
+                        const base64 = compressedDataUrl.split(',')[1];
+                        
+                        uploadImageMutation.mutate({ 
+                          imageData: base64, 
+                          filename: file.name 
+                        });
+                      };
+                      
+                      const reader = new FileReader();
+                      reader.onload = () => {
+                        img.src = reader.result as string;
+                      };
+                      reader.readAsDataURL(file);
+                    }
+                  }}
+                  className="hidden"
+                  id="image-upload"
+                />
+                <label
+                  htmlFor="image-upload"
+                  className="cursor-pointer block w-full p-6 border-2 border-dashed border-gray-300 rounded-lg hover:border-gray-400 transition-colors"
+                >
+                  <div className="text-center">
+                    <Plus className="mx-auto h-12 w-12 text-gray-400" />
+                    <div className="mt-2">
+                      <p className="text-sm font-medium text-gray-900">
+                        Click to upload image
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        PNG, JPG, GIF up to 10MB
+                      </p>
+                    </div>
+                  </div>
+                </label>
               </div>
-            </label>
-          </div>
-          <Button
-            variant="outline"
-            onClick={() => setImageUploadDialogOpen(false)}
-            className="w-full"
-          >
-            Cancel
-          </Button>
-        </DialogContent>
-      </Dialog>
+              <Button
+                variant="outline"
+                onClick={() => setImageUploadDialogOpen(false)}
+                className="w-full"
+              >
+                Cancel
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
     </div>
   );
 }
