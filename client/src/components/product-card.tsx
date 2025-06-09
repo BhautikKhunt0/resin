@@ -1,6 +1,4 @@
-import { ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { useCart } from "@/lib/cart-context";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "wouter";
@@ -33,55 +31,46 @@ export default function ProductCard({ product }: ProductCardProps) {
   };
 
   return (
-    <Link href={`/products/${product.id}`}>
-      <Card className="group cursor-pointer hover:shadow-lg transition-shadow duration-300">
-        <CardContent className="p-0">
-          <div className="relative overflow-hidden rounded-t-lg">
-{(() => {
-              const imageUrl = product.imageBlob ? `data:image/jpeg;base64,${product.imageBlob}` : product.imageUrl;
-              return imageUrl ? (
-                <img
-                  src={imageUrl}
-                  alt={product.name}
-                  className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
-                />
-              ) : (
-                <div className="w-full h-48 bg-gray-200 flex items-center justify-center">
-                  <span className="text-gray-400">No image</span>
-                </div>
-              );
-            })()}
+    <div className="group">
+      <Link href={`/products/${product.id}`}>
+        <div className="relative aspect-square overflow-hidden rounded-lg bg-gray-200 mb-3">
+          {(() => {
+            const imageUrl = product.imageBlob ? `data:image/jpeg;base64,${product.imageBlob}` : product.imageUrl;
+            return imageUrl ? (
+              <img
+                src={imageUrl}
+                alt={product.name}
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center">
+                <span className="text-gray-400">No image</span>
+              </div>
+            );
+          })()}
+          
+          {/* Add to Cart button on hover */}
+          <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center">
             <Button
-              variant="secondary"
-              size="sm"
-              className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity"
+              size="lg"
+              className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 transform translate-y-2 group-hover:translate-y-0"
               onClick={handleAddToCart}
             >
-              <ShoppingCart className="h-4 w-4" />
+              Add to Cart
             </Button>
           </div>
-          <div className="p-4">
-            <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2">
-              {product.name}
-            </h3>
-            <p className="text-gray-600 text-sm mb-3 line-clamp-2">
-              {product.description}
-            </p>
-            <div className="flex justify-between items-center">
-              <span className="text-xl font-bold text-primary">
-                ₹{parseFloat(product.price).toFixed(2)}
-              </span>
-              <Button
-                size="sm"
-                onClick={handleAddToCart}
-                className="group-hover:bg-primary-600"
-              >
-                Add to Cart
-              </Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    </Link>
+        </div>
+      </Link>
+      
+      {/* Title and Price outside the image */}
+      <div className="space-y-1">
+        <h3 className="font-medium text-gray-900 text-sm line-clamp-2 leading-tight">
+          {product.name}
+        </h3>
+        <p className="text-lg font-bold text-gray-900">
+          ₹{parseFloat(product.price).toFixed(2)}
+        </p>
+      </div>
+    </div>
   );
 }
