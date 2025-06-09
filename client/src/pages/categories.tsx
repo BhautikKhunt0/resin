@@ -69,26 +69,27 @@ export default function Categories() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {subcategories.map((subcategory) => (
             <Link key={subcategory.id} href={`/subcategory/${subcategory.id}/products`}>
-              <Card className="group cursor-pointer hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+              <Card className="group cursor-pointer hover:shadow-lg transition-all duration-300 hover:-translate-y-1 overflow-hidden">
+                {subcategory.imageUrl || subcategory.imageBlob ? (
+                  <div className="relative h-48 w-full overflow-hidden">
+                    <img
+                      src={subcategory.imageBlob ? `data:image/jpeg;base64,${subcategory.imageBlob}` : subcategory.imageUrl || ''}
+                      alt={subcategory.name}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                    <div className="absolute inset-0 bg-black bg-opacity-20 group-hover:bg-opacity-30 transition-all duration-300"></div>
+                  </div>
+                ) : (
+                  <div className="h-48 w-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                    <Grid3X3 className="h-16 w-16 text-white group-hover:scale-110 transition-transform duration-300" />
+                  </div>
+                )}
                 <CardContent className="p-6 text-center">
-                  {subcategory.imageUrl || subcategory.imageBlob ? (
-                    <div className="w-20 h-20 mx-auto mb-4 group-hover:scale-110 transition-transform duration-300 overflow-hidden rounded-lg">
-                      <img
-                        src={subcategory.imageBlob ? `data:image/jpeg;base64,${subcategory.imageBlob}` : subcategory.imageUrl || ''}
-                        alt={subcategory.name}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  ) : (
-                    <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
-                      <Grid3X3 className="h-8 w-8 text-white" />
-                    </div>
-                  )}
-                  <h3 className="font-semibold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
+                  <h3 className="font-semibold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors text-lg">
                     {subcategory.name}
                   </h3>
                   {subcategory.description && (
-                    <p className="text-gray-600 text-sm">
+                    <p className="text-gray-600 text-sm line-clamp-2">
                       {subcategory.description}
                     </p>
                   )}
