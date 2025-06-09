@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useRoute } from "wouter";
-import { ArrowLeft, ShoppingCart, Package, Truck, Shield } from "lucide-react";
+import { useState } from "react";
+import { ArrowLeft, ShoppingCart, Package, Truck, Shield, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -9,7 +10,7 @@ import { useCart } from "@/lib/cart-context";
 import { useToast } from "@/hooks/use-toast";
 import { api } from "@/lib/api";
 import { Link } from "wouter";
-import type { Product } from "@shared/schema";
+import type { Product, ProductImage } from "@shared/schema";
 
 export default function ProductDetail() {
   const [, params] = useRoute("/products/:id");

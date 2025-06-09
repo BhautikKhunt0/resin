@@ -102,6 +102,17 @@ export class MongoDBStorage implements IStorage {
     };
   }
 
+  private convertProductImage(doc: IProductImage): ProductImage {
+    return {
+      id: parseInt(doc._id.toString().slice(-8), 16),
+      productId: parseInt(doc.productId.slice(-8), 16),
+      imageUrl: doc.imageUrl || null,
+      imageBlob: doc.imageBlob ? doc.imageBlob.toString('base64') : null,
+      priority: doc.priority,
+      createdAt: doc.createdAt
+    };
+  }
+
   private convertOrder(doc: IOrder): Order {
     return {
       id: parseInt(doc._id.toString().slice(-8), 16),
@@ -463,6 +474,89 @@ export class MongoDBStorage implements IStorage {
 
     await ProductModel.findByIdAndDelete(existing._id);
     return true;
+  }
+
+  // Product Images
+  async getProductImages(productId: number): Promise<ProductImage[]> {
+    const products = await ProductModel.find();
+    const product = products.find(prod => parseInt(prod._id.toString().slice(-8), 16) === productId);
+    if (!product) return [];
+
+    const images = await ProductImageModel.find({ productId: product._id.toString() }).sort({ priority: 1 });
+    return images.map(img => this.convertProductImage(img));
+  }
+
+  async getProductImageById(id: number): Promise<ProductImage | undefined> {
+    const images = await ProductImageModel.find();
+    const image = images.find(img => parseInt(img._id.toString().slice(-8), 16) === id);
+    return image ? this.convertProductImage(image) : undefined;
+  }
+
+  async createProductImage(productImage: InsertProductImage): Promise<ProductImage> {
+    const products = await ProductModel.find();
+    const product = products.find(prod => parseInt(prod._id.toString().slice(-8), 16) === productImage.productId);
+    if (!product) throw new Error('Product not found');
+
+    const newProductImage = new ProductImageModel({
+      productId: product._id.toString(),
+      imageUrl: productImage.imageUrl,
+      imageBlob: productImage.imageBlob ? Buffer.from(productImage.imageBlob, 'base64') : undefined,
+      priority: productImage.priority || 0
+    });
+
+    const saved = await newProductImage.save();
+    return this.convertProductImage(saved);
+  }
+
+  async updateProductImage(id: number, productImage: Partial<InsertProductImage>): Promise<ProductImage | undefined> {
+    const images = await ProductImageModel.find();
+    const existing = images.find(img => parseInt(img._id.toString().slice(-8), 16) === id);
+    if (!existing) return undefined;
+
+    const updateData: any = {};
+    
+    if (productImage.imageUrl !== undefined) {
+      updateData.imageUrl = productImage.imageUrl;
+    }
+    
+    if (productImage.imageBlob !== undefined) {
+      updateData.imageBlob = productImage.imageBlob ? Buffer.from(productImage.imageBlob, 'base64') : null;
+    }
+    
+    if (productImage.priority !== undefined) {
+      updateData.priority = productImage.priority;
+    }
+
+    const updated = await ProductImageModel.findByIdAndUpdate(
+      existing._id,
+      updateData,
+      { new: true }
+    );
+    
+    return updated ? this.convertProductImage(updated) : undefined;
+  }
+
+  async deleteProductImage(id: number): Promise<boolean> {
+    const images = await ProductImageModel.find();
+    const existing = images.find(img => parseInt(img._id.toString().slice(-8), 16) === id);
+    if (!existing) return false;
+
+    await ProductImageModel.findByIdAndDelete(existing._id);
+    return true;
+  }
+
+  async updateProductImagePriority(id: number, priority: number): Promise<ProductImage | undefined> {
+    const images = await ProductImageModel.find();
+    const existing = images.find(img => parseInt(img._id.toString().slice(-8), 16) === id);
+    if (!existing) return undefined;
+
+    const updated = await ProductImageModel.findByIdAndUpdate(
+      existing._id,
+      { priority },
+      { new: true }
+    );
+    
+    return updated ? this.convertProductImage(updated) : undefined;
   }
 
   // Orders

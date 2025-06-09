@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
-import { insertProductSchema, insertCategorySchema, insertSubcategorySchema, insertOrderSchema, insertBannerSchema } from "@shared/schema";
+import { insertProductSchema, insertProductImageSchema, insertCategorySchema, insertSubcategorySchema, insertOrderSchema, insertBannerSchema } from "@shared/schema";
 import { sendOrderConfirmationEmail, sendOrderStatusUpdateEmail } from "./email-service";
 
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
@@ -121,6 +121,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(product);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch product" });
+    }
+  });
+
+  // Public routes - Product Images
+  app.get("/api/products/:id/images", async (req, res) => {
+    try {
+      const productId = parseInt(req.params.id);
+      const images = await storage.getProductImages(productId);
+      res.json(images);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch product images" });
     }
   });
 
@@ -343,6 +354,83 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(204).send();
     } catch (error) {
       res.status(500).json({ message: "Failed to delete product" });
+    }
+  });
+
+  // Admin routes - Product Images
+  app.get("/api/admin/products/:id/images", authenticateAdmin, async (req, res) => {
+    try {
+      const productId = parseInt(req.params.id);
+      const images = await storage.getProductImages(productId);
+      res.json(images);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch product images" });
+    }
+  });
+
+  app.post("/api/admin/products/:id/images", authenticateAdmin, async (req, res) => {
+    try {
+      const productId = parseInt(req.params.id);
+      const imageData = insertProductImageSchema.parse({
+        ...req.body,
+        productId
+      });
+      const image = await storage.createProductImage(imageData);
+      res.status(201).json(image);
+    } catch (error) {
+      res.status(400).json({ message: "Failed to create product image" });
+    }
+  });
+
+  app.put("/api/admin/product-images/:id", authenticateAdmin, async (req, res) => {
+    try {
+      const imageId = parseInt(req.params.id);
+      const imageData = req.body;
+      const image = await storage.updateProductImage(imageId, imageData);
+      
+      if (!image) {
+        return res.status(404).json({ message: "Product image not found" });
+      }
+
+      res.json(image);
+    } catch (error) {
+      res.status(400).json({ message: "Failed to update product image" });
+    }
+  });
+
+  app.put("/api/admin/product-images/:id/priority", authenticateAdmin, async (req, res) => {
+    try {
+      const imageId = parseInt(req.params.id);
+      const { priority } = req.body;
+      
+      if (typeof priority !== 'number') {
+        return res.status(400).json({ message: "Priority must be a number" });
+      }
+
+      const image = await storage.updateProductImagePriority(imageId, priority);
+      
+      if (!image) {
+        return res.status(404).json({ message: "Product image not found" });
+      }
+
+      res.json(image);
+    } catch (error) {
+      res.status(400).json({ message: "Failed to update image priority" });
+    }
+  });
+
+  app.delete("/api/admin/product-images/:id", authenticateAdmin, async (req, res) => {
+    try {
+      const imageId = parseInt(req.params.id);
+      const deleted = await storage.deleteProductImage(imageId);
+      
+      if (!deleted) {
+        return res.status(404).json({ message: "Product image not found" });
+      }
+
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete product image" });
     }
   });
 
