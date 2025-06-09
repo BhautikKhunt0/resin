@@ -283,7 +283,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put("/api/admin/products/:id", authenticateAdmin, async (req, res) => {
     try {
       const productId = parseInt(req.params.id);
+      console.log('Updating product:', productId, 'with data:', req.body);
+      
+      // Validate and parse the request data
       const productData = insertProductSchema.partial().parse(req.body);
+      console.log('Parsed product data:', productData);
+      
       const product = await storage.updateProduct(productId, productData);
       
       if (!product) {
@@ -292,7 +297,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.json(product);
     } catch (error) {
-      res.status(400).json({ message: "Failed to update product" });
+      console.error('Product update error:', error);
+      res.status(400).json({ 
+        message: "Failed to update product",
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
     }
   });
 

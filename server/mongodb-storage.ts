@@ -288,19 +288,29 @@ export class MongoDBStorage implements IStorage {
     if (product.stock !== undefined) updateData.stock = product.stock;
     if (product.isFeatured !== undefined) updateData.isFeatured = product.isFeatured;
     
-    if (product.categoryId) {
+    // Handle categoryId - always update if provided
+    if (product.categoryId !== undefined) {
       const categories = await CategoryModel.find();
       const category = categories.find(cat => parseInt(cat._id.toString().slice(-8), 16) === product.categoryId!);
       if (category) {
         updateData.categoryId = category._id.toString();
+      } else {
+        throw new Error('Category not found');
       }
     }
 
-    if (product.subcategoryId) {
-      const subcategories = await SubcategoryModel.find();
-      const subcategory = subcategories.find(sub => parseInt(sub._id.toString().slice(-8), 16) === product.subcategoryId!);
-      if (subcategory) {
-        updateData.subcategoryId = subcategory._id.toString();
+    // Handle subcategoryId - can be null/undefined to clear it
+    if (product.subcategoryId !== undefined) {
+      if (product.subcategoryId === null || product.subcategoryId === 0) {
+        updateData.subcategoryId = null;
+      } else {
+        const subcategories = await SubcategoryModel.find();
+        const subcategory = subcategories.find(sub => parseInt(sub._id.toString().slice(-8), 16) === product.subcategoryId!);
+        if (subcategory) {
+          updateData.subcategoryId = subcategory._id.toString();
+        } else {
+          throw new Error('Subcategory not found');
+        }
       }
     }
 

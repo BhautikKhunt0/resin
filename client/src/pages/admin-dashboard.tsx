@@ -452,7 +452,7 @@ export default function AdminDashboard() {
       ...data,
       price: data.price,
       categoryId: parseInt(data.categoryId),
-      subcategoryId: data.subcategoryId ? parseInt(data.subcategoryId) : undefined,
+      subcategoryId: data.subcategoryId && data.subcategoryId.trim() !== "" ? parseInt(data.subcategoryId) : null,
       stock: parseInt(data.stock),
       imageUrl: data.imageUrl || undefined,
       imageBlob: data.imageBlob || undefined,
