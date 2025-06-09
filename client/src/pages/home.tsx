@@ -150,8 +150,8 @@ export default function Home() {
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8">
               {/* Display Categories Only */}
               {categories?.map((category) => (
-                <Link key={`category-${category.id}`} href={`/category/${category.id}`} className="block text-center">
-                  <div className="group cursor-pointer">
+                <Link key={`category-${category.id}`} href={`/category/${category.id}`} className="block">
+                  <div className="group cursor-pointer w-full flex flex-col items-center">
                     <div className="aspect-square rounded-xl overflow-hidden bg-gray-100 mb-4 group-hover:shadow-xl transition-all duration-300 h-32 md:h-40">
                       {(() => {
                         const imageUrl = category.imageBlob ? `data:image/jpeg;base64,${category.imageBlob}` : category.imageUrl;
@@ -168,7 +168,7 @@ export default function Home() {
                         );
                       })()}
                     </div>
-                    <h3 className="text-base font-semibold text-gray-900 text-center group-hover:text-blue-600 transition-colors w-full">
+                    <h3 className="text-base font-semibold text-gray-900 group-hover:text-blue-600 transition-colors text-center w-full">
                       {category.name}
                     </h3>
                   </div>
