@@ -1277,14 +1277,14 @@ export default function AdminDashboard() {
                       Add Category
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className="max-w-2xl">
-                    <DialogHeader className="pb-6 border-b border-gray-100">
+                  <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
+                    <DialogHeader className="pb-4 border-b border-gray-100">
                       <div className="flex items-center space-x-3">
-                        <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                          <Tags className="h-6 w-6 text-green-600" />
+                        <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                          <Tags className="h-5 w-5 text-green-600" />
                         </div>
                         <div>
-                          <DialogTitle className="text-2xl font-bold text-gray-900">
+                          <DialogTitle className="text-xl font-bold text-gray-900">
                             {editingCategory ? "Edit Category" : "Add New Category"}
                           </DialogTitle>
                           <p className="text-sm text-gray-500 mt-1">
@@ -1294,9 +1294,9 @@ export default function AdminDashboard() {
                       </div>
                     </DialogHeader>
                     
-                    <div className="py-6">
+                    <div className="py-4">
                       <Form {...categoryForm}>
-                        <form onSubmit={categoryForm.handleSubmit(handleCategorySubmit)} className="space-y-6">
+                        <form onSubmit={categoryForm.handleSubmit(handleCategorySubmit)} className="space-y-4">
                           <FormField
                             control={categoryForm.control}
                             name="name"
@@ -1308,7 +1308,7 @@ export default function AdminDashboard() {
                                 <FormControl>
                                   <Input 
                                     placeholder="e.g., Electronics, Clothing, Books" 
-                                    className="h-11 border-gray-200 focus:border-green-500 focus:ring-2 focus:ring-green-200"
+                                    className="h-9 border-gray-200 focus:border-green-500 focus:ring-2 focus:ring-green-200"
                                     {...field} 
                                   />
                                 </FormControl>
@@ -1326,7 +1326,7 @@ export default function AdminDashboard() {
                                 <FormControl>
                                   <Textarea 
                                     placeholder="Describe this category and what products it contains..."
-                                    className="min-h-[100px] border-gray-200 focus:border-green-500 focus:ring-2 focus:ring-green-200"
+                                    className="min-h-[60px] border-gray-200 focus:border-green-500 focus:ring-2 focus:ring-green-200"
                                     {...field} 
                                   />
                                 </FormControl>
@@ -1536,14 +1536,14 @@ export default function AdminDashboard() {
                       Add Subcategory
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className="max-w-2xl">
-                    <DialogHeader className="pb-6 border-b border-gray-100">
+                  <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
+                    <DialogHeader className="pb-4 border-b border-gray-100">
                       <div className="flex items-center space-x-3">
-                        <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                          <Tags className="h-6 w-6 text-purple-600" />
+                        <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                          <Tags className="h-5 w-5 text-purple-600" />
                         </div>
                         <div>
-                          <DialogTitle className="text-2xl font-bold text-gray-900">
+                          <DialogTitle className="text-xl font-bold text-gray-900">
                             {editingSubcategory ? "Edit Subcategory" : "Add New Subcategory"}
                           </DialogTitle>
                           <p className="text-sm text-gray-500 mt-1">
@@ -1553,10 +1553,10 @@ export default function AdminDashboard() {
                       </div>
                     </DialogHeader>
                     
-                    <div className="py-6">
+                    <div className="py-4">
                       <Form {...subcategoryForm}>
-                        <form onSubmit={subcategoryForm.handleSubmit(handleSubcategorySubmit)} className="space-y-6">
-                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <form onSubmit={subcategoryForm.handleSubmit(handleSubcategorySubmit)} className="space-y-4">
+                          <div className="space-y-4">
                             <FormField
                               control={subcategoryForm.control}
                               name="name"
