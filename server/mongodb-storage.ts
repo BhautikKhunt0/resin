@@ -120,32 +120,56 @@ export class MongoDBStorage implements IStorage {
   }
 
   async createCategory(category: InsertCategory): Promise<Category> {
-    const newCategory = new CategoryModel({
-      name: category.name,
-      description: category.description,
-      imageUrl: category.imageUrl,
-      imageBlob: category.imageBlob ? Buffer.from(category.imageBlob, 'base64') : undefined
-    });
-    const saved = await newCategory.save();
-    return this.convertCategory(saved);
+    try {
+      const newCategory = new CategoryModel({
+        name: category.name,
+        description: category.description,
+        imageUrl: category.imageUrl,
+        imageBlob: category.imageBlob ? Buffer.from(category.imageBlob, 'base64') : undefined
+      });
+      const saved = await newCategory.save();
+      console.log(`Category created with ID: ${saved._id}, has imageBlob: ${!!saved.imageBlob}, has imageUrl: ${!!saved.imageUrl}`);
+      return this.convertCategory(saved);
+    } catch (error) {
+      console.error('Error creating category:', error);
+      throw error;
+    }
   }
 
   async updateCategory(id: number, category: Partial<InsertCategory>): Promise<Category | undefined> {
-    const categories = await CategoryModel.find();
-    const existing = categories.find(cat => parseInt(cat._id.toString().slice(-8), 16) === id);
-    if (!existing) return undefined;
+    try {
+      const categories = await CategoryModel.find();
+      const existing = categories.find(cat => parseInt(cat._id.toString().slice(-8), 16) === id);
+      if (!existing) return undefined;
 
-    const updateData: any = { ...category };
-    if (updateData.imageBlob) {
-      updateData.imageBlob = Buffer.from(updateData.imageBlob, 'base64');
+      const updateData: any = {};
+      
+      // Handle each field individually to ensure proper updates
+      if (category.name !== undefined) updateData.name = category.name;
+      if (category.description !== undefined) updateData.description = category.description;
+      if (category.imageUrl !== undefined) updateData.imageUrl = category.imageUrl;
+      
+      // Handle imageBlob properly - convert to Buffer or set to null
+      if (category.imageBlob !== undefined) {
+        updateData.imageBlob = category.imageBlob ? Buffer.from(category.imageBlob, 'base64') : null;
+        console.log(`Updating category ${id} with imageBlob: ${!!category.imageBlob}`);
+      }
+
+      const updated = await CategoryModel.findByIdAndUpdate(
+        existing._id,
+        updateData,
+        { new: true }
+      );
+      
+      if (updated) {
+        console.log(`Category updated with ID: ${updated._id}, has imageBlob: ${!!updated.imageBlob}, has imageUrl: ${!!updated.imageUrl}`);
+      }
+      
+      return updated ? this.convertCategory(updated) : undefined;
+    } catch (error) {
+      console.error('Error updating category:', error);
+      throw error;
     }
-
-    const updated = await CategoryModel.findByIdAndUpdate(
-      existing._id,
-      updateData,
-      { new: true }
-    );
-    return updated ? this.convertCategory(updated) : undefined;
   }
 
   async deleteCategory(id: number): Promise<boolean> {
@@ -179,48 +203,72 @@ export class MongoDBStorage implements IStorage {
   }
 
   async createSubcategory(subcategory: InsertSubcategory): Promise<Subcategory> {
-    const categories = await CategoryModel.find();
-    const category = categories.find(cat => parseInt(cat._id.toString().slice(-8), 16) === subcategory.categoryId);
-    if (!category) throw new Error('Category not found');
+    try {
+      const categories = await CategoryModel.find();
+      const category = categories.find(cat => parseInt(cat._id.toString().slice(-8), 16) === subcategory.categoryId);
+      if (!category) throw new Error('Category not found');
 
-    const newSubcategory = new SubcategoryModel({
-      name: subcategory.name,
-      description: subcategory.description,
-      categoryId: category._id.toString(),
-      imageUrl: subcategory.imageUrl,
-      imageBlob: subcategory.imageBlob ? Buffer.from(subcategory.imageBlob, 'base64') : undefined
-    });
-    const saved = await newSubcategory.save();
-    return this.convertSubcategory(saved);
+      const newSubcategory = new SubcategoryModel({
+        name: subcategory.name,
+        description: subcategory.description,
+        categoryId: category._id.toString(),
+        imageUrl: subcategory.imageUrl,
+        imageBlob: subcategory.imageBlob ? Buffer.from(subcategory.imageBlob, 'base64') : undefined
+      });
+      const saved = await newSubcategory.save();
+      console.log(`Subcategory created with ID: ${saved._id}, has imageBlob: ${!!saved.imageBlob}, has imageUrl: ${!!saved.imageUrl}`);
+      return this.convertSubcategory(saved);
+    } catch (error) {
+      console.error('Error creating subcategory:', error);
+      throw error;
+    }
   }
 
   async updateSubcategory(id: number, subcategory: Partial<InsertSubcategory>): Promise<Subcategory | undefined> {
-    const subcategories = await SubcategoryModel.find();
-    const existing = subcategories.find(sub => parseInt(sub._id.toString().slice(-8), 16) === id);
-    if (!existing) return undefined;
+    try {
+      const subcategories = await SubcategoryModel.find();
+      const existing = subcategories.find(sub => parseInt(sub._id.toString().slice(-8), 16) === id);
+      if (!existing) return undefined;
 
-    let updateData: any = {};
-    if (subcategory.name) updateData.name = subcategory.name;
-    if (subcategory.description !== undefined) updateData.description = subcategory.description;
-    if (subcategory.imageUrl !== undefined) updateData.imageUrl = subcategory.imageUrl;
-    if (subcategory.imageBlob !== undefined) {
-      updateData.imageBlob = subcategory.imageBlob ? Buffer.from(subcategory.imageBlob, 'base64') : null;
-    }
-    
-    if (subcategory.categoryId) {
-      const categories = await CategoryModel.find();
-      const category = categories.find(cat => parseInt(cat._id.toString().slice(-8), 16) === subcategory.categoryId);
-      if (category) {
-        updateData.categoryId = category._id.toString();
+      const updateData: any = {};
+      
+      // Handle each field individually to ensure proper updates
+      if (subcategory.name !== undefined) updateData.name = subcategory.name;
+      if (subcategory.description !== undefined) updateData.description = subcategory.description;
+      if (subcategory.imageUrl !== undefined) updateData.imageUrl = subcategory.imageUrl;
+      
+      // Handle imageBlob properly - convert to Buffer or set to null
+      if (subcategory.imageBlob !== undefined) {
+        updateData.imageBlob = subcategory.imageBlob ? Buffer.from(subcategory.imageBlob, 'base64') : null;
+        console.log(`Updating subcategory ${id} with imageBlob: ${!!subcategory.imageBlob}`);
       }
-    }
+      
+      // Handle categoryId update
+      if (subcategory.categoryId !== undefined) {
+        const categories = await CategoryModel.find();
+        const category = categories.find(cat => parseInt(cat._id.toString().slice(-8), 16) === subcategory.categoryId);
+        if (category) {
+          updateData.categoryId = category._id.toString();
+        } else {
+          throw new Error('Category not found');
+        }
+      }
 
-    const updated = await SubcategoryModel.findByIdAndUpdate(
-      existing._id,
-      updateData,
-      { new: true }
-    );
-    return updated ? this.convertSubcategory(updated) : undefined;
+      const updated = await SubcategoryModel.findByIdAndUpdate(
+        existing._id,
+        updateData,
+        { new: true }
+      );
+      
+      if (updated) {
+        console.log(`Subcategory updated with ID: ${updated._id}, has imageBlob: ${!!updated.imageBlob}, has imageUrl: ${!!updated.imageUrl}`);
+      }
+      
+      return updated ? this.convertSubcategory(updated) : undefined;
+    } catch (error) {
+      console.error('Error updating subcategory:', error);
+      throw error;
+    }
   }
 
   async deleteSubcategory(id: number): Promise<boolean> {
