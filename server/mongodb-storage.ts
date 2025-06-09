@@ -178,11 +178,22 @@ export class MongoDBStorage implements IStorage {
       // Handle each field individually to ensure proper updates
       if (category.name !== undefined) updateData.name = category.name;
       if (category.description !== undefined) updateData.description = category.description;
-      if (category.imageUrl !== undefined) updateData.imageUrl = category.imageUrl;
       
-      // Handle imageBlob properly - convert to Buffer or set to null
+      // Handle image updates properly - ensure only one type is set
+      if (category.imageUrl !== undefined) {
+        updateData.imageUrl = category.imageUrl || null;
+        // If setting imageUrl, clear imageBlob unless imageBlob is also being updated
+        if (category.imageBlob === undefined && category.imageUrl) {
+          updateData.imageBlob = null;
+        }
+      }
+      
       if (category.imageBlob !== undefined) {
         updateData.imageBlob = category.imageBlob ? Buffer.from(category.imageBlob, 'base64') : null;
+        // If setting imageBlob, clear imageUrl unless imageUrl is also being updated
+        if (category.imageUrl === undefined && category.imageBlob) {
+          updateData.imageUrl = null;
+        }
         console.log(`Updating category ${id} with imageBlob: ${!!category.imageBlob}`);
       }
 
@@ -266,11 +277,22 @@ export class MongoDBStorage implements IStorage {
       // Handle each field individually to ensure proper updates
       if (subcategory.name !== undefined) updateData.name = subcategory.name;
       if (subcategory.description !== undefined) updateData.description = subcategory.description;
-      if (subcategory.imageUrl !== undefined) updateData.imageUrl = subcategory.imageUrl;
       
-      // Handle imageBlob properly - convert to Buffer or set to null
+      // Handle image updates properly - ensure only one type is set
+      if (subcategory.imageUrl !== undefined) {
+        updateData.imageUrl = subcategory.imageUrl || null;
+        // If setting imageUrl, clear imageBlob unless imageBlob is also being updated
+        if (subcategory.imageBlob === undefined && subcategory.imageUrl) {
+          updateData.imageBlob = null;
+        }
+      }
+      
       if (subcategory.imageBlob !== undefined) {
         updateData.imageBlob = subcategory.imageBlob ? Buffer.from(subcategory.imageBlob, 'base64') : null;
+        // If setting imageBlob, clear imageUrl unless imageUrl is also being updated
+        if (subcategory.imageUrl === undefined && subcategory.imageBlob) {
+          updateData.imageUrl = null;
+        }
         console.log(`Updating subcategory ${id} with imageBlob: ${!!subcategory.imageBlob}`);
       }
       

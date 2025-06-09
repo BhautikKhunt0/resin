@@ -590,6 +590,8 @@ export default function AdminDashboard() {
     categoryForm.reset({
       name: category.name,
       description: category.description || "",
+      imageUrl: category.imageUrl || "",
+      imageBlob: category.imageBlob || "",
     });
     setCategoryDialogOpen(true);
   };
@@ -600,6 +602,8 @@ export default function AdminDashboard() {
       name: subcategory.name,
       description: subcategory.description || "",
       categoryId: subcategory.categoryId.toString(),
+      imageUrl: subcategory.imageUrl || "",
+      imageBlob: subcategory.imageBlob || "",
     });
     setSubcategoryDialogOpen(true);
   };
