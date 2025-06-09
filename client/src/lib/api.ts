@@ -3,8 +3,12 @@ import { apiRequest } from './queryClient';
 export const api = {
   // Categories
   getCategories: () => fetch('/api/categories').then(res => res.json()),
+  getCategoryById: (id: number) => fetch(`/api/categories/${id}`).then(res => res.json()),
   getSubcategories: (categoryId: number) => 
     fetch(`/api/categories/${categoryId}/subcategories`).then(res => res.json()),
+  getSubcategoriesByCategory: (categoryId: number) => 
+    fetch(`/api/categories/${categoryId}/subcategories`).then(res => res.json()),
+  getSubcategoryById: (id: number) => fetch(`/api/subcategories/${id}`).then(res => res.json()),
 
   // Products
   getProducts: (params?: { categoryId?: number; subcategoryId?: number }) => {
@@ -15,6 +19,8 @@ export const api = {
     return fetch(`/api/products?${searchParams}`).then(res => res.json());
   },
   getProduct: (id: number) => fetch(`/api/products/${id}`).then(res => res.json()),
+  getProductsBySubcategory: (subcategoryId: number) => 
+    fetch(`/api/products?subcategoryId=${subcategoryId}`).then(res => res.json()),
 
   // Orders
   createOrder: (orderData: any) => apiRequest('POST', '/api/orders', orderData),

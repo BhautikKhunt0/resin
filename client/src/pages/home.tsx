@@ -4,7 +4,8 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { ChevronLeft, ChevronRight, Star, ShoppingBag, Truck, Shield, Headphones, ArrowRight, Grid3X3, Sparkles } from "lucide-react";
 import { api } from "@/lib/api";
 import ProductCard from "@/components/product-card";
 import type { Category, Product, Banner } from "@shared/schema";
@@ -25,7 +26,8 @@ export default function Home() {
     queryFn: api.getBanners,
   });
 
-  const featuredProducts = products?.slice(0, 4) || [];
+  const featuredProducts = products?.filter(p => p.isFeatured === 1).slice(0, 8) || [];
+  const bestSellingProducts = products?.slice(0, 8) || [];
   const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
 
   // Auto-slide banners every 5 seconds
@@ -182,13 +184,13 @@ export default function Home() {
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
               {categories?.map((category) => (
-                <Link key={category.id} href={`/products?categoryId=${category.id}`}>
-                  <Card className="group cursor-pointer hover:shadow-md transition-shadow">
+                <Link key={category.id} href={`/category/${category.id}`}>
+                  <Card className="group cursor-pointer hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
                     <CardContent className="p-6 text-center">
-                      <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-primary/20 transition-colors">
-                        <i className="fas fa-laptop text-primary text-2xl"></i>
+                      <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
+                        <Grid3X3 className="text-white text-2xl h-8 w-8" />
                       </div>
-                      <h3 className="font-semibold text-gray-900 group-hover:text-primary transition-colors">
+                      <h3 className="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
                         {category.name}
                       </h3>
                       {category.description && (
@@ -196,6 +198,10 @@ export default function Home() {
                           {category.description}
                         </p>
                       )}
+                      <div className="mt-3 flex items-center justify-center text-sm text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <span>View Categories</span>
+                        <ArrowRight className="h-4 w-4 ml-1" />
+                      </div>
                     </CardContent>
                   </Card>
                 </Link>
