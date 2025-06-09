@@ -137,7 +137,6 @@ export class MemStorage implements IStorage {
         imageBlob: null,
         categoryId: electronics.id,
         subcategoryId: headphones.id,
-        stock: 45,
         isFeatured: 1,
         createdAt: new Date(),
       },
@@ -150,7 +149,6 @@ export class MemStorage implements IStorage {
         imageBlob: null,
         categoryId: electronics.id,
         subcategoryId: null,
-        stock: 32,
         isFeatured: 0,
         createdAt: new Date(),
       },
@@ -163,7 +161,6 @@ export class MemStorage implements IStorage {
         imageBlob: null,
         categoryId: electronics.id,
         subcategoryId: laptops.id,
-        stock: 18,
         isFeatured: 1,
         createdAt: new Date(),
       },
@@ -176,7 +173,6 @@ export class MemStorage implements IStorage {
         imageBlob: null,
         categoryId: electronics.id,
         subcategoryId: smartphones.id,
-        stock: 67,
         isFeatured: 1,
         createdAt: new Date(),
       },
@@ -351,7 +347,6 @@ export class MemStorage implements IStorage {
       imageUrl: product.imageUrl || null,
       imageBlob: product.imageBlob || null,
       subcategoryId: product.subcategoryId || null,
-      stock: product.stock || 0,
       isFeatured: product.isFeatured || 0,
     };
     this.products.set(newProduct.id, newProduct);
@@ -369,6 +364,52 @@ export class MemStorage implements IStorage {
 
   async deleteProduct(id: number): Promise<boolean> {
     return this.products.delete(id);
+  }
+
+  // Product Images
+  async getProductImages(productId: number): Promise<ProductImage[]> {
+    return Array.from(this.productImages.values())
+      .filter(image => image.productId === productId)
+      .sort((a, b) => a.priority - b.priority);
+  }
+
+  async getProductImageById(id: number): Promise<ProductImage | undefined> {
+    return this.productImages.get(id);
+  }
+
+  async createProductImage(productImage: InsertProductImage): Promise<ProductImage> {
+    const newProductImage: ProductImage = {
+      ...productImage,
+      id: this.currentProductImageId++,
+      imageUrl: productImage.imageUrl || null,
+      imageBlob: productImage.imageBlob || null,
+      priority: productImage.priority || 0,
+      createdAt: new Date(),
+    };
+    this.productImages.set(newProductImage.id, newProductImage);
+    return newProductImage;
+  }
+
+  async updateProductImage(id: number, productImage: Partial<InsertProductImage>): Promise<ProductImage | undefined> {
+    const existing = this.productImages.get(id);
+    if (!existing) return undefined;
+    
+    const updated = { ...existing, ...productImage };
+    this.productImages.set(id, updated);
+    return updated;
+  }
+
+  async deleteProductImage(id: number): Promise<boolean> {
+    return this.productImages.delete(id);
+  }
+
+  async updateProductImagePriority(id: number, priority: number): Promise<ProductImage | undefined> {
+    const existing = this.productImages.get(id);
+    if (!existing) return undefined;
+    
+    const updated = { ...existing, priority };
+    this.productImages.set(id, updated);
+    return updated;
   }
 
   // Orders

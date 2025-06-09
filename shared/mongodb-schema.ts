@@ -65,6 +65,26 @@ const productSchema = new Schema<IProduct>({
 
 export const ProductModel = model<IProduct>('Product', productSchema);
 
+// Product Image Schema
+export interface IProductImage extends Document {
+  _id: string;
+  productId: string;
+  imageUrl?: string;
+  imageBlob?: Buffer;
+  priority: number;
+  createdAt: Date;
+}
+
+const productImageSchema = new Schema<IProductImage>({
+  productId: { type: String, required: true },
+  imageUrl: { type: String },
+  imageBlob: { type: Buffer },
+  priority: { type: Number, default: 0 },
+  createdAt: { type: Date, default: Date.now }
+});
+
+export const ProductImageModel = model<IProductImage>('ProductImage', productImageSchema);
+
 // Order Schema
 export interface IOrder extends Document {
   _id: string;
