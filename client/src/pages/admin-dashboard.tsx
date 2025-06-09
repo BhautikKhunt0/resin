@@ -565,7 +565,6 @@ export default function AdminDashboard() {
       imageBlob: product.imageBlob || "",
       categoryId: product.categoryId.toString(),
       subcategoryId: product.subcategoryId?.toString() || "",
-      stock: product.stock?.toString() || "0",
       isFeatured: Boolean(product.isFeatured),
     });
     setProductDialogOpen(true);
