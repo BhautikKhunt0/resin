@@ -79,11 +79,6 @@ export default function ProductCard({ product }: ProductCardProps) {
                 Add to Cart
               </Button>
             </div>
-            {product.stock !== null && (
-              <p className="text-xs text-gray-500 mt-2">
-                {product.stock > 0 ? `${product.stock} in stock` : "Out of stock"}
-              </p>
-            )}
           </div>
         </CardContent>
       </Card>

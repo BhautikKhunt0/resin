@@ -1225,7 +1225,6 @@ export default function AdminDashboard() {
                           <TableHead>Name</TableHead>
                           <TableHead>Category</TableHead>
                           <TableHead>Price</TableHead>
-                          <TableHead>Stock</TableHead>
                           <TableHead>Featured</TableHead>
                           <TableHead>Actions</TableHead>
                         </TableRow>

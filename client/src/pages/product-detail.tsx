@@ -31,7 +31,7 @@ export default function ProductDetail() {
       name: product.name,
       price: parseFloat(product.price),
       quantity: 1,
-      imageUrl: product.imageUrl || undefined,
+      imageUrl: product.imageBlob ? `data:image/jpeg;base64,${product.imageBlob}` : product.imageUrl || undefined,
     });
 
     toast({
@@ -73,7 +73,7 @@ export default function ProductDetail() {
     );
   }
 
-  const isOutOfStock = product.stock !== null && product.stock <= 0;
+
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -90,17 +90,20 @@ export default function ProductDetail() {
           {/* Product Image */}
           <div className="space-y-4">
             <div className="aspect-square bg-white rounded-lg overflow-hidden shadow-sm">
-              {product.imageUrl ? (
-                <img
-                  src={product.imageUrl}
-                  alt={product.name}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center bg-gray-100">
-                  <Package className="h-24 w-24 text-gray-400" />
-                </div>
-              )}
+              {(() => {
+                const imageUrl = product.imageBlob ? `data:image/jpeg;base64,${product.imageBlob}` : product.imageUrl;
+                return imageUrl ? (
+                  <img
+                    src={imageUrl}
+                    alt={product.name}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center bg-gray-100">
+                    <Package className="h-24 w-24 text-gray-400" />
+                  </div>
+                );
+              })()}
             </div>
           </div>
 
@@ -114,11 +117,6 @@ export default function ProductDetail() {
                 <span className="text-3xl font-bold text-primary">
                   ${parseFloat(product.price).toFixed(2)}
                 </span>
-                {product.stock !== null && (
-                  <Badge variant={isOutOfStock ? "destructive" : "secondary"}>
-                    {isOutOfStock ? "Out of Stock" : `${product.stock} in stock`}
-                  </Badge>
-                )}
               </div>
             </div>
 
@@ -134,10 +132,9 @@ export default function ProductDetail() {
                   size="lg"
                   className="w-full"
                   onClick={handleAddToCart}
-                  disabled={isOutOfStock}
                 >
                   <ShoppingCart className="h-5 w-5 mr-2" />
-                  {isOutOfStock ? "Out of Stock" : "Add to Cart"}
+                  Add to Cart
                 </Button>
               </CardContent>
             </Card>
