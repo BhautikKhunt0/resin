@@ -151,7 +151,7 @@ export default function Home() {
               {/* Display Categories Only */}
               {categories?.map((category) => (
                 <Link key={`category-${category.id}`} href={`/category/${category.id}`}>
-                  <div className="group cursor-pointer">
+                  <div className="group cursor-pointer text-center">
                     <div className="aspect-square rounded-xl overflow-hidden bg-gray-100 mb-4 group-hover:shadow-xl transition-all duration-300 h-32 md:h-40">
                       {(() => {
                         const imageUrl = category.imageBlob ? `data:image/jpeg;base64,${category.imageBlob}` : category.imageUrl;
