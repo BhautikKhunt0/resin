@@ -17,6 +17,7 @@ export default function ProductDetail() {
   const productId = params?.id ? parseInt(params.id) : null;
   const { addItem } = useCart();
   const { toast } = useToast();
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
   const { data: product, isLoading, error } = useQuery<Product>({
     queryKey: ["/api/products", productId],
@@ -24,21 +25,48 @@ export default function ProductDetail() {
     enabled: !!productId,
   });
 
+  const { data: productImages = [], isLoading: imagesLoading } = useQuery<ProductImage[]>({
+    queryKey: ["/api/products", productId, "images"],
+    queryFn: () => productId ? fetch(`/api/products/${productId}/images`).then(res => res.json()) : Promise.reject(new Error("No product ID")),
+    enabled: !!productId,
+  });
+
+  // Combine product main image with additional images, prioritizing additional images
+  const allImages = productImages.length > 0 ? productImages : (product ? [{
+    id: 0,
+    productId: product.id,
+    imageUrl: product.imageUrl,
+    imageBlob: product.imageBlob,
+    priority: 0,
+    createdAt: new Date()
+  }] : []);
+
   const handleAddToCart = () => {
     if (!product) return;
+
+    const primaryImage = allImages[0];
+    const imageUrl = primaryImage?.imageBlob ? `data:image/jpeg;base64,${primaryImage.imageBlob}` : primaryImage?.imageUrl;
 
     addItem({
       productId: product.id,
       name: product.name,
       price: parseFloat(product.price),
       quantity: 1,
-      imageUrl: product.imageBlob ? `data:image/jpeg;base64,${product.imageBlob}` : product.imageUrl || undefined,
+      imageUrl: imageUrl || undefined,
     });
 
     toast({
       title: "Added to cart",
       description: `${product.name} has been added to your cart.`,
     });
+  };
+
+  const nextImage = () => {
+    setSelectedImageIndex((prev) => (prev + 1) % allImages.length);
+  };
+
+  const prevImage = () => {
+    setSelectedImageIndex((prev) => (prev - 1 + allImages.length) % allImages.length);
   };
 
   if (isLoading) {
@@ -88,24 +116,87 @@ export default function ProductDetail() {
         </Link>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-          {/* Product Image */}
+          {/* Product Image Gallery */}
           <div className="space-y-4">
-            <div className="aspect-square bg-white rounded-lg overflow-hidden shadow-sm">
-              {(() => {
-                const imageUrl = product.imageBlob ? `data:image/jpeg;base64,${product.imageBlob}` : product.imageUrl;
-                return imageUrl ? (
-                  <img
-                    src={imageUrl}
-                    alt={product.name}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-gray-100">
-                    <Package className="h-24 w-24 text-gray-400" />
-                  </div>
-                );
-              })()}
+            {/* Main Image Display */}
+            <div className="relative aspect-square bg-white rounded-lg overflow-hidden shadow-sm">
+              {allImages.length > 0 ? (
+                <>
+                  {(() => {
+                    const currentImage = allImages[selectedImageIndex];
+                    const imageUrl = currentImage?.imageBlob ? `data:image/jpeg;base64,${currentImage.imageBlob}` : currentImage?.imageUrl;
+                    return imageUrl ? (
+                      <img
+                        src={imageUrl}
+                        alt={product.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-gray-100">
+                        <Package className="h-24 w-24 text-gray-400" />
+                      </div>
+                    );
+                  })()}
+                  
+                  {/* Navigation Arrows */}
+                  {allImages.length > 1 && (
+                    <>
+                      <button
+                        onClick={prevImage}
+                        className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-20 hover:bg-opacity-30 text-white p-2 rounded-full transition-all duration-200"
+                      >
+                        <ChevronLeft className="w-6 h-6" />
+                      </button>
+                      <button
+                        onClick={nextImage}
+                        className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-20 hover:bg-opacity-30 text-white p-2 rounded-full transition-all duration-200"
+                      >
+                        <ChevronRight className="w-6 h-6" />
+                      </button>
+                      
+                      {/* Image Counter */}
+                      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-50 text-white px-3 py-1 rounded-full text-sm">
+                        {selectedImageIndex + 1} / {allImages.length}
+                      </div>
+                    </>
+                  )}
+                </>
+              ) : (
+                <div className="w-full h-full flex items-center justify-center bg-gray-100">
+                  <Package className="h-24 w-24 text-gray-400" />
+                </div>
+              )}
             </div>
+            
+            {/* Thumbnail Navigation */}
+            {allImages.length > 1 && (
+              <div className="grid grid-cols-4 gap-2">
+                {allImages.map((image, index) => {
+                  const imageUrl = image.imageBlob ? `data:image/jpeg;base64,${image.imageBlob}` : image.imageUrl;
+                  return (
+                    <button
+                      key={image.id}
+                      onClick={() => setSelectedImageIndex(index)}
+                      className={`aspect-square bg-white rounded-lg overflow-hidden shadow-sm border-2 transition-all duration-200 ${
+                        index === selectedImageIndex ? 'border-primary' : 'border-transparent hover:border-gray-300'
+                      }`}
+                    >
+                      {imageUrl ? (
+                        <img
+                          src={imageUrl}
+                          alt={`${product.name} - Image ${index + 1}`}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-gray-100">
+                          <Package className="h-8 w-8 text-gray-400" />
+                        </div>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
           {/* Product Info */}
