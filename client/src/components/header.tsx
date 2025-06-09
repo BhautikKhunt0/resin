@@ -21,6 +21,7 @@ export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isCollectionsOpen, setIsCollectionsOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState<number | null>(null);
+  const [expandedMobileCategories, setExpandedMobileCategories] = useState<Set<number>>(new Set());
   const { toggleCart, getTotalItems } = useCart();
   const [location] = useLocation();
   const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -86,6 +87,19 @@ export default function Header() {
     categoryTimeoutRef.current = setTimeout(() => {
       setActiveCategory(null);
     }, 100);
+  };
+
+  // Handle mobile category toggle
+  const toggleMobileCategory = (categoryId: number) => {
+    setExpandedMobileCategories(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(categoryId)) {
+        newSet.delete(categoryId);
+      } else {
+        newSet.add(categoryId);
+      }
+      return newSet;
+    });
   };
 
   // Collections dropdown component with stable hover functionality
@@ -324,21 +338,37 @@ export default function Header() {
                 <div className="space-y-1">
                   {categories.map((category) => {
                     const categorySubcategories = getSubcategoriesForCategory(category.id);
+                    const isExpanded = expandedMobileCategories.has(category.id);
+                    
                     return (
                       <div key={category.id} className="space-y-1">
-                        <Link href={`/category/${category.id}`}>
-                          <div
-                            className="flex items-center gap-3 px-2 py-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-50 cursor-pointer"
-                            onClick={() => setIsMobileMenuOpen(false)}
-                          >
-                            <div className="w-6 h-6 bg-gradient-to-br from-primary/20 to-primary/10 rounded-full flex items-center justify-center">
-                              <Package className="h-3 w-3 text-primary" />
+                        <div className="flex items-center">
+                          <Link href={`/category/${category.id}`} className="flex-1">
+                            <div
+                              className="flex items-center gap-3 px-2 py-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-50 cursor-pointer"
+                              onClick={() => setIsMobileMenuOpen(false)}
+                            >
+                              <div className="w-6 h-6 bg-gradient-to-br from-primary/20 to-primary/10 rounded-full flex items-center justify-center">
+                                <Package className="h-3 w-3 text-primary" />
+                              </div>
+                              <span className="font-medium text-sm">{category.name}</span>
                             </div>
-                            <span className="font-medium text-sm">{category.name}</span>
-                          </div>
-                        </Link>
-                        {categorySubcategories.length > 0 && (
-                          <div className="ml-6 space-y-1">
+                          </Link>
+                          {categorySubcategories.length > 0 && (
+                            <button
+                              onClick={() => toggleMobileCategory(category.id)}
+                              className="p-2 hover:bg-gray-50 rounded-md transition-colors"
+                            >
+                              <ChevronDown 
+                                className={`h-4 w-4 text-gray-400 transition-transform duration-200 ${
+                                  isExpanded ? 'rotate-180' : ''
+                                }`} 
+                              />
+                            </button>
+                          )}
+                        </div>
+                        {categorySubcategories.length > 0 && isExpanded && (
+                          <div className="ml-6 space-y-1 animate-in slide-in-from-top-2 duration-200">
                             {categorySubcategories.map((subcategory) => (
                               <Link key={subcategory.id} href={`/subcategory/${subcategory.id}/products`}>
                                 <div
