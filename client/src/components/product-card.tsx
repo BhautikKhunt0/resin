@@ -65,7 +65,7 @@ export default function ProductCard({ product }: ProductCardProps) {
           </div>
           
           {/* Title and Price below image */}
-          <div className="p-4">
+          <div className="p-4 text-center">
             <h3 className="font-medium text-gray-900 line-clamp-2 leading-tight mb-2">
               {product.name}
             </h3>
