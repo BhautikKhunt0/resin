@@ -97,17 +97,17 @@ export class MemStorage implements IStorage {
 
   private seedData() {
     // Seed categories
-    const electronics: Category = { id: this.currentCategoryId++, name: "Electronics", description: "Electronic devices and gadgets" };
-    const clothing: Category = { id: this.currentCategoryId++, name: "Clothing", description: "Fashion and apparel" };
-    const homeGarden: Category = { id: this.currentCategoryId++, name: "Home & Garden", description: "Home and garden essentials" };
-    const sports: Category = { id: this.currentCategoryId++, name: "Sports", description: "Sports and fitness equipment" };
+    const electronics: Category = { id: this.currentCategoryId++, name: "Electronics", description: "Electronic devices and gadgets", imageUrl: null, imageBlob: null };
+    const clothing: Category = { id: this.currentCategoryId++, name: "Clothing", description: "Fashion and apparel", imageUrl: null, imageBlob: null };
+    const homeGarden: Category = { id: this.currentCategoryId++, name: "Home & Garden", description: "Home and garden essentials", imageUrl: null, imageBlob: null };
+    const sports: Category = { id: this.currentCategoryId++, name: "Sports", description: "Sports and fitness equipment", imageUrl: null, imageBlob: null };
 
     [electronics, clothing, homeGarden, sports].forEach(cat => this.categories.set(cat.id, cat));
 
     // Seed subcategories
-    const smartphones: Subcategory = { id: this.currentSubcategoryId++, name: "Smartphones", description: "Mobile phones", categoryId: electronics.id };
-    const laptops: Subcategory = { id: this.currentSubcategoryId++, name: "Laptops", description: "Portable computers", categoryId: electronics.id };
-    const headphones: Subcategory = { id: this.currentSubcategoryId++, name: "Headphones", description: "Audio devices", categoryId: electronics.id };
+    const smartphones: Subcategory = { id: this.currentSubcategoryId++, name: "Smartphones", description: "Mobile phones", categoryId: electronics.id, imageUrl: null, imageBlob: null };
+    const laptops: Subcategory = { id: this.currentSubcategoryId++, name: "Laptops", description: "Portable computers", categoryId: electronics.id, imageUrl: null, imageBlob: null };
+    const headphones: Subcategory = { id: this.currentSubcategoryId++, name: "Headphones", description: "Audio devices", categoryId: electronics.id, imageUrl: null, imageBlob: null };
 
     [smartphones, laptops, headphones].forEach(sub => this.subcategories.set(sub.id, sub));
 
@@ -447,3 +447,15 @@ import { MongoDBStorage } from "./mongodb-storage";
 
 // Using MongoDB storage to access existing orders data
 export const storage = new MongoDBStorage();
+
+// Initialize and verify image storage
+export async function initializeStorage(): Promise<void> {
+  try {
+    if (storage instanceof MongoDBStorage) {
+      await storage.verifyImageStorage();
+    }
+  } catch (error) {
+    console.error('Failed to initialize storage:', error);
+    throw error;
+  }
+}

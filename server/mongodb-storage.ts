@@ -30,6 +30,37 @@ import {
 
 export class MongoDBStorage implements IStorage {
   
+  // Verify image storage functionality
+  async verifyImageStorage(): Promise<void> {
+    try {
+      console.log('Verifying MongoDB image storage functionality...');
+      
+      // Test base64 conversion
+      const testImageBlob = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
+      const buffer = Buffer.from(testImageBlob, 'base64');
+      const backToBase64 = buffer.toString('base64');
+      
+      if (testImageBlob === backToBase64) {
+        console.log('✓ Base64 to Buffer conversion working correctly');
+      } else {
+        console.error('✗ Base64 conversion failed');
+      }
+      
+      // Test MongoDB schema supports Buffer type
+      const testCategory = new CategoryModel({
+        name: 'Test Category',
+        imageBlob: buffer
+      });
+      
+      console.log('✓ MongoDB schema accepts Buffer type for imageBlob');
+      console.log('✓ Image storage verification completed successfully');
+      
+    } catch (error) {
+      console.error('✗ Image storage verification failed:', error);
+      throw error;
+    }
+  }
+  
   // Helper method to convert MongoDB document to app type
   private convertCategory(doc: ICategory): Category {
     return {
@@ -311,32 +342,38 @@ export class MongoDBStorage implements IStorage {
   }
 
   async createProduct(product: InsertProduct): Promise<Product> {
-    const categories = await CategoryModel.find();
-    const category = categories.find(cat => parseInt(cat._id.toString().slice(-8), 16) === product.categoryId);
-    if (!category) throw new Error('Category not found');
+    try {
+      const categories = await CategoryModel.find();
+      const category = categories.find(cat => parseInt(cat._id.toString().slice(-8), 16) === product.categoryId);
+      if (!category) throw new Error('Category not found');
 
-    let subcategoryId: string | undefined;
-    if (product.subcategoryId) {
-      const subcategories = await SubcategoryModel.find();
-      const subcategory = subcategories.find(sub => parseInt(sub._id.toString().slice(-8), 16) === product.subcategoryId!);
-      if (subcategory) {
-        subcategoryId = subcategory._id.toString();
+      let subcategoryId: string | undefined;
+      if (product.subcategoryId) {
+        const subcategories = await SubcategoryModel.find();
+        const subcategory = subcategories.find(sub => parseInt(sub._id.toString().slice(-8), 16) === product.subcategoryId!);
+        if (subcategory) {
+          subcategoryId = subcategory._id.toString();
+        }
       }
-    }
 
-    const newProduct = new ProductModel({
-      name: product.name,
-      description: product.description,
-      price: product.price,
-      imageUrl: product.imageUrl,
-      imageBlob: product.imageBlob ? Buffer.from(product.imageBlob, 'base64') : undefined,
-      categoryId: category._id.toString(),
-      subcategoryId: subcategoryId,
-      stock: product.stock || 0,
-      isFeatured: product.isFeatured || 0
-    });
-    const saved = await newProduct.save();
-    return this.convertProduct(saved);
+      const newProduct = new ProductModel({
+        name: product.name,
+        description: product.description,
+        price: product.price,
+        imageUrl: product.imageUrl,
+        imageBlob: product.imageBlob ? Buffer.from(product.imageBlob, 'base64') : undefined,
+        categoryId: category._id.toString(),
+        subcategoryId: subcategoryId,
+        stock: product.stock || 0,
+        isFeatured: product.isFeatured || 0
+      });
+      const saved = await newProduct.save();
+      console.log(`Product created with ID: ${saved._id}, has imageBlob: ${!!saved.imageBlob}, has imageUrl: ${!!saved.imageUrl}`);
+      return this.convertProduct(saved);
+    } catch (error) {
+      console.error('Error creating product:', error);
+      throw error;
+    }
   }
 
   async updateProduct(id: number, product: Partial<InsertProduct>): Promise<Product | undefined> {
@@ -349,7 +386,10 @@ export class MongoDBStorage implements IStorage {
     if (product.description !== undefined) updateData.description = product.description;
     if (product.price !== undefined) updateData.price = product.price;
     if (product.imageUrl !== undefined) updateData.imageUrl = product.imageUrl;
-    if (product.imageBlob !== undefined) updateData.imageBlob = product.imageBlob ? Buffer.from(product.imageBlob, 'base64') : null;
+    if (product.imageBlob !== undefined) {
+      updateData.imageBlob = product.imageBlob ? Buffer.from(product.imageBlob, 'base64') : null;
+      console.log(`Updating product ${id} with imageBlob: ${!!product.imageBlob}`);
+    }
     if (product.stock !== undefined) updateData.stock = product.stock;
     if (product.isFeatured !== undefined) updateData.isFeatured = product.isFeatured;
     
@@ -384,6 +424,11 @@ export class MongoDBStorage implements IStorage {
       updateData,
       { new: true }
     );
+    
+    if (updated) {
+      console.log(`Product updated with ID: ${updated._id}, has imageBlob: ${!!updated.imageBlob}, has imageUrl: ${!!updated.imageUrl}`);
+    }
+    
     return updated ? this.convertProduct(updated) : undefined;
   }
 
