@@ -253,6 +253,8 @@ export class MemStorage implements IStorage {
       ...category,
       id: this.currentCategoryId++,
       description: category.description || null,
+      imageUrl: category.imageUrl || null,
+      imageBlob: category.imageBlob || null,
     };
     this.categories.set(newCategory.id, newCategory);
     return newCategory;
@@ -289,6 +291,8 @@ export class MemStorage implements IStorage {
       ...subcategory,
       id: this.currentSubcategoryId++,
       description: subcategory.description || null,
+      imageUrl: subcategory.imageUrl || null,
+      imageBlob: subcategory.imageBlob || null,
     };
     this.subcategories.set(newSubcategory.id, newSubcategory);
     return newSubcategory;

@@ -43,6 +43,9 @@ app.use((req, res, next) => {
     // Connect to MongoDB to access existing orders data
     await connectToMongoDB();
     
+    // Initialize and verify image storage
+    await initializeStorage();
+    
     const server = await registerRoutes(app);
 
     app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
