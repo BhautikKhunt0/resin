@@ -141,6 +141,8 @@ export default function AdminDashboard() {
   const [bannerDialogOpen, setBannerDialogOpen] = useState(false);
   const [imageUploadDialogOpen, setImageUploadDialogOpen] = useState(false);
   const [currentImageField, setCurrentImageField] = useState<string | null>(null);
+  const [orderDetailsDialogOpen, setOrderDetailsDialogOpen] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
   const { admin, token, logout, isAuthenticated } = useAuth();
   const { toast } = useToast();
@@ -576,6 +578,11 @@ export default function AdminDashboard() {
   const handleImageUpload = (fieldType: string) => {
     setCurrentImageField(fieldType);
     setImageUploadDialogOpen(true);
+  };
+
+  const handleViewOrderDetails = (order: Order) => {
+    setSelectedOrder(order);
+    setOrderDetailsDialogOpen(true);
   };
 
   const handleLogout = () => {
@@ -1887,7 +1894,8 @@ export default function AdminDashboard() {
                         <TableRow>
                           <TableHead>Order ID</TableHead>
                           <TableHead>Customer</TableHead>
-                          <TableHead>Email</TableHead>
+                          <TableHead>Contact</TableHead>
+                          <TableHead>Items</TableHead>
                           <TableHead>Total</TableHead>
                           <TableHead>Status</TableHead>
                           <TableHead>Date</TableHead>
@@ -1898,8 +1906,43 @@ export default function AdminDashboard() {
                         {orders?.map((order) => (
                           <TableRow key={order.id}>
                             <TableCell className="font-medium">#ORD-{order.id}</TableCell>
-                            <TableCell>{order.customerName}</TableCell>
-                            <TableCell className="text-gray-600">{order.customerEmail}</TableCell>
+                            <TableCell>
+                              <div>
+                                <div className="font-medium">{order.customerName}</div>
+                                <div className="text-sm text-gray-500">{order.customerEmail}</div>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div className="text-sm">
+                                <div>{order.customerPhone}</div>
+                                <div className="text-gray-500 max-w-xs truncate" title={order.shippingAddress}>
+                                  {order.shippingAddress}
+                                </div>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div className="text-sm">
+                                {Array.isArray(order.orderItems) ? (
+                                  <div>
+                                    <div className="font-medium">{order.orderItems.length} items</div>
+                                    <div className="text-gray-500">
+                                      {order.orderItems.slice(0, 2).map((item, idx) => (
+                                        <div key={idx} className="truncate max-w-xs">
+                                          {item.quantity}x {item.name}
+                                        </div>
+                                      ))}
+                                      {order.orderItems.length > 2 && (
+                                        <div className="text-gray-400">
+                                          +{order.orderItems.length - 2} more...
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <span className="text-gray-400">No items</span>
+                                )}
+                              </div>
+                            </TableCell>
                             <TableCell className="font-medium">${parseFloat(order.totalAmount).toFixed(2)}</TableCell>
                             <TableCell>
                               <Select
@@ -1919,16 +1962,31 @@ export default function AdminDashboard() {
                                 </SelectContent>
                               </Select>
                             </TableCell>
-                            <TableCell>{new Date(order.createdAt).toLocaleDateString()}</TableCell>
                             <TableCell>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => deleteOrderMutation.mutate(order.id)}
-                                className="text-red-600 hover:text-red-700"
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
+                              <div className="text-sm">
+                                <div>{new Date(order.createdAt).toLocaleDateString()}</div>
+                                <div className="text-gray-500">{new Date(order.createdAt).toLocaleTimeString()}</div>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex space-x-2">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleViewOrderDetails(order)}
+                                  className="text-blue-600 hover:text-blue-700"
+                                >
+                                  <Eye className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => deleteOrderMutation.mutate(order.id)}
+                                  className="text-red-600 hover:text-red-700"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
                             </TableCell>
                           </TableRow>
                         ))}
@@ -1942,6 +2000,196 @@ export default function AdminDashboard() {
 
         </main>
       </div>
+
+      {/* Order Details Dialog */}
+      <Dialog open={orderDetailsDialogOpen} onOpenChange={setOrderDetailsDialogOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader className="pb-6 border-b border-gray-100">
+            <div className="flex items-center space-x-3">
+              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                <ShoppingBag className="h-6 w-6 text-blue-600" />
+              </div>
+              <div>
+                <DialogTitle className="text-2xl font-bold text-gray-900">
+                  Order Details - #ORD-{selectedOrder?.id}
+                </DialogTitle>
+                <p className="text-sm text-gray-500 mt-1">
+                  Complete order information and status
+                </p>
+              </div>
+            </div>
+          </DialogHeader>
+
+          {selectedOrder && (
+            <div className="py-6 space-y-8">
+              {/* Order Summary */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg flex items-center">
+                      <Users className="h-5 w-5 mr-2 text-blue-600" />
+                      Customer Information
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div>
+                      <label className="text-sm font-medium text-gray-600">Name</label>
+                      <p className="text-gray-900">{selectedOrder.customerName}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-600">Email</label>
+                      <p className="text-gray-900">{selectedOrder.customerEmail}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-600">Phone</label>
+                      <p className="text-gray-900">{selectedOrder.customerPhone}</p>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg flex items-center">
+                      <Truck className="h-5 w-5 mr-2 text-green-600" />
+                      Shipping Address
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-gray-900 leading-relaxed">{selectedOrder.shippingAddress}</p>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg flex items-center">
+                      <DollarSign className="h-5 w-5 mr-2 text-purple-600" />
+                      Order Summary
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Total Amount</span>
+                      <span className="font-semibold text-lg">${parseFloat(selectedOrder.totalAmount).toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Status</span>
+                      <Badge variant={
+                        selectedOrder.status === "Processing" ? "secondary" :
+                        selectedOrder.status === "Shipped" ? "default" :
+                        selectedOrder.status === "Delivered" ? "outline" : "destructive"
+                      }>
+                        {selectedOrder.status}
+                      </Badge>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Order Date</span>
+                      <span>{new Date(selectedOrder.createdAt).toLocaleDateString()}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Order Time</span>
+                      <span>{new Date(selectedOrder.createdAt).toLocaleTimeString()}</span>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Order Items */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center">
+                    <Package className="h-5 w-5 mr-2 text-orange-600" />
+                    Order Items ({Array.isArray(selectedOrder.orderItems) ? selectedOrder.orderItems.length : 0} items)
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-0">
+                  {Array.isArray(selectedOrder.orderItems) && selectedOrder.orderItems.length > 0 ? (
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Product</TableHead>
+                          <TableHead>Price</TableHead>
+                          <TableHead>Quantity</TableHead>
+                          <TableHead>Subtotal</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {selectedOrder.orderItems.map((item, index) => (
+                          <TableRow key={index}>
+                            <TableCell>
+                              <div>
+                                <div className="font-medium">{item.name}</div>
+                                <div className="text-sm text-gray-500">Product ID: {item.productId}</div>
+                              </div>
+                            </TableCell>
+                            <TableCell>${parseFloat(item.price.toString()).toFixed(2)}</TableCell>
+                            <TableCell>
+                              <Badge variant="outline">{item.quantity}</Badge>
+                            </TableCell>
+                            <TableCell className="font-medium">
+                              ${(parseFloat(item.price.toString()) * item.quantity).toFixed(2)}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  ) : (
+                    <div className="p-6 text-center text-gray-500">
+                      No items found in this order
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Order Actions */}
+              <div className="flex items-center justify-between pt-6 border-t border-gray-100">
+                <div className="flex items-center space-x-4">
+                  <div>
+                    <label className="text-sm font-medium text-gray-700 block mb-2">Update Order Status</label>
+                    <Select
+                      value={selectedOrder.status}
+                      onValueChange={(status) => {
+                        updateOrderStatusMutation.mutate({ id: selectedOrder.id, status });
+                        setSelectedOrder({ ...selectedOrder, status });
+                      }}
+                    >
+                      <SelectTrigger className="w-40">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Processing">Processing</SelectItem>
+                        <SelectItem value="Shipped">Shipped</SelectItem>
+                        <SelectItem value="Delivered">Delivered</SelectItem>
+                        <SelectItem value="Cancelled">Cancelled</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                
+                <div className="flex items-center space-x-3">
+                  <Button
+                    variant="outline"
+                    onClick={() => setOrderDetailsDialogOpen(false)}
+                    className="px-6"
+                  >
+                    Close
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    onClick={() => {
+                      deleteOrderMutation.mutate(selectedOrder.id);
+                      setOrderDetailsDialogOpen(false);
+                    }}
+                    className="px-6"
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Delete Order
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* Image Upload Dialog */}
       <Dialog open={imageUploadDialogOpen} onOpenChange={setImageUploadDialogOpen}>
