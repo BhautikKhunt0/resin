@@ -189,10 +189,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Admin routes - Categories
   app.post("/api/admin/categories", authenticateAdmin, async (req, res) => {
     try {
+      console.log('Creating category with data:', JSON.stringify(req.body, null, 2));
       const categoryData = insertCategorySchema.parse(req.body);
+      console.log('Parsed category data:', JSON.stringify(categoryData, null, 2));
       const category = await storage.createCategory(categoryData);
+      console.log('Created category result:', JSON.stringify(category, null, 2));
       res.status(201).json(category);
     } catch (error) {
+      console.error('Error creating category:', error);
       res.status(400).json({ message: "Failed to create category" });
     }
   });
@@ -200,8 +204,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put("/api/admin/categories/:id", authenticateAdmin, async (req, res) => {
     try {
       const categoryId = parseInt(req.params.id);
+      console.log('Updating category', categoryId, 'with data:', JSON.stringify(req.body, null, 2));
       const categoryData = insertCategorySchema.partial().parse(req.body);
+      console.log('Parsed category data:', JSON.stringify(categoryData, null, 2));
       const category = await storage.updateCategory(categoryId, categoryData);
+      console.log('Updated category result:', JSON.stringify(category, null, 2));
       
       if (!category) {
         return res.status(404).json({ message: "Category not found" });
@@ -209,6 +216,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.json(category);
     } catch (error) {
+      console.error('Error updating category:', error);
       res.status(400).json({ message: "Failed to update category" });
     }
   });
@@ -240,10 +248,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/admin/subcategories", authenticateAdmin, async (req, res) => {
     try {
+      console.log('Creating subcategory with data:', JSON.stringify(req.body, null, 2));
       const subcategoryData = insertSubcategorySchema.parse(req.body);
+      console.log('Parsed subcategory data:', JSON.stringify(subcategoryData, null, 2));
       const subcategory = await storage.createSubcategory(subcategoryData);
+      console.log('Created subcategory result:', JSON.stringify(subcategory, null, 2));
       res.status(201).json(subcategory);
     } catch (error) {
+      console.error('Error creating subcategory:', error);
       res.status(400).json({ message: "Failed to create subcategory" });
     }
   });
@@ -251,8 +263,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put("/api/admin/subcategories/:id", authenticateAdmin, async (req, res) => {
     try {
       const subcategoryId = parseInt(req.params.id);
+      console.log('Updating subcategory', subcategoryId, 'with data:', JSON.stringify(req.body, null, 2));
       const subcategoryData = insertSubcategorySchema.partial().parse(req.body);
+      console.log('Parsed subcategory data:', JSON.stringify(subcategoryData, null, 2));
       const subcategory = await storage.updateSubcategory(subcategoryId, subcategoryData);
+      console.log('Updated subcategory result:', JSON.stringify(subcategory, null, 2));
       
       if (!subcategory) {
         return res.status(404).json({ message: "Subcategory not found" });
@@ -260,6 +275,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.json(subcategory);
     } catch (error) {
+      console.error('Error updating subcategory:', error);
       res.status(400).json({ message: "Failed to update subcategory" });
     }
   });
