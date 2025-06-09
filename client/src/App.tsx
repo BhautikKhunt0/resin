@@ -8,6 +8,7 @@ import { AuthProvider } from "@/lib/auth-context";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
 import CartSidebar from "@/components/cart-sidebar";
+import MobileBottomNav from "@/components/mobile-bottom-nav";
 import Home from "@/pages/home";
 import Products from "@/pages/products";
 import ProductDetail from "@/pages/product-detail";
@@ -22,10 +23,13 @@ function Layout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
-      <main className="flex-1">
+      <main className="flex-1 pb-20 md:pb-0">
         {children}
       </main>
-      <Footer />
+      <div className="hidden md:block">
+        <Footer />
+      </div>
+      <MobileBottomNav />
       <CartSidebar />
     </div>
   );

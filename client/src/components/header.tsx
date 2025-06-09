@@ -217,9 +217,23 @@ export default function Header() {
     <header className="bg-white shadow-sm border-b sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          {/* Logo */}
+          {/* Mobile Menu Button - Left side */}
+          <Button
+            variant="ghost"
+            size="sm"
+            className="md:hidden"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          >
+            {isMobileMenuOpen ? (
+              <X className="h-5 w-5" />
+            ) : (
+              <Menu className="h-5 w-5" />
+            )}
+          </Button>
+
+          {/* Logo - Center on mobile, left on desktop */}
           <Link href="/">
-            <h1 className="text-2xl font-bold text-primary cursor-pointer">
+            <h1 className="text-xl md:text-2xl font-bold text-primary cursor-pointer">
               ModernShop
             </h1>
           </Link>
@@ -243,12 +257,12 @@ export default function Header() {
           </nav>
 
           {/* Cart & Admin */}
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2 md:space-x-4">
             <Button
               variant="ghost"
               size="sm"
               onClick={toggleCart}
-              className="relative p-2"
+              className="relative p-2 md:hidden"
             >
               <ShoppingCart className="h-5 w-5" />
               {totalItems > 0 && (
@@ -258,25 +272,27 @@ export default function Header() {
               )}
             </Button>
 
-            <Link href="/admin/login">
-              <Button variant="ghost" size="sm">
-                Admin
+            <div className="hidden md:flex items-center space-x-4">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={toggleCart}
+                className="relative p-2"
+              >
+                <ShoppingCart className="h-5 w-5" />
+                {totalItems > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-primary text-white text-xs rounded-full h-5 w-5 flex items-center justify-center animate-cart-bounce">
+                    {totalItems}
+                  </span>
+                )}
               </Button>
-            </Link>
 
-            {/* Mobile menu button */}
-            <Button
-              variant="ghost"
-              size="sm"
-              className="md:hidden"
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            >
-              {isMobileMenuOpen ? (
-                <X className="h-5 w-5" />
-              ) : (
-                <Menu className="h-5 w-5" />
-              )}
-            </Button>
+              <Link href="/admin/login">
+                <Button variant="ghost" size="sm">
+                  Admin
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
 
