@@ -24,6 +24,7 @@ export const products = pgTable("products", {
   name: text("name").notNull(),
   description: text("description").notNull(),
   price: decimal("price", { precision: 10, scale: 2 }).notNull(),
+  weight: text("weight"), // Weight category like "500g", "1kg", "2kg"
   imageUrl: text("image_url"),
   imageBlob: text("image_blob"), // Base64 encoded image data
   categoryId: integer("category_id").notNull(),

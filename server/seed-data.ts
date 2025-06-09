@@ -2,6 +2,7 @@ import {
   CategoryModel,
   SubcategoryModel,
   ProductModel,
+  ProductImageModel,
   AdminModel
 } from "@shared/mongodb-schema";
 
@@ -12,6 +13,7 @@ export async function seedInitialData() {
     await CategoryModel.deleteMany({});
     await SubcategoryModel.deleteMany({});
     await ProductModel.deleteMany({});
+    await ProductImageModel.deleteMany({});
     await AdminModel.deleteMany({});
 
     console.log('Seeding initial data...');
@@ -275,33 +277,98 @@ export async function seedInitialData() {
       categoryId: jewelry._id.toString()
     });
 
-    // Create comprehensive product catalog
-    await ProductModel.create([
+    // Create comprehensive product catalog with weight variants
+    const products = await ProductModel.create([
       // Electronics - Smartphones
       {
         name: "iPhone 15 Pro Max",
-        description: "Latest flagship iPhone with titanium design and advanced camera system",
+        description: "Latest flagship iPhone with titanium design and advanced camera system. Features A17 Pro chip, 48MP camera system, and titanium build.",
         price: "1199.99",
-        imageUrl: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300",
+        weight: "221g",
         categoryId: electronics._id.toString(),
         subcategoryId: smartphones._id.toString(),
-        stock: 25,
         isFeatured: 1
       },
       {
         name: "Samsung Galaxy S24 Ultra",
-        description: "Premium Android phone with S Pen and incredible zoom capabilities",
+        description: "Premium Android phone with S Pen and incredible zoom capabilities. 200MP camera with 100x Space Zoom.",
         price: "1099.99",
-        imageUrl: "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300",
+        weight: "232g",
         categoryId: electronics._id.toString(),
         subcategoryId: smartphones._id.toString(),
-        stock: 30,
         isFeatured: 1
       },
       {
-        name: "Google Pixel 8 Pro",
-        description: "AI-powered photography and pure Android experience",
-        price: "899.99",
+        name: "MacBook Pro 16-inch",
+        description: "Powerful laptop with M3 Max chip, 18-hour battery life, and stunning Liquid Retina XDR display.",
+        price: "2499.99",
+        weight: "2.1kg",
+        categoryId: electronics._id.toString(),
+        subcategoryId: laptops._id.toString(),
+        isFeatured: 1
+      },
+      {
+        name: "Sony WH-1000XM5",
+        description: "Industry-leading noise canceling headphones with 30-hour battery life and premium sound quality.",
+        price: "399.99",
+        weight: "250g",
+        categoryId: electronics._id.toString(),
+        subcategoryId: headphones._id.toString(),
+        isFeatured: 1
+      },
+      // Clothing with size/weight variants
+      {
+        name: "Premium Cotton T-Shirt",
+        description: "100% organic cotton t-shirt with comfortable fit and durable construction. Available in multiple sizes.",
+        price: "29.99",
+        weight: "Medium",
+        categoryId: clothing._id.toString(),
+        subcategoryId: menShirts._id.toString(),
+        isFeatured: 0
+      },
+      {
+        name: "Premium Cotton T-Shirt",
+        description: "100% organic cotton t-shirt with comfortable fit and durable construction. Available in multiple sizes.",
+        price: "29.99",
+        weight: "Large",
+        categoryId: clothing._id.toString(),
+        subcategoryId: menShirts._id.toString(),
+        isFeatured: 0
+      },
+      {
+        name: "Premium Cotton T-Shirt",
+        description: "100% organic cotton t-shirt with comfortable fit and durable construction. Available in multiple sizes.",
+        price: "29.99",
+        weight: "X-Large",
+        categoryId: clothing._id.toString(),
+        subcategoryId: menShirts._id.toString(),
+        isFeatured: 0
+      }
+    ]);
+
+    // Create multiple product images for each product with dummy base64 data
+    const dummyImages = [
+      // Small dummy images in base64 format
+      'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==', // Red pixel
+      'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChAGAkN5S0gAAAABJRU5ErkJggg==', // Green pixel
+      'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYGhgYGAAAQQAAPO7aPAAAAgAAAAASUVORK5CYII=', // Blue pixel
+      'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYGBgAAACAAEBWQ7ePAAAAASUVORK5CYII=', // White pixel
+      'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYGBgAAACAAEBWQ7eAAAAASUVORK5CYII='  // Black pixel
+    ];
+
+    // Add multiple images for each product
+    for (const product of products) {
+      const productImages = [];
+      for (let i = 0; i < 4; i++) {
+        productImages.push({
+          productId: product._id.toString(),
+          imageBlob: Buffer.from(dummyImages[i % dummyImages.length], 'base64'),
+          priority: i,
+          createdAt: new Date()
+        });
+      }
+      await ProductImageModel.create(productImages);
+    }
         imageUrl: "https://images.unsplash.com/photo-1598300042247-d088f8ab3a91?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300",
         categoryId: electronics._id.toString(),
         subcategoryId: smartphones._id.toString(),

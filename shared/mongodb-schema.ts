@@ -44,6 +44,7 @@ export interface IProduct extends Document {
   name: string;
   description: string;
   price: string;
+  weight?: string;
   imageUrl?: string;
   imageBlob?: Buffer;
   categoryId: string;
@@ -56,6 +57,7 @@ const productSchema = new Schema<IProduct>({
   name: { type: String, required: true },
   description: { type: String, required: true },
   price: { type: String, required: true },
+  weight: { type: String },
   imageUrl: { type: String },
   imageBlob: { type: Buffer },
   categoryId: { type: String, required: true },
