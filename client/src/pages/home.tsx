@@ -71,47 +71,14 @@ export default function Home() {
                 }`}
               >
                 {banner.imageUrl || banner.imageBlob ? (
-                  <div className="relative w-full h-full">
-                    <img
-                      src={banner.imageBlob ? `data:image/jpeg;base64,${banner.imageBlob}` : (banner.imageUrl || '')}
-                      alt={banner.title}
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
-                      <div className="text-center text-white max-w-4xl px-4">
-                        <h1 className="text-4xl md:text-6xl font-bold mb-6">
-                          {banner.title}
-                        </h1>
-                        {banner.description && (
-                          <p className="text-xl md:text-2xl mb-8">
-                            {banner.description}
-                          </p>
-                        )}
-                        <Link href="/products">
-                          <Button size="lg" variant="secondary">
-                            Shop Now
-                          </Button>
-                        </Link>
-                      </div>
-                    </div>
-                  </div>
+                  <img
+                    src={banner.imageBlob ? `data:image/jpeg;base64,${banner.imageBlob}` : (banner.imageUrl || '')}
+                    alt={banner.title}
+                    className="w-full h-full object-cover"
+                  />
                 ) : (
-                  <div className="relative bg-gradient-to-r from-primary to-blue-700 text-white h-full flex items-center justify-center">
-                    <div className="text-center max-w-4xl px-4">
-                      <h1 className="text-4xl md:text-6xl font-bold mb-6">
-                        {banner.title}
-                      </h1>
-                      {banner.description && (
-                        <p className="text-xl md:text-2xl mb-8 text-blue-100">
-                          {banner.description}
-                        </p>
-                      )}
-                      <Link href="/products">
-                        <Button size="lg" variant="secondary" className="text-primary">
-                          Shop Now
-                        </Button>
-                      </Link>
-                    </div>
+                  <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                    <span className="text-gray-400 text-lg">No banner image</span>
                   </div>
                 )}
               </div>
@@ -152,19 +119,10 @@ export default function Home() {
           </div>
         </section>
       ) : (
-        <section className="relative bg-gradient-to-r from-primary to-blue-700 text-white py-20">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h1 className="text-4xl md:text-6xl font-bold mb-6">
-              Discover Amazing Products
-            </h1>
-            <p className="text-xl md:text-2xl mb-8 text-blue-100">
-              Shop the latest trends with fast, secure delivery
-            </p>
-            <Link href="/products">
-              <Button size="lg" variant="secondary" className="text-primary">
-                Shop Now
-              </Button>
-            </Link>
+        <section className="relative h-96 bg-gray-100 flex items-center justify-center">
+          <div className="text-center text-gray-500">
+            <h2 className="text-2xl font-semibold mb-2">No banners available</h2>
+            <p className="text-gray-400">Admin can add banners from the dashboard</p>
           </div>
         </section>
       )}
