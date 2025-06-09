@@ -2,18 +2,21 @@ import {
   categories, 
   subcategories, 
   products, 
+  productImages,
   orders, 
   admins,
   banners,
   type Category,
   type Subcategory,
   type Product,
+  type ProductImage,
   type Order,
   type Admin,
   type Banner,
   type InsertCategory,
   type InsertSubcategory,
   type InsertProduct,
+  type InsertProductImage,
   type InsertOrder,
   type InsertAdmin,
   type InsertBanner
@@ -44,6 +47,14 @@ export interface IStorage {
   updateProduct(id: number, product: Partial<InsertProduct>): Promise<Product | undefined>;
   deleteProduct(id: number): Promise<boolean>;
 
+  // Product Images
+  getProductImages(productId: number): Promise<ProductImage[]>;
+  getProductImageById(id: number): Promise<ProductImage | undefined>;
+  createProductImage(productImage: InsertProductImage): Promise<ProductImage>;
+  updateProductImage(id: number, productImage: Partial<InsertProductImage>): Promise<ProductImage | undefined>;
+  deleteProductImage(id: number): Promise<boolean>;
+  updateProductImagePriority(id: number, priority: number): Promise<ProductImage | undefined>;
+
   // Orders
   getOrders(): Promise<Order[]>;
   getOrderById(id: number): Promise<Order | undefined>;
@@ -68,12 +79,14 @@ export class MemStorage implements IStorage {
   private categories: Map<number, Category>;
   private subcategories: Map<number, Subcategory>;
   private products: Map<number, Product>;
+  private productImages: Map<number, ProductImage>;
   private orders: Map<number, Order>;
   private admins: Map<number, Admin>;
   private banners: Map<number, Banner>;
   private currentCategoryId: number;
   private currentSubcategoryId: number;
   private currentProductId: number;
+  private currentProductImageId: number;
   private currentOrderId: number;
   private currentAdminId: number;
   private currentBannerId: number;
@@ -82,12 +95,14 @@ export class MemStorage implements IStorage {
     this.categories = new Map();
     this.subcategories = new Map();
     this.products = new Map();
+    this.productImages = new Map();
     this.orders = new Map();
     this.admins = new Map();
     this.banners = new Map();
     this.currentCategoryId = 1;
     this.currentSubcategoryId = 1;
     this.currentProductId = 1;
+    this.currentProductImageId = 1;
     this.currentOrderId = 1;
     this.currentAdminId = 1;
     this.currentBannerId = 1;

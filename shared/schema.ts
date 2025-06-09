@@ -32,6 +32,15 @@ export const products = pgTable("products", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+export const productImages = pgTable("product_images", {
+  id: serial("id").primaryKey(),
+  productId: integer("product_id").notNull(),
+  imageUrl: text("image_url"),
+  imageBlob: text("image_blob"), // Base64 encoded image data
+  priority: integer("priority").default(0).notNull(), // Lower number = higher priority
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 export const orders = pgTable("orders", {
   id: serial("id").primaryKey(),
   customerName: text("customer_name").notNull(),
@@ -93,6 +102,13 @@ export const insertBannerSchema = createInsertSchema(banners).omit({
   createdAt: true,
 });
 
+export const insertProductImageSchema = createInsertSchema(productImages).omit({
+  id: true,
+  createdAt: true,
+}).extend({
+  productId: z.number().int().min(1).max(Number.MAX_SAFE_INTEGER),
+});
+
 // Types
 export type Category = typeof categories.$inferSelect;
 export type InsertCategory = z.infer<typeof insertCategorySchema>;
@@ -102,6 +118,9 @@ export type InsertSubcategory = z.infer<typeof insertSubcategorySchema>;
 
 export type Product = typeof products.$inferSelect;
 export type InsertProduct = z.infer<typeof insertProductSchema>;
+
+export type ProductImage = typeof productImages.$inferSelect;
+export type InsertProductImage = z.infer<typeof insertProductImageSchema>;
 
 export type Order = typeof orders.$inferSelect;
 export type InsertOrder = z.infer<typeof insertOrderSchema>;
