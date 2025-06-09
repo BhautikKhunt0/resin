@@ -58,10 +58,10 @@ export default function Home() {
     <div className="min-h-screen">
 
 
-      {/* Banner Section - Desktop Only */}
+      {/* Banner Section */}
       {!bannersLoading && banners && banners.length > 0 && (
-        <section className="hidden md:block relative">
-          <div className="relative w-full h-96 overflow-hidden">
+        <section className="relative">
+          <div className="relative w-full h-48 md:h-96 overflow-hidden">
             {banners.map((banner, index) => (
               <div
                 key={banner.id}
@@ -89,27 +89,27 @@ export default function Home() {
               <>
                 <button
                   onClick={prevBanner}
-                  className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-20 hover:bg-opacity-30 text-white p-2 rounded-full transition-all duration-200"
+                  className="absolute left-2 md:left-4 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-20 hover:bg-opacity-30 text-white p-1 md:p-2 rounded-full transition-all duration-200"
                 >
-                  <ChevronLeft className="w-6 h-6" />
+                  <ChevronLeft className="w-4 h-4 md:w-6 md:h-6" />
                 </button>
                 <button
                   onClick={nextBanner}
-                  className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-20 hover:bg-opacity-30 text-white p-2 rounded-full transition-all duration-200"
+                  className="absolute right-2 md:right-4 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-20 hover:bg-opacity-30 text-white p-1 md:p-2 rounded-full transition-all duration-200"
                 >
-                  <ChevronRight className="w-6 h-6" />
+                  <ChevronRight className="w-4 h-4 md:w-6 md:h-6" />
                 </button>
               </>
             )}
 
             {/* Dots indicator */}
             {banners.length > 1 && (
-              <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
+              <div className="absolute bottom-2 md:bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-1 md:space-x-2">
                 {banners.map((_, index) => (
                   <button
                     key={index}
                     onClick={() => setCurrentBannerIndex(index)}
-                    className={`w-3 h-3 rounded-full transition-all duration-200 ${
+                    className={`w-2 h-2 md:w-3 md:h-3 rounded-full transition-all duration-200 ${
                       index === currentBannerIndex ? 'bg-white' : 'bg-white bg-opacity-50'
                     }`}
                   />
