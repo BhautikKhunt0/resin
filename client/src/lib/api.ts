@@ -59,6 +59,39 @@ export const api = {
       },
     }),
 
+  // Admin - Subcategories
+  getAdminSubcategories: (token: string) =>
+    fetch('/api/admin/subcategories', {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    }).then(res => res.json()),
+  createSubcategory: (token: string, data: any) =>
+    fetch('/api/admin/subcategories', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify(data),
+    }),
+  updateSubcategory: (token: string, id: number, data: any) =>
+    fetch(`/api/admin/subcategories/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify(data),
+    }),
+  deleteSubcategory: (token: string, id: number) =>
+    fetch(`/api/admin/subcategories/${id}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    }),
+
   // Admin - Products
   createProduct: (token: string, data: any) =>
     fetch('/api/admin/products', {
