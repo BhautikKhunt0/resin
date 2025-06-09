@@ -20,6 +20,7 @@ import {
   X,
   Upload,
   Image as ImageIcon,
+  Truck,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -94,12 +95,42 @@ const productSchema = z.object({
 const categorySchema = z.object({
   name: z.string().min(1, "Category name is required"),
   description: z.string().optional(),
+  imageUrl: z.string().optional(),
+  imageBlob: z.string().optional(),
+}).refine((data) => {
+  if (data.imageUrl && data.imageUrl.trim() !== '') {
+    try {
+      new URL(data.imageUrl);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+  return true;
+}, {
+  message: "Please enter a valid URL",
+  path: ["imageUrl"]
 });
 
 const subcategorySchema = z.object({
   name: z.string().min(1, "Subcategory name is required"),
   description: z.string().optional(),
   categoryId: z.string().min(1, "Category is required"),
+  imageUrl: z.string().optional(),
+  imageBlob: z.string().optional(),
+}).refine((data) => {
+  if (data.imageUrl && data.imageUrl.trim() !== '') {
+    try {
+      new URL(data.imageUrl);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+  return true;
+}, {
+  message: "Please enter a valid URL",
+  path: ["imageUrl"]
 });
 
 const bannerSchema = z.object({

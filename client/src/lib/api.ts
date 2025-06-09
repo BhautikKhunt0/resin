@@ -4,8 +4,7 @@ export const api = {
   // Categories
   getCategories: () => fetch('/api/categories').then(res => res.json()),
   getCategoryById: (id: number) => fetch(`/api/categories/${id}`).then(res => res.json()),
-  getSubcategories: (categoryId: number) => 
-    fetch(`/api/categories/${categoryId}/subcategories`).then(res => res.json()),
+  getSubcategories: () => fetch('/api/subcategories').then(res => res.json()),
   getSubcategoriesByCategory: (categoryId: number) => 
     fetch(`/api/categories/${categoryId}/subcategories`).then(res => res.json()),
   getSubcategoryById: (id: number) => fetch(`/api/subcategories/${id}`).then(res => res.json()),

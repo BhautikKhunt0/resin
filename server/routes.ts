@@ -64,6 +64,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get all subcategories
+  app.get("/api/subcategories", async (req, res) => {
+    try {
+      const subcategories = await storage.getSubcategories();
+      res.json(subcategories);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch subcategories" });
+    }
+  });
+
   app.get("/api/subcategories/:id", async (req, res) => {
     try {
       const subcategoryId = parseInt(req.params.id);
