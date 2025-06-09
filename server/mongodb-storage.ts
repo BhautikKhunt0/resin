@@ -35,7 +35,9 @@ export class MongoDBStorage implements IStorage {
     return {
       id: parseInt(doc._id.toString().slice(-8), 16), // Convert ObjectId to number for compatibility
       name: doc.name,
-      description: doc.description || null
+      description: doc.description || null,
+      imageUrl: doc.imageUrl || null,
+      imageBlob: doc.imageBlob ? doc.imageBlob.toString('base64') : null
     };
   }
 
@@ -44,7 +46,9 @@ export class MongoDBStorage implements IStorage {
       id: parseInt(doc._id.toString().slice(-8), 16),
       name: doc.name,
       description: doc.description || null,
-      categoryId: parseInt(doc.categoryId.slice(-8), 16)
+      categoryId: parseInt(doc.categoryId.slice(-8), 16),
+      imageUrl: doc.imageUrl || null,
+      imageBlob: doc.imageBlob ? doc.imageBlob.toString('base64') : null
     };
   }
 
@@ -118,7 +122,9 @@ export class MongoDBStorage implements IStorage {
   async createCategory(category: InsertCategory): Promise<Category> {
     const newCategory = new CategoryModel({
       name: category.name,
-      description: category.description
+      description: category.description,
+      imageUrl: category.imageUrl,
+      imageBlob: category.imageBlob ? Buffer.from(category.imageBlob, 'base64') : undefined
     });
     const saved = await newCategory.save();
     return this.convertCategory(saved);
@@ -129,9 +135,14 @@ export class MongoDBStorage implements IStorage {
     const existing = categories.find(cat => parseInt(cat._id.toString().slice(-8), 16) === id);
     if (!existing) return undefined;
 
+    const updateData: any = { ...category };
+    if (updateData.imageBlob) {
+      updateData.imageBlob = Buffer.from(updateData.imageBlob, 'base64');
+    }
+
     const updated = await CategoryModel.findByIdAndUpdate(
       existing._id,
-      { ...category },
+      updateData,
       { new: true }
     );
     return updated ? this.convertCategory(updated) : undefined;
@@ -175,7 +186,9 @@ export class MongoDBStorage implements IStorage {
     const newSubcategory = new SubcategoryModel({
       name: subcategory.name,
       description: subcategory.description,
-      categoryId: category._id.toString()
+      categoryId: category._id.toString(),
+      imageUrl: subcategory.imageUrl,
+      imageBlob: subcategory.imageBlob ? Buffer.from(subcategory.imageBlob, 'base64') : undefined
     });
     const saved = await newSubcategory.save();
     return this.convertSubcategory(saved);
