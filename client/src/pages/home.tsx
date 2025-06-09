@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { ChevronLeft, ChevronRight, Star, ShoppingBag, Truck, Shield, Headphones, ArrowRight, Grid3X3, Sparkles } from "lucide-react";
 import { api } from "@/lib/api";
 import ProductCard from "@/components/product-card";
-import type { Category, Product, Banner, Subcategory } from "@shared/schema";
+import type { Category, Product, Banner } from "@shared/schema";
 
 export default function Home() {
   const { data: categories, isLoading: categoriesLoading } = useQuery<Category[]>({
@@ -26,10 +26,7 @@ export default function Home() {
     queryFn: api.getBanners,
   });
 
-  const { data: subcategories, isLoading: subcategoriesLoading } = useQuery<Subcategory[]>({
-    queryKey: ["/api/subcategories"],
-    queryFn: api.getSubcategories,
-  });
+
 
   const featuredProducts = products?.filter(p => p.isFeatured === 1).slice(0, 8) || [];
   const bestSellingProducts = products?.slice(0, 8) || [];
@@ -140,9 +137,9 @@ export default function Home() {
             <p className="text-gray-600">Craft Your Imagination - Explore Our Exclusive Resin Collections!</p>
           </div>
           
-          {categoriesLoading || subcategoriesLoading ? (
+          {categoriesLoading ? (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-              {[...Array(12)].map((_, i) => (
+              {[...Array(6)].map((_, i) => (
                 <div key={i} className="space-y-2">
                   <Skeleton className="aspect-square rounded-lg" />
                   <Skeleton className="h-4 w-3/4 mx-auto" />
@@ -151,8 +148,8 @@ export default function Home() {
             </div>
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-              {/* Display Categories */}
-              {categories?.slice(0, 4).map((category) => (
+              {/* Display Categories Only */}
+              {categories?.map((category) => (
                 <Link key={`category-${category.id}`} href={`/category/${category.id}`}>
                   <div className="group cursor-pointer">
                     <div className="aspect-square rounded-lg overflow-hidden bg-gray-100 mb-3 group-hover:shadow-lg transition-all duration-300">
@@ -170,30 +167,6 @@ export default function Home() {
                     </div>
                     <h3 className="text-sm font-medium text-gray-900 text-center group-hover:text-blue-600 transition-colors">
                       {category.name}
-                    </h3>
-                  </div>
-                </Link>
-              ))}
-              
-              {/* Display Subcategories */}
-              {subcategories?.slice(0, 8).map((subcategory) => (
-                <Link key={`subcategory-${subcategory.id}`} href={`/subcategory/${subcategory.id}`}>
-                  <div className="group cursor-pointer">
-                    <div className="aspect-square rounded-lg overflow-hidden bg-gray-100 mb-3 group-hover:shadow-lg transition-all duration-300">
-                      {subcategory.imageUrl || subcategory.imageBlob ? (
-                        <img
-                          src={subcategory.imageBlob ? `data:image/jpeg;base64,${subcategory.imageBlob}` : (subcategory.imageUrl || '')}
-                          alt={subcategory.name}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-green-100 to-blue-100">
-                          <Sparkles className="w-12 h-12 text-gray-400" />
-                        </div>
-                      )}
-                    </div>
-                    <h3 className="text-sm font-medium text-gray-900 text-center group-hover:text-green-600 transition-colors">
-                      {subcategory.name}
                     </h3>
                   </div>
                 </Link>
