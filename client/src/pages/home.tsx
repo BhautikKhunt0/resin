@@ -251,23 +251,135 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Best Selling Products */}
+      <section className="py-16 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">Best Selling Products</h2>
+            <p className="text-gray-600 max-w-2xl mx-auto">
+              Discover our most popular items that customers love and recommend
+            </p>
+          </div>
+
+          {productsLoading ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {[...Array(8)].map((_, i) => (
+                <Card key={i}>
+                  <CardContent className="p-0">
+                    <Skeleton className="w-full h-48 rounded-t-lg" />
+                    <div className="p-4">
+                      <Skeleton className="h-6 mb-2" />
+                      <Skeleton className="h-4 mb-4" />
+                      <div className="flex justify-between items-center">
+                        <Skeleton className="h-6 w-20" />
+                        <Skeleton className="h-9 w-24" />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {bestSellingProducts.map((product, index) => (
+                <div key={product.id} className="relative">
+                  {index < 3 && (
+                    <Badge className="absolute -top-2 -right-2 z-10 bg-gradient-to-r from-yellow-400 to-orange-500 text-white">
+                      <Star className="h-3 w-3 mr-1" />
+                      Best Seller
+                    </Badge>
+                  )}
+                  <ProductCard product={product} />
+                </div>
+              ))}
+            </div>
+          )}
+
+          <div className="text-center mt-12">
+            <Link href="/products">
+              <Button size="lg" className="gap-2">
+                <ShoppingBag className="h-5 w-5" />
+                Shop All Products
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Services Section */}
+      <section className="py-16 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">Why Choose Us</h2>
+            <p className="text-gray-600 max-w-2xl mx-auto">
+              We provide exceptional service and quality products to ensure your satisfaction
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Truck className="h-8 w-8 text-green-600" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Free Shipping</h3>
+              <p className="text-gray-600 text-sm">
+                Free delivery on orders over $50. Fast and secure shipping worldwide.
+              </p>
+            </div>
+            
+            <div className="text-center">
+              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Shield className="h-8 w-8 text-blue-600" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Secure Payment</h3>
+              <p className="text-gray-600 text-sm">
+                Your payment information is processed securely with industry-standard encryption.
+              </p>
+            </div>
+            
+            <div className="text-center">
+              <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Headphones className="h-8 w-8 text-purple-600" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">24/7 Support</h3>
+              <p className="text-gray-600 text-sm">
+                Our customer support team is available around the clock to help you.
+              </p>
+            </div>
+            
+            <div className="text-center">
+              <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Sparkles className="h-8 w-8 text-orange-600" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Quality Guarantee</h3>
+              <p className="text-gray-600 text-sm">
+                We guarantee the quality of our products with easy returns and exchanges.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Newsletter Section */}
-      <section className="py-16 bg-primary text-white">
+      <section className="py-16 bg-gradient-to-r from-blue-600 to-purple-600 text-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl font-bold mb-4">Stay Updated</h2>
+          <h2 className="text-3xl font-bold mb-4">Stay Updated with Latest Deals</h2>
           <p className="text-xl mb-8 text-blue-100">
-            Get the latest deals and product updates delivered to your inbox
+            Subscribe to our newsletter and get exclusive offers, new product updates, and shopping tips
           </p>
           <div className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
             <input
               type="email"
-              placeholder="Enter your email"
+              placeholder="Enter your email address"
               className="flex-1 px-4 py-3 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-white"
             />
-            <Button variant="secondary" className="px-6 py-3">
+            <Button variant="secondary" className="px-8 py-3 text-blue-600 font-semibold">
               Subscribe
             </Button>
           </div>
+          <p className="text-sm text-blue-200 mt-4">
+            No spam, unsubscribe at any time. We respect your privacy.
+          </p>
         </div>
       </section>
     </div>

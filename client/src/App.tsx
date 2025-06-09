@@ -11,6 +11,8 @@ import CartSidebar from "@/components/cart-sidebar";
 import Home from "@/pages/home";
 import Products from "@/pages/products";
 import ProductDetail from "@/pages/product-detail";
+import Categories from "@/pages/categories";
+import SubcategoryProducts from "@/pages/subcategory-products";
 import Checkout from "@/pages/checkout";
 import AdminLogin from "@/pages/admin-login";
 import AdminDashboard from "@/pages/admin-dashboard";
@@ -56,6 +58,18 @@ function Router() {
       <Route path="/products/:id">
         <Layout>
           <ProductDetail />
+        </Layout>
+      </Route>
+      
+      <Route path="/category/:categoryId">
+        <Layout>
+          <Categories />
+        </Layout>
+      </Route>
+      
+      <Route path="/subcategory/:subcategoryId/products">
+        <Layout>
+          <SubcategoryProducts />
         </Layout>
       </Route>
       
