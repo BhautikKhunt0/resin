@@ -65,11 +65,11 @@ export default function ProductCard({ product }: ProductCardProps) {
           </div>
           
           {/* Title and Price below image */}
-          <div className="p-2 md:p-4 text-center">
-            <h3 className="font-medium text-gray-900 line-clamp-2 leading-tight mb-1 md:mb-2 text-sm md:text-base">
+          <div className="p-4 text-center">
+            <h3 className="font-medium text-gray-900 line-clamp-2 leading-tight mb-2">
               {product.name}
             </h3>
-            <p className="text-sm md:text-lg font-bold text-primary">
+            <p className="text-lg font-bold text-primary">
               ₹{parseFloat(product.price).toFixed(2)}
             </p>
           </div>
