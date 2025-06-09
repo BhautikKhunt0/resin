@@ -5,11 +5,15 @@ export interface ICategory extends Document {
   _id: string;
   name: string;
   description?: string;
+  imageUrl?: string;
+  imageBlob?: Buffer;
 }
 
 const categorySchema = new Schema<ICategory>({
   name: { type: String, required: true },
-  description: { type: String }
+  description: { type: String },
+  imageUrl: { type: String },
+  imageBlob: { type: Buffer }
 }, { timestamps: false });
 
 export const CategoryModel = model<ICategory>('Category', categorySchema);
@@ -20,12 +24,16 @@ export interface ISubcategory extends Document {
   name: string;
   description?: string;
   categoryId: string;
+  imageUrl?: string;
+  imageBlob?: Buffer;
 }
 
 const subcategorySchema = new Schema<ISubcategory>({
   name: { type: String, required: true },
   description: { type: String },
-  categoryId: { type: String, required: true }
+  categoryId: { type: String, required: true },
+  imageUrl: { type: String },
+  imageBlob: { type: Buffer }
 }, { timestamps: false });
 
 export const SubcategoryModel = model<ISubcategory>('Subcategory', subcategorySchema);

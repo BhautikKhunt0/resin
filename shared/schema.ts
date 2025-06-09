@@ -6,6 +6,8 @@ export const categories = pgTable("categories", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
   description: text("description"),
+  imageUrl: text("image_url"),
+  imageBlob: text("image_blob"), // Base64 encoded image data
 });
 
 export const subcategories = pgTable("subcategories", {
@@ -13,6 +15,8 @@ export const subcategories = pgTable("subcategories", {
   name: text("name").notNull(),
   description: text("description"),
   categoryId: integer("category_id").notNull(),
+  imageUrl: text("image_url"),
+  imageBlob: text("image_blob"), // Base64 encoded image data
 });
 
 export const products = pgTable("products", {

@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { ChevronLeft, ChevronRight, Star, ShoppingBag, Truck, Shield, Headphones, ArrowRight, Grid3X3, Sparkles } from "lucide-react";
 import { api } from "@/lib/api";
 import ProductCard from "@/components/product-card";
-import type { Category, Product, Banner } from "@shared/schema";
+import type { Category, Product, Banner, Subcategory } from "@shared/schema";
 
 export default function Home() {
   const { data: categories, isLoading: categoriesLoading } = useQuery<Category[]>({
@@ -24,6 +24,11 @@ export default function Home() {
   const { data: banners, isLoading: bannersLoading } = useQuery<Banner[]>({
     queryKey: ["/api/banners"],
     queryFn: api.getBanners,
+  });
+
+  const { data: subcategories, isLoading: subcategoriesLoading } = useQuery<Subcategory[]>({
+    queryKey: ["/api/subcategories"],
+    queryFn: api.getSubcategories,
   });
 
   const featuredProducts = products?.filter(p => p.isFeatured === 1).slice(0, 8) || [];
@@ -127,41 +132,70 @@ export default function Home() {
         </section>
       )}
 
-      {/* Featured Categories */}
+      {/* Top Collections */}
       <section className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-center mb-12 text-gray-900">
-            Shop by Category
-          </h2>
-          {categoriesLoading ? (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-              {[...Array(4)].map((_, i) => (
-                <Skeleton key={i} className="h-32 rounded-lg" />
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-2">Top Collections</h2>
+            <p className="text-gray-600">Craft Your Imagination - Explore Our Exclusive Resin Collections!</p>
+          </div>
+          
+          {categoriesLoading || subcategoriesLoading ? (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+              {[...Array(12)].map((_, i) => (
+                <div key={i} className="space-y-2">
+                  <Skeleton className="aspect-square rounded-lg" />
+                  <Skeleton className="h-4 w-3/4 mx-auto" />
+                </div>
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-              {categories?.map((category) => (
-                <Link key={category.id} href={`/category/${category.id}`}>
-                  <Card className="group cursor-pointer hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
-                    <CardContent className="p-6 text-center">
-                      <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
-                        <Grid3X3 className="text-white text-2xl h-8 w-8" />
-                      </div>
-                      <h3 className="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
-                        {category.name}
-                      </h3>
-                      {category.description && (
-                        <p className="text-sm text-gray-600 mt-1">
-                          {category.description}
-                        </p>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+              {/* Display Categories */}
+              {categories?.slice(0, 4).map((category) => (
+                <Link key={`category-${category.id}`} href={`/category/${category.id}`}>
+                  <div className="group cursor-pointer">
+                    <div className="aspect-square rounded-lg overflow-hidden bg-gray-100 mb-3 group-hover:shadow-lg transition-all duration-300">
+                      {category.imageUrl || category.imageBlob ? (
+                        <img
+                          src={category.imageBlob ? `data:image/jpeg;base64,${category.imageBlob}` : (category.imageUrl || '')}
+                          alt={category.name}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-100 to-purple-100">
+                          <Grid3X3 className="w-12 h-12 text-gray-400" />
+                        </div>
                       )}
-                      <div className="mt-3 flex items-center justify-center text-sm text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <span>View Categories</span>
-                        <ArrowRight className="h-4 w-4 ml-1" />
-                      </div>
-                    </CardContent>
-                  </Card>
+                    </div>
+                    <h3 className="text-sm font-medium text-gray-900 text-center group-hover:text-blue-600 transition-colors">
+                      {category.name}
+                    </h3>
+                  </div>
+                </Link>
+              ))}
+              
+              {/* Display Subcategories */}
+              {subcategories?.slice(0, 8).map((subcategory) => (
+                <Link key={`subcategory-${subcategory.id}`} href={`/subcategory/${subcategory.id}`}>
+                  <div className="group cursor-pointer">
+                    <div className="aspect-square rounded-lg overflow-hidden bg-gray-100 mb-3 group-hover:shadow-lg transition-all duration-300">
+                      {subcategory.imageUrl || subcategory.imageBlob ? (
+                        <img
+                          src={subcategory.imageBlob ? `data:image/jpeg;base64,${subcategory.imageBlob}` : (subcategory.imageUrl || '')}
+                          alt={subcategory.name}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-green-100 to-blue-100">
+                          <Sparkles className="w-12 h-12 text-gray-400" />
+                        </div>
+                      )}
+                    </div>
+                    <h3 className="text-sm font-medium text-gray-900 text-center group-hover:text-green-600 transition-colors">
+                      {subcategory.name}
+                    </h3>
+                  </div>
                 </Link>
               ))}
             </div>
