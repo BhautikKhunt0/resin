@@ -70,20 +70,23 @@ export default function Categories() {
           {subcategories.map((subcategory) => (
             <Link key={subcategory.id} href={`/subcategory/${subcategory.id}/products`}>
               <Card className="group cursor-pointer hover:shadow-lg transition-all duration-300 hover:-translate-y-1 overflow-hidden">
-                {subcategory.imageUrl || subcategory.imageBlob ? (
-                  <div className="relative h-48 w-full overflow-hidden">
-                    <img
-                      src={subcategory.imageBlob ? `data:image/jpeg;base64,${subcategory.imageBlob}` : subcategory.imageUrl || ''}
-                      alt={subcategory.name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                    <div className="absolute inset-0 bg-black bg-opacity-20 group-hover:bg-opacity-30 transition-all duration-300"></div>
-                  </div>
-                ) : (
-                  <div className="h-48 w-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-                    <Grid3X3 className="h-16 w-16 text-white group-hover:scale-110 transition-transform duration-300" />
-                  </div>
-                )}
+{(() => {
+                  const imageUrl = subcategory.imageBlob ? `data:image/jpeg;base64,${subcategory.imageBlob}` : subcategory.imageUrl;
+                  return imageUrl ? (
+                    <div className="relative h-48 w-full overflow-hidden">
+                      <img
+                        src={imageUrl}
+                        alt={subcategory.name}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                      <div className="absolute inset-0 bg-black bg-opacity-20 group-hover:bg-opacity-30 transition-all duration-300"></div>
+                    </div>
+                  ) : (
+                    <div className="h-48 w-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                      <Grid3X3 className="h-16 w-16 text-white group-hover:scale-110 transition-transform duration-300" />
+                    </div>
+                  );
+                })()}
                 <CardContent className="p-6 text-center">
                   <h3 className="font-semibold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors text-lg">
                     {subcategory.name}

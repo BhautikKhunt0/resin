@@ -37,17 +37,20 @@ export default function ProductCard({ product }: ProductCardProps) {
       <Card className="group cursor-pointer hover:shadow-lg transition-shadow duration-300">
         <CardContent className="p-0">
           <div className="relative overflow-hidden rounded-t-lg">
-            {product.imageUrl || product.imageBlob ? (
-              <img
-                src={product.imageBlob ? `data:image/jpeg;base64,${product.imageBlob}` : product.imageUrl || ''}
-                alt={product.name}
-                className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
-              />
-            ) : (
-              <div className="w-full h-48 bg-gray-200 flex items-center justify-center">
-                <span className="text-gray-400">No image</span>
-              </div>
-            )}
+{(() => {
+              const imageUrl = product.imageBlob ? `data:image/jpeg;base64,${product.imageBlob}` : product.imageUrl;
+              return imageUrl ? (
+                <img
+                  src={imageUrl}
+                  alt={product.name}
+                  className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                />
+              ) : (
+                <div className="w-full h-48 bg-gray-200 flex items-center justify-center">
+                  <span className="text-gray-400">No image</span>
+                </div>
+              );
+            })()}
             <Button
               variant="secondary"
               size="sm"

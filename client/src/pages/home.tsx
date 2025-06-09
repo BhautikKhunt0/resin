@@ -153,17 +153,20 @@ export default function Home() {
                 <Link key={`category-${category.id}`} href={`/category/${category.id}`}>
                   <div className="group cursor-pointer">
                     <div className="aspect-square rounded-lg overflow-hidden bg-gray-100 mb-3 group-hover:shadow-lg transition-all duration-300">
-                      {category.imageUrl || category.imageBlob ? (
-                        <img
-                          src={category.imageBlob ? `data:image/jpeg;base64,${category.imageBlob}` : (category.imageUrl || '')}
-                          alt={category.name}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-100 to-purple-100">
-                          <Grid3X3 className="w-12 h-12 text-gray-400" />
-                        </div>
-                      )}
+                      {(() => {
+                        const imageUrl = category.imageBlob ? `data:image/jpeg;base64,${category.imageBlob}` : category.imageUrl;
+                        return imageUrl ? (
+                          <img
+                            src={imageUrl}
+                            alt={category.name}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-100 to-purple-100">
+                            <Grid3X3 className="w-12 h-12 text-gray-400" />
+                          </div>
+                        );
+                      })()}
                     </div>
                     <h3 className="text-sm font-medium text-gray-900 text-center group-hover:text-blue-600 transition-colors">
                       {category.name}
