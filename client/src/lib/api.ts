@@ -185,4 +185,43 @@ export const api = {
       },
       body: JSON.stringify({ imageData, filename }),
     }).then(res => res.json()),
+
+  // Pages
+  getPages: () =>
+    fetch('/api/pages').then(res => res.json()),
+  getPageBySlug: (slug: string) =>
+    fetch(`/api/pages/${slug}`).then(res => res.json()),
+
+  // Admin - Pages
+  getAdminPages: (token: string) =>
+    fetch('/api/admin/pages', {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    }).then(res => res.json()),
+  createPage: (token: string, data: any) =>
+    fetch('/api/admin/pages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify(data),
+    }),
+  updatePage: (token: string, id: number, data: any) =>
+    fetch(`/api/admin/pages/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify(data),
+    }),
+  deletePage: (token: string, id: number) =>
+    fetch(`/api/admin/pages/${id}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    }),
 };

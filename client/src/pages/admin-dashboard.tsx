@@ -106,10 +106,18 @@ const bannerSchema = z.object({
   isActive: z.boolean().optional(),
 });
 
+const pageSchema = z.object({
+  title: z.string().min(1, "Page title is required"),
+  slug: z.string().min(1, "Page slug is required").regex(/^[a-z0-9-]+$/, "Slug can only contain lowercase letters, numbers, and hyphens"),
+  content: z.string().min(1, "Page content is required"),
+  isActive: z.boolean().optional(),
+});
+
 type ProductFormData = z.infer<typeof productSchema>;
 type CategoryFormData = z.infer<typeof categorySchema>;
 type SubcategoryFormData = z.infer<typeof subcategorySchema>;
 type BannerFormData = z.infer<typeof bannerSchema>;
+type PageFormData = z.infer<typeof pageSchema>;
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -118,10 +126,12 @@ export default function AdminDashboard() {
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [editingSubcategory, setEditingSubcategory] = useState<any>(null);
   const [editingBanner, setEditingBanner] = useState<Banner | null>(null);
+  const [editingPage, setEditingPage] = useState<Page | null>(null);
   const [productDialogOpen, setProductDialogOpen] = useState(false);
   const [categoryDialogOpen, setCategoryDialogOpen] = useState(false);
   const [subcategoryDialogOpen, setSubcategoryDialogOpen] = useState(false);
   const [bannerDialogOpen, setBannerDialogOpen] = useState(false);
+  const [pageDialogOpen, setPageDialogOpen] = useState(false);
   const [orderDetailsDialogOpen, setOrderDetailsDialogOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [productImages, setProductImages] = useState<Array<{url: string; blob: string; priority: number}>>([]);
@@ -170,6 +180,11 @@ export default function AdminDashboard() {
     queryFn: () => api.getAdminBanners(token),
   });
 
+  const { data: pages, isLoading: pagesLoading } = useQuery<Page[]>({
+    queryKey: ["/api/admin/pages"],
+    queryFn: () => api.getAdminPages(token),
+  });
+
   // Forms
   const productForm = useForm<ProductFormData>({
     resolver: zodResolver(productSchema),
@@ -214,6 +229,16 @@ export default function AdminDashboard() {
       description: "",
       imageUrl: "",
       imageBlob: "",
+      isActive: true,
+    },
+  });
+
+  const pageForm = useForm<PageFormData>({
+    resolver: zodResolver(pageSchema),
+    defaultValues: {
+      title: "",
+      slug: "",
+      content: "",
       isActive: true,
     },
   });
