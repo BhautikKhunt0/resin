@@ -1341,12 +1341,12 @@ export default function AdminDashboard() {
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
                       <label className="text-sm font-medium text-gray-700 mb-2 block">Status</label>
-                      <Select value={orderStatusFilter} onValueChange={setOrderStatusFilter}>
+                      <Select value={orderStatusFilter || "all"} onValueChange={(value) => setOrderStatusFilter(value === "all" ? "" : value)}>
                         <SelectTrigger>
                           <SelectValue placeholder="All Statuses" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="">All Statuses</SelectItem>
+                          <SelectItem value="all">All Statuses</SelectItem>
                           <SelectItem value="Processing">Processing</SelectItem>
                           <SelectItem value="Shipped">Shipped</SelectItem>
                           <SelectItem value="Delivered">Delivered</SelectItem>
