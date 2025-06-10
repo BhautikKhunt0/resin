@@ -353,7 +353,7 @@ export default function AdminDashboard() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="flex h-screen bg-gray-50">
       {/* Mobile sidebar backdrop */}
       {sidebarOpen && (
         <div 
@@ -364,29 +364,31 @@ export default function AdminDashboard() {
 
       {/* Sidebar */}
       <div className={`
-        fixed inset-y-0 left-0 z-50 w-72 bg-white shadow-xl transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0
+        fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-xl transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 flex flex-col
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
       `}>
-        <div className="flex items-center justify-between h-20 px-6 border-b border-gray-100 bg-gradient-to-r from-blue-600 to-blue-700">
+        {/* Sidebar Header */}
+        <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200 bg-gradient-to-r from-blue-600 to-blue-700 flex-shrink-0">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
-              <Package className="h-6 w-6 text-blue-600" />
+            <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center">
+              <Package className="h-5 w-5 text-blue-600" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-white">Admin Panel</h1>
-              <p className="text-blue-100 text-sm">E-commerce Management</p>
+              <h1 className="text-lg font-bold text-white">Admin Panel</h1>
+              <p className="text-blue-100 text-xs">E-commerce Management</p>
             </div>
           </div>
           <button
             onClick={() => setSidebarOpen(false)}
-            className="lg:hidden p-2 rounded-md text-blue-100 hover:text-white hover:bg-blue-500"
+            className="lg:hidden p-1.5 rounded-md text-blue-100 hover:text-white hover:bg-blue-500"
           >
-            <X className="h-5 w-5" />
+            <X className="h-4 w-4" />
           </button>
         </div>
         
-        <nav className="mt-6 px-4">
-          <ul className="space-y-1">
+        {/* Navigation */}
+        <nav className="flex-1 px-4 py-6 overflow-y-auto">
+          <ul className="space-y-2">
             {sidebarItems.map((item) => {
               const Icon = item.icon;
               return (
@@ -397,14 +399,14 @@ export default function AdminDashboard() {
                       setSidebarOpen(false);
                     }}
                     className={`
-                      w-full flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200
+                      w-full flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200
                       ${activeTab === item.id
-                        ? 'bg-blue-50 text-blue-700 border-l-4 border-blue-600 shadow-sm'
+                        ? 'bg-blue-50 text-blue-700 shadow-sm'
                         : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                       }
                     `}
                   >
-                    <Icon className="h-5 w-5 mr-3" />
+                    <Icon className="h-5 w-5 mr-3 flex-shrink-0" />
                     {item.label}
                   </button>
                 </li>
@@ -413,10 +415,11 @@ export default function AdminDashboard() {
           </ul>
         </nav>
 
-        <div className="absolute bottom-0 w-full p-6 border-t border-gray-100 bg-gray-50">
-          <div className="flex items-center space-x-3 mb-4">
-            <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
-              <Users className="h-5 w-5 text-white" />
+        {/* User Profile Section */}
+        <div className="flex-shrink-0 p-4 border-t border-gray-200 bg-gray-50">
+          <div className="flex items-center space-x-3 mb-3">
+            <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
+              <Users className="h-4 w-4 text-white" />
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-gray-900 truncate">{admin?.email}</p>
@@ -427,7 +430,7 @@ export default function AdminDashboard() {
             variant="outline" 
             size="sm" 
             onClick={handleLogout}
-            className="w-full border-gray-200 hover:bg-red-50 hover:border-red-200 hover:text-red-600"
+            className="w-full text-xs border-gray-200 hover:bg-red-50 hover:border-red-200 hover:text-red-600"
           >
             <LogOut className="h-4 w-4 mr-2" />
             Sign Out
@@ -436,20 +439,21 @@ export default function AdminDashboard() {
       </div>
 
       {/* Main content */}
-      <div className="lg:pl-72">
+      <div className="flex-1 flex flex-col min-h-0">
         {/* Top bar */}
-        <div className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 border-b border-gray-200 bg-white px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8">
+        <div className="flex-shrink-0 h-16 flex items-center gap-x-4 border-b border-gray-200 bg-white px-4 shadow-sm sm:gap-x-6 sm:px-6">
           <button
             type="button"
-            className="-m-2.5 p-2.5 text-gray-700 lg:hidden hover:bg-gray-100 rounded-md"
+            className="lg:hidden p-2 text-gray-700 hover:bg-gray-100 rounded-md"
             onClick={() => setSidebarOpen(true)}
           >
-            <Menu className="h-6 w-6" />
+            <Menu className="h-5 w-5" />
           </button>
+          <div className="flex-1" />
         </div>
 
         {/* Page content */}
-        <main className="py-8 px-4 sm:px-6 lg:px-8 max-w-full">
+        <main className="flex-1 overflow-y-auto py-6 px-4 sm:px-6">
           {/* Dashboard Tab */}
           {activeTab === "dashboard" && (
             <div className="space-y-8">
