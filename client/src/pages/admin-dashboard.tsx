@@ -1623,10 +1623,30 @@ export default function AdminDashboard() {
                               </TableCell>
                               <TableCell className="py-4 px-6 text-right">
                                 <div className="flex justify-end space-x-2">
-                                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-gray-400 hover:text-blue-600 hover:bg-blue-50">
+                                  <Button 
+                                    variant="ghost" 
+                                    size="sm" 
+                                    className="h-8 w-8 p-0 text-gray-400 hover:text-blue-600 hover:bg-blue-50"
+                                    onClick={() => {
+                                      setEditingSubcategory(subcategory);
+                                      subcategoryForm.reset({
+                                        name: subcategory.name,
+                                        description: subcategory.description || "",
+                                        categoryId: subcategory.categoryId.toString(),
+                                        imageUrl: subcategory.imageUrl || "",
+                                        imageBlob: subcategory.imageBlob || "",
+                                      });
+                                      setSubcategoryDialogOpen(true);
+                                    }}
+                                  >
                                     <Edit className="h-4 w-4" />
                                   </Button>
-                                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-gray-400 hover:text-red-600 hover:bg-red-50">
+                                  <Button 
+                                    variant="ghost" 
+                                    size="sm" 
+                                    className="h-8 w-8 p-0 text-gray-400 hover:text-red-600 hover:bg-red-50"
+                                    onClick={() => deleteSubcategoryMutation.mutate(subcategory.id)}
+                                  >
                                     <Trash2 className="h-4 w-4" />
                                   </Button>
                                 </div>
@@ -1660,7 +1680,20 @@ export default function AdminDashboard() {
                   <h2 className="text-2xl font-bold text-gray-900">Banners Management</h2>
                   <p className="text-gray-600 mt-1">Manage promotional banners and announcements</p>
                 </div>
-                <Button className="bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 shadow-lg">
+                <Button 
+                  className="bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 shadow-lg"
+                  onClick={() => {
+                    setEditingBanner(null);
+                    bannerForm.reset({
+                      title: "",
+                      description: "",
+                      imageUrl: "",
+                      imageBlob: "",
+                      isActive: true,
+                    });
+                    setBannerDialogOpen(true);
+                  }}
+                >
                   <Plus className="h-4 w-4 mr-2" />
                   Add Banner
                 </Button>
@@ -1697,8 +1730,16 @@ export default function AdminDashboard() {
                           {banners.map((banner, index) => (
                             <TableRow key={banner.id} className={`border-gray-100 hover:bg-gray-50 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-gray-25'}`}>
                               <TableCell className="py-4 px-6">
-                                <div className="w-20 h-12 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg flex items-center justify-center">
-                                  <ImageIcon className="h-6 w-6 text-gray-400" />
+                                <div className="w-20 h-12 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg flex items-center justify-center overflow-hidden">
+                                  {banner.imageUrl || banner.imageBlob ? (
+                                    <img 
+                                      src={banner.imageUrl || `data:image/jpeg;base64,${banner.imageBlob}`} 
+                                      alt={banner.title}
+                                      className="w-full h-full object-cover rounded-lg"
+                                    />
+                                  ) : (
+                                    <ImageIcon className="h-6 w-6 text-gray-400" />
+                                  )}
                                 </div>
                               </TableCell>
                               <TableCell className="py-4 px-6">
@@ -1722,10 +1763,30 @@ export default function AdminDashboard() {
                               </TableCell>
                               <TableCell className="py-4 px-6 text-right">
                                 <div className="flex justify-end space-x-2">
-                                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-gray-400 hover:text-blue-600 hover:bg-blue-50">
+                                  <Button 
+                                    variant="ghost" 
+                                    size="sm" 
+                                    className="h-8 w-8 p-0 text-gray-400 hover:text-blue-600 hover:bg-blue-50"
+                                    onClick={() => {
+                                      setEditingBanner(banner);
+                                      bannerForm.reset({
+                                        title: banner.title,
+                                        description: banner.description || "",
+                                        imageUrl: banner.imageUrl || "",
+                                        imageBlob: banner.imageBlob || "",
+                                        isActive: banner.isActive === 1,
+                                      });
+                                      setBannerDialogOpen(true);
+                                    }}
+                                  >
                                     <Edit className="h-4 w-4" />
                                   </Button>
-                                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-gray-400 hover:text-red-600 hover:bg-red-50">
+                                  <Button 
+                                    variant="ghost" 
+                                    size="sm" 
+                                    className="h-8 w-8 p-0 text-gray-400 hover:text-red-600 hover:bg-red-50"
+                                    onClick={() => deleteBannerMutation.mutate(banner.id)}
+                                  >
                                     <Trash2 className="h-4 w-4" />
                                   </Button>
                                 </div>
