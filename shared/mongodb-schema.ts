@@ -47,6 +47,11 @@ export interface IProduct extends Document {
   weight?: string;
   imageUrl?: string;
   imageBlob?: Buffer;
+  images?: Array<{
+    imageUrl?: string;
+    imageBlob?: Buffer;
+    priority: number;
+  }>;
   categoryId: string;
   subcategoryId?: string;
   isFeatured: number;
@@ -60,6 +65,11 @@ const productSchema = new Schema<IProduct>({
   weight: { type: String },
   imageUrl: { type: String },
   imageBlob: { type: Buffer },
+  images: [{
+    imageUrl: { type: String },
+    imageBlob: { type: Buffer },
+    priority: { type: Number, default: 0 }
+  }],
   categoryId: { type: String, required: true },
   subcategoryId: { type: String },
   isFeatured: { type: Number, default: 0 }

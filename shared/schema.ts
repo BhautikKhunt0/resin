@@ -27,6 +27,7 @@ export const products = pgTable("products", {
   weight: text("weight"), // Weight category like "500g", "1kg", "2kg"
   imageUrl: text("image_url"),
   imageBlob: text("image_blob"), // Base64 encoded image data
+  images: jsonb("images"), // Array of image objects with url, blob, and priority
   categoryId: integer("category_id").notNull(),
   subcategoryId: integer("subcategory_id"),
   isFeatured: integer("is_featured").default(0).notNull(), // 0 = false, 1 = true
@@ -133,6 +134,12 @@ export type Banner = typeof banners.$inferSelect;
 export type InsertBanner = z.infer<typeof insertBannerSchema>;
 
 // Extended types for frontend
+export type ProductImageData = {
+  imageUrl?: string | null;
+  imageBlob?: string | null;
+  priority: number;
+};
+
 export type CartItem = {
   productId: number;
   name: string;

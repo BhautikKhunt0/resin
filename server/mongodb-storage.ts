@@ -93,8 +93,14 @@ export class MongoDBStorage implements IStorage {
       name: doc.name,
       description: doc.description,
       price: doc.price,
+      weight: doc.weight || null,
       imageUrl: doc.imageUrl || null,
       imageBlob: doc.imageBlob ? doc.imageBlob.toString('base64') : null,
+      images: doc.images ? doc.images.map(img => ({
+        imageUrl: img.imageUrl || null,
+        imageBlob: img.imageBlob ? img.imageBlob.toString('base64') : null,
+        priority: img.priority
+      })) : [],
       categoryId: parseInt(doc.categoryId.slice(-8), 16),
       subcategoryId: doc.subcategoryId ? parseInt(doc.subcategoryId.slice(-8), 16) : null,
       isFeatured: doc.isFeatured,
@@ -392,35 +398,32 @@ export class MongoDBStorage implements IStorage {
         }
       }
 
+      // Handle multiple images if provided
+      let imagesArray: Array<{imageUrl?: string; imageBlob?: Buffer; priority: number}> = [];
+      if ((product as any).images && Array.isArray((product as any).images)) {
+        const images = (product as any).images;
+        imagesArray = images.map((image: any, index: number) => ({
+          imageUrl: image.url || image.imageUrl,
+          imageBlob: image.blob || image.imageBlob ? Buffer.from(image.blob || image.imageBlob, 'base64') : undefined,
+          priority: image.priority !== undefined ? image.priority : index
+        })).filter((img: any) => img.imageUrl || img.imageBlob);
+      }
+
       const newProduct = new ProductModel({
         name: product.name,
         description: product.description,
         price: product.price,
+        weight: product.weight,
         imageUrl: product.imageUrl,
         imageBlob: product.imageBlob ? Buffer.from(product.imageBlob, 'base64') : undefined,
+        images: imagesArray,
         categoryId: category._id.toString(),
         subcategoryId: subcategoryId,
         isFeatured: product.isFeatured || 0
       });
       const saved = await newProduct.save();
 
-      // Handle multiple images if provided
-      if ((product as any).images && Array.isArray((product as any).images)) {
-        const images = (product as any).images;
-        for (let i = 0; i < images.length; i++) {
-          const image = images[i];
-          if (image.url || image.blob) {
-            await this.createProductImage({
-              productId: parseInt(saved._id.toString().slice(-8), 16),
-              imageUrl: image.url,
-              imageBlob: image.blob,
-              priority: image.priority || i
-            });
-          }
-        }
-      }
-
-      console.log(`Product created with ID: ${saved._id}, has imageBlob: ${!!saved.imageBlob}, has imageUrl: ${!!saved.imageUrl}`);
+      console.log(`Product created with ID: ${saved._id}, has imageBlob: ${!!saved.imageBlob}, has imageUrl: ${!!saved.imageUrl}, images count: ${saved.images?.length || 0}`);
       return this.convertProduct(saved);
     } catch (error) {
       console.error('Error creating product:', error);
