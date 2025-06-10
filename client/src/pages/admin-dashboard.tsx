@@ -352,7 +352,7 @@ export default function AdminDashboard() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gray-50">
       {/* Mobile sidebar backdrop */}
       {sidebarOpen && (
         <div 
@@ -363,21 +363,29 @@ export default function AdminDashboard() {
 
       {/* Sidebar */}
       <div className={`
-        fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-gray-800 shadow-lg transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0
+        fixed inset-y-0 left-0 z-50 w-72 bg-white shadow-xl transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
       `}>
-        <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200 dark:border-gray-700">
-          <h1 className="text-xl font-bold text-gray-900 dark:text-white">Admin Panel</h1>
+        <div className="flex items-center justify-between h-20 px-6 border-b border-gray-100 bg-gradient-to-r from-blue-600 to-blue-700">
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
+              <Package className="h-6 w-6 text-blue-600" />
+            </div>
+            <div>
+              <h1 className="text-xl font-bold text-white">Admin Panel</h1>
+              <p className="text-blue-100 text-sm">E-commerce Management</p>
+            </div>
+          </div>
           <button
             onClick={() => setSidebarOpen(false)}
-            className="lg:hidden p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100"
+            className="lg:hidden p-2 rounded-md text-blue-100 hover:text-white hover:bg-blue-500"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
         
-        <nav className="mt-8 px-4">
-          <ul className="space-y-2">
+        <nav className="mt-6 px-4">
+          <ul className="space-y-1">
             {sidebarItems.map((item) => {
               const Icon = item.icon;
               return (
@@ -388,10 +396,10 @@ export default function AdminDashboard() {
                       setSidebarOpen(false);
                     }}
                     className={`
-                      w-full flex items-center px-4 py-2 text-sm font-medium rounded-lg transition-colors
+                      w-full flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200
                       ${activeTab === item.id
-                        ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
-                        : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700'
+                        ? 'bg-blue-50 text-blue-700 border-l-4 border-blue-600 shadow-sm'
+                        : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                       }
                     `}
                   >
@@ -404,21 +412,21 @@ export default function AdminDashboard() {
           </ul>
         </nav>
 
-        <div className="absolute bottom-0 w-full p-4 border-t border-gray-200 dark:border-gray-700">
-          <div className="flex items-center space-x-3 mb-3">
-            <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
-              <Users className="h-4 w-4 text-white" />
+        <div className="absolute bottom-0 w-full p-6 border-t border-gray-100 bg-gray-50">
+          <div className="flex items-center space-x-3 mb-4">
+            <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
+              <Users className="h-5 w-5 text-white" />
             </div>
-            <div>
-              <p className="text-sm font-medium text-gray-900 dark:text-white">{admin?.email}</p>
-              <p className="text-xs text-gray-500 dark:text-gray-400">Administrator</p>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-gray-900 truncate">{admin?.email}</p>
+              <p className="text-xs text-gray-500">Administrator</p>
             </div>
           </div>
           <Button 
             variant="outline" 
             size="sm" 
             onClick={handleLogout}
-            className="w-full"
+            className="w-full border-gray-200 hover:bg-red-50 hover:border-red-200 hover:text-red-600"
           >
             <LogOut className="h-4 w-4 mr-2" />
             Sign Out
@@ -427,54 +435,73 @@ export default function AdminDashboard() {
       </div>
 
       {/* Main content */}
-      <div className="lg:pl-64">
+      <div className="lg:pl-72">
         {/* Top bar */}
-        <div className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 border-b border-gray-200 bg-white px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8 dark:bg-gray-800 dark:border-gray-700">
+        <div className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 border-b border-gray-200 bg-white px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8">
           <button
             type="button"
-            className="-m-2.5 p-2.5 text-gray-700 lg:hidden"
+            className="-m-2.5 p-2.5 text-gray-700 lg:hidden hover:bg-gray-100 rounded-md"
             onClick={() => setSidebarOpen(true)}
           >
             <Menu className="h-6 w-6" />
           </button>
+          <div className="flex-1">
+            <h1 className="text-lg font-semibold text-gray-900 capitalize">
+              {activeTab === "dashboard" ? "Dashboard Overview" : `${activeTab} Management`}
+            </h1>
+          </div>
         </div>
 
         {/* Page content */}
-        <main className="py-10 px-4 sm:px-6 lg:px-8">
+        <main className="py-8 px-4 sm:px-6 lg:px-8 max-w-full">
           {/* Dashboard Tab */}
           {activeTab === "dashboard" && (
-            <div className="space-y-6">
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
+            <div className="space-y-8">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h1 className="text-3xl font-bold text-gray-900">Welcome back!</h1>
+                  <p className="text-gray-600 mt-2">Here's what's happening with your store today</p>
+                </div>
+              </div>
               
               {/* Stats */}
-              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                <Card>
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                <Card className="border-0 shadow-lg bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Total Products</CardTitle>
-                    <Package className="h-4 w-4 text-muted-foreground" />
+                    <CardTitle className="text-sm font-medium text-blue-700">Total Products</CardTitle>
+                    <div className="p-2 bg-blue-500 rounded-lg">
+                      <Package className="h-5 w-5 text-white" />
+                    </div>
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold">{totalProducts}</div>
+                    <div className="text-3xl font-bold text-blue-900">{totalProducts}</div>
+                    <p className="text-xs text-blue-600 mt-1">Active products in store</p>
                   </CardContent>
                 </Card>
                 
-                <Card>
+                <Card className="border-0 shadow-lg bg-gradient-to-br from-green-50 to-green-100 border-green-200">
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Total Orders</CardTitle>
-                    <ShoppingBag className="h-4 w-4 text-muted-foreground" />
+                    <CardTitle className="text-sm font-medium text-green-700">Total Orders</CardTitle>
+                    <div className="p-2 bg-green-500 rounded-lg">
+                      <ShoppingBag className="h-5 w-5 text-white" />
+                    </div>
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold">{totalOrders}</div>
+                    <div className="text-3xl font-bold text-green-900">{totalOrders}</div>
+                    <p className="text-xs text-green-600 mt-1">Orders received</p>
                   </CardContent>
                 </Card>
                 
-                <Card>
+                <Card className="border-0 shadow-lg bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200">
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-                    <DollarSign className="h-4 w-4 text-muted-foreground" />
+                    <CardTitle className="text-sm font-medium text-purple-700">Total Revenue</CardTitle>
+                    <div className="p-2 bg-purple-500 rounded-lg">
+                      <DollarSign className="h-5 w-5 text-white" />
+                    </div>
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold">₹{totalRevenue.toFixed(2)}</div>
+                    <div className="text-3xl font-bold text-purple-900">₹{totalRevenue.toFixed(2)}</div>
+                    <p className="text-xs text-purple-600 mt-1">Total sales revenue</p>
                   </CardContent>
                 </Card>
               </div>
@@ -484,11 +511,14 @@ export default function AdminDashboard() {
           {/* Products Tab */}
           {activeTab === "products" && (
             <div className="space-y-6">
-              <div className="flex justify-between items-center">
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Product Management</h2>
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900">Product Management</h2>
+                  <p className="text-gray-600 mt-1">Manage your product catalog and inventory</p>
+                </div>
                 <Dialog open={productDialogOpen} onOpenChange={setProductDialogOpen}>
                   <DialogTrigger asChild>
-                    <Button onClick={handleAddProduct} className="bg-blue-600 hover:bg-blue-700">
+                    <Button onClick={handleAddProduct} className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-lg">
                       <Plus className="h-4 w-4 mr-2" />
                       Add Product
                     </Button>
@@ -854,78 +884,112 @@ export default function AdminDashboard() {
                 </Dialog>
               </div>
 
-              <Card>
-                <CardContent className="p-6">
+              <Card className="border-0 shadow-lg">
+                <CardContent className="p-0">
                   {productsLoading ? (
-                    <div className="space-y-3">
+                    <div className="p-6 space-y-4">
                       {[...Array(5)].map((_, i) => (
-                        <Skeleton key={i} className="h-12 w-full" />
+                        <div key={i} className="flex items-center space-x-4">
+                          <Skeleton className="h-16 w-16 rounded-lg" />
+                          <div className="space-y-2 flex-1">
+                            <Skeleton className="h-4 w-48" />
+                            <Skeleton className="h-3 w-24" />
+                          </div>
+                          <Skeleton className="h-8 w-20" />
+                        </div>
                       ))}
                     </div>
-                  ) : (
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Image</TableHead>
-                          <TableHead>Name</TableHead>
-                          <TableHead>Category</TableHead>
-                          <TableHead>Price</TableHead>
-                          <TableHead>Featured</TableHead>
-                          <TableHead>Actions</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {products?.map((product) => (
-                          <TableRow key={product.id}>
-                            <TableCell>
-                              {(() => {
-                                const imageUrl = product.imageBlob ? `data:image/jpeg;base64,${product.imageBlob}` : product.imageUrl;
-                                return imageUrl ? (
-                                  <img
-                                    src={imageUrl}
-                                    alt={product.name}
-                                    className="w-12 h-12 object-cover rounded"
-                                  />
-                                ) : (
-                                  <div className="w-12 h-12 bg-gray-200 rounded flex items-center justify-center">
-                                    <Package className="h-6 w-6 text-gray-400" />
-                                  </div>
-                                );
-                              })()}
-                            </TableCell>
-                            <TableCell className="font-medium">{product.name}</TableCell>
-                            <TableCell>
-                              {categories?.find(c => c.id === product.categoryId)?.name}
-                            </TableCell>
-                            <TableCell>₹{parseFloat(product.price).toFixed(2)}</TableCell>
-                            <TableCell>
-                              <Badge variant={product.isFeatured ? "default" : "secondary"}>
-                                {product.isFeatured ? "Featured" : "Standard"}
-                              </Badge>
-                            </TableCell>
-                            <TableCell>
-                              <div className="flex space-x-2">
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => handleEditProduct(product)}
-                                >
-                                  <Edit className="h-4 w-4" />
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => deleteProductMutation.mutate(product.id)}
-                                  className="text-red-600 hover:text-red-700"
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              </div>
-                            </TableCell>
+                  ) : products && products.length > 0 ? (
+                    <div className="overflow-hidden">
+                      <Table>
+                        <TableHeader className="bg-gray-50">
+                          <TableRow className="border-none">
+                            <TableHead className="py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">Image</TableHead>
+                            <TableHead className="py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">Name</TableHead>
+                            <TableHead className="py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">Category</TableHead>
+                            <TableHead className="py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">Price</TableHead>
+                            <TableHead className="py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">Featured</TableHead>
+                            <TableHead className="py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider text-right">Actions</TableHead>
                           </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
+                        </TableHeader>
+                        <TableBody>
+                          {products.map((product, index) => (
+                            <TableRow key={product.id} className={`border-gray-100 hover:bg-gray-50 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-gray-25'}`}>
+                              <TableCell className="py-4 px-6">
+                                {(() => {
+                                  const imageUrl = product.imageBlob ? `data:image/jpeg;base64,${product.imageBlob}` : product.imageUrl;
+                                  return imageUrl ? (
+                                    <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-100 shadow-sm">
+                                      <img
+                                        src={imageUrl}
+                                        alt={product.name}
+                                        className="w-full h-full object-cover"
+                                      />
+                                    </div>
+                                  ) : (
+                                    <div className="w-16 h-16 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg flex items-center justify-center shadow-sm">
+                                      <Package className="h-8 w-8 text-gray-400" />
+                                    </div>
+                                  );
+                                })()}
+                              </TableCell>
+                              <TableCell className="py-4 px-6">
+                                <div>
+                                  <div className="font-semibold text-gray-900 text-sm">{product.name}</div>
+                                  <div className="text-gray-500 text-xs mt-1 line-clamp-2">{product.description}</div>
+                                </div>
+                              </TableCell>
+                              <TableCell className="py-4 px-6">
+                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                  {categories?.find(c => c.id === product.categoryId)?.name || 'Unknown'}
+                                </span>
+                              </TableCell>
+                              <TableCell className="py-4 px-6">
+                                <div className="font-semibold text-gray-900">₹{parseFloat(product.price).toFixed(2)}</div>
+                              </TableCell>
+                              <TableCell className="py-4 px-6">
+                                <Badge 
+                                  variant={product.isFeatured ? "default" : "secondary"}
+                                  className={product.isFeatured ? "bg-green-100 text-green-800 hover:bg-green-100" : "bg-gray-100 text-gray-600 hover:bg-gray-100"}
+                                >
+                                  {product.isFeatured ? "Featured" : "Standard"}
+                                </Badge>
+                              </TableCell>
+                              <TableCell className="py-4 px-6 text-right">
+                                <div className="flex justify-end space-x-2">
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => handleEditProduct(product)}
+                                    className="h-8 w-8 p-0 text-gray-400 hover:text-blue-600 hover:bg-blue-50"
+                                  >
+                                    <Edit className="h-4 w-4" />
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => deleteProductMutation.mutate(product.id)}
+                                    className="h-8 w-8 p-0 text-gray-400 hover:text-red-600 hover:bg-red-50"
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  ) : (
+                    <div className="text-center py-12">
+                      <Package className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+                      <h3 className="text-lg font-medium text-gray-900 mb-2">No products yet</h3>
+                      <p className="text-gray-500 mb-6">Get started by adding your first product to the catalog</p>
+                      <Button onClick={handleAddProduct} className="bg-blue-600 hover:bg-blue-700">
+                        <Plus className="h-4 w-4 mr-2" />
+                        Add Your First Product
+                      </Button>
+                    </div>
                   )}
                 </CardContent>
               </Card>
