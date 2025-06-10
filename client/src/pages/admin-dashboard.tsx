@@ -1927,6 +1927,110 @@ export default function AdminDashboard() {
               </Card>
             </div>
           )}
+
+          {/* Pages Tab */}
+          {activeTab === "pages" && (
+            <div className="space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900">Pages Management</h2>
+                  <p className="text-gray-600 mt-1">Manage static pages like return policy, terms of service, etc.</p>
+                </div>
+                <Button onClick={handleAddPage} className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 shadow-lg">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Page
+                </Button>
+              </div>
+
+              <Card className="border-0 shadow-lg">
+                <CardContent className="p-0">
+                  {pagesLoading ? (
+                    <div className="p-6 space-y-4">
+                      {[...Array(3)].map((_, i) => (
+                        <div key={i} className="flex items-center space-x-4">
+                          <Skeleton className="h-12 w-12 rounded-lg" />
+                          <div className="space-y-2 flex-1">
+                            <Skeleton className="h-4 w-32" />
+                            <Skeleton className="h-3 w-48" />
+                          </div>
+                          <Skeleton className="h-8 w-16" />
+                        </div>
+                      ))}
+                    </div>
+                  ) : pages && pages.length > 0 ? (
+                    <div className="overflow-x-auto">
+                      <Table>
+                        <TableHeader>
+                          <TableRow className="border-b border-gray-200">
+                            <TableHead className="py-4 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</TableHead>
+                            <TableHead className="py-4 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Slug</TableHead>
+                            <TableHead className="py-4 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</TableHead>
+                            <TableHead className="py-4 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</TableHead>
+                            <TableHead className="py-4 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {pages.map((page) => (
+                            <TableRow key={page.id} className="border-b border-gray-100 hover:bg-gray-50">
+                              <TableCell className="py-4 px-6">
+                                <div className="font-semibold text-gray-900">{page.title}</div>
+                              </TableCell>
+                              <TableCell className="py-4 px-6">
+                                <code className="text-sm bg-gray-100 px-2 py-1 rounded">{page.slug}</code>
+                              </TableCell>
+                              <TableCell className="py-4 px-6">
+                                <Badge 
+                                  variant={page.isActive ? "default" : "secondary"}
+                                  className={page.isActive ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-600"}
+                                >
+                                  {page.isActive ? "Active" : "Inactive"}
+                                </Badge>
+                              </TableCell>
+                              <TableCell className="py-4 px-6">
+                                <div className="text-sm text-gray-500">
+                                  {new Date(page.createdAt).toLocaleDateString()}
+                                </div>
+                              </TableCell>
+                              <TableCell className="py-4 px-6 text-right">
+                                <div className="flex justify-end space-x-2">
+                                  <Button 
+                                    variant="ghost" 
+                                    size="sm" 
+                                    className="h-8 w-8 p-0 text-gray-400 hover:text-blue-600 hover:bg-blue-50"
+                                    onClick={() => handleEditPage(page)}
+                                  >
+                                    <Edit className="h-4 w-4" />
+                                  </Button>
+                                  <Button 
+                                    variant="ghost" 
+                                    size="sm" 
+                                    className="h-8 w-8 p-0 text-gray-400 hover:text-red-600 hover:bg-red-50"
+                                    onClick={() => deletePageMutation.mutate(page.id)}
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  ) : (
+                    <div className="text-center py-12">
+                      <FileText className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+                      <h3 className="text-lg font-medium text-gray-900 mb-2">No pages yet</h3>
+                      <p className="text-gray-500 mb-6">Create static pages for your store policies and information</p>
+                      <Button onClick={handleAddPage} className="bg-purple-600 hover:bg-purple-700">
+                        <Plus className="h-4 w-4 mr-2" />
+                        Add Your First Page
+                      </Button>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          )}
         </main>
       </div>
 
