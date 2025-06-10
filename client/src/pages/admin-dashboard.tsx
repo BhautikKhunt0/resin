@@ -64,7 +64,7 @@ import { useToast } from "@/hooks/use-toast";
 import { api } from "@/lib/api";
 import { queryClient } from "@/lib/queryClient";
 import { useLocation } from "wouter";
-import type { Product, Category, Order, Banner } from "@shared/schema";
+import type { Product, Category, Order, Banner, Page } from "@shared/schema";
 
 // Form schemas
 const productSchema = z.object({

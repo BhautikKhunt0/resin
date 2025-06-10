@@ -162,6 +162,18 @@ export class MongoDBStorage implements IStorage {
     };
   }
 
+  private convertPage(doc: IPage): Page {
+    return {
+      id: parseInt(doc._id.toString().slice(-8), 16),
+      title: doc.title,
+      slug: doc.slug,
+      content: doc.content,
+      isActive: doc.isActive,
+      createdAt: doc.createdAt,
+      updatedAt: doc.updatedAt
+    };
+  }
+
   // Categories
   async getCategories(): Promise<Category[]> {
     const categories = await CategoryModel.find();
@@ -714,6 +726,67 @@ export class MongoDBStorage implements IStorage {
     if (!existing) return false;
 
     await BannerModel.findByIdAndDelete(existing._id);
+    return true;
+  }
+
+  // Pages
+  async getPages(): Promise<Page[]> {
+    const pages = await PageModel.find();
+    return pages.map(page => this.convertPage(page));
+  }
+
+  async getActivePages(): Promise<Page[]> {
+    const pages = await PageModel.find({ isActive: 1 });
+    return pages.map(page => this.convertPage(page));
+  }
+
+  async getPageById(id: number): Promise<Page | undefined> {
+    const pages = await PageModel.find();
+    const page = pages.find(p => parseInt(p._id.toString().slice(-8), 16) === id);
+    return page ? this.convertPage(page) : undefined;
+  }
+
+  async getPageBySlug(slug: string): Promise<Page | undefined> {
+    const page = await PageModel.findOne({ slug });
+    return page ? this.convertPage(page) : undefined;
+  }
+
+  async createPage(page: InsertPage): Promise<Page> {
+    const newPage = new PageModel({
+      title: page.title,
+      slug: page.slug,
+      content: page.content,
+      isActive: page.isActive ?? 1
+    });
+    const saved = await newPage.save();
+    return this.convertPage(saved);
+  }
+
+  async updatePage(id: number, page: Partial<InsertPage>): Promise<Page | undefined> {
+    const pages = await PageModel.find();
+    const existing = pages.find(p => parseInt(p._id.toString().slice(-8), 16) === id);
+    if (!existing) return undefined;
+
+    const updateData: any = {};
+    if (page.title !== undefined) updateData.title = page.title;
+    if (page.slug !== undefined) updateData.slug = page.slug;
+    if (page.content !== undefined) updateData.content = page.content;
+    if (page.isActive !== undefined) updateData.isActive = page.isActive;
+
+    const updated = await PageModel.findByIdAndUpdate(
+      existing._id,
+      updateData,
+      { new: true }
+    );
+    return updated ? this.convertPage(updated) : undefined;
+  }
+
+  async deletePage(id: number): Promise<boolean> {
+    const pages = await PageModel.find();
+    const existing = pages.find(p => parseInt(p._id.toString().slice(-8), 16) === id);
+    if (!existing) return false;
+
+    await PageModel.findByIdAndDelete(existing._id);
     return true;
   }
 }
