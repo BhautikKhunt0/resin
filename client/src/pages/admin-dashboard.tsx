@@ -1003,6 +1003,93 @@ export default function AdminDashboard() {
                             />
                           </div>
 
+                          {/* Main Product Image Section */}
+                          <div className="space-y-6">
+                            <div className="flex items-center justify-between pb-4 border-b border-gray-100">
+                              <div className="flex items-center space-x-3">
+                                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                                  <span className="text-blue-600 font-semibold text-sm">2</span>
+                                </div>
+                                <h3 className="text-lg font-semibold text-gray-900">Main Product Image</h3>
+                              </div>
+                            </div>
+                            
+                            <div className="space-y-4">
+                              <FormField
+                                control={productForm.control}
+                                name="imageUrl"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Image URL</FormLabel>
+                                    <FormControl>
+                                      <Input 
+                                        placeholder="https://example.com/product-image.jpg" 
+                                        {...field}
+                                        onChange={(e) => {
+                                          field.onChange(e);
+                                          if (e.target.value && e.target.value.trim() !== '') {
+                                            productForm.setValue('imageBlob', '');
+                                          }
+                                        }}
+                                      />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                              
+                              <div className="flex items-center my-4">
+                                <div className="flex-1 border-t border-gray-200"></div>
+                                <span className="px-3 text-sm text-gray-500 bg-gray-50">OR</span>
+                                <div className="flex-1 border-t border-gray-200"></div>
+                              </div>
+                              
+                              <div className="text-center">
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  onChange={(e) => handleMainImageFileUpload(e, 'product')}
+                                  className="hidden"
+                                  id="product-main-image-upload"
+                                />
+                                <label
+                                  htmlFor="product-main-image-upload"
+                                  className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 cursor-pointer"
+                                >
+                                  <Upload className="h-4 w-4 mr-2" />
+                                  Upload Main Image
+                                </label>
+                              </div>
+                              
+                              {/* Image Preview */}
+                              {(() => {
+                                const imageBlob = productForm.watch('imageBlob');
+                                const imageUrl = productForm.watch('imageUrl');
+                                const hasImage = imageBlob || (imageUrl && imageUrl.trim() !== '');
+                                
+                                if (!hasImage) return null;
+                                
+                                return (
+                                  <div className="mt-4">
+                                    <p className="text-sm text-green-600 mb-2">
+                                      ✓ Image {imageBlob ? 'uploaded' : 'loaded'} successfully
+                                    </p>
+                                    <div className="border rounded-lg p-2 bg-gray-50">
+                                      <img
+                                        src={imageBlob ? `data:image/jpeg;base64,${imageBlob}` : imageUrl || ''}
+                                        alt="Product preview"
+                                        className="w-full h-48 object-cover rounded"
+                                        onError={(e) => {
+                                          e.currentTarget.style.display = 'none';
+                                        }}
+                                      />
+                                    </div>
+                                  </div>
+                                );
+                              })()}
+                            </div>
+                          </div>
+
                           {/* Product Images Section */}
                           <div className="space-y-6">
                             <div className="flex items-center justify-between pb-4 border-b border-gray-100">
@@ -2285,6 +2372,85 @@ export default function AdminDashboard() {
                   </FormItem>
                 )}
               />
+              
+              {/* Image Upload Section */}
+              <div className="space-y-4">
+                <h3 className="text-sm font-medium text-gray-700">Banner Image</h3>
+                
+                <FormField
+                  control={bannerForm.control}
+                  name="imageUrl"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Image URL</FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="https://example.com/banner.jpg" 
+                          {...field}
+                          onChange={(e) => {
+                            field.onChange(e);
+                            if (e.target.value && e.target.value.trim() !== '') {
+                              bannerForm.setValue('imageBlob', '');
+                            }
+                          }}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <div className="flex items-center my-4">
+                  <div className="flex-1 border-t border-gray-200"></div>
+                  <span className="px-3 text-sm text-gray-500 bg-gray-50">OR</span>
+                  <div className="flex-1 border-t border-gray-200"></div>
+                </div>
+                
+                <div className="text-center">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => handleMainImageFileUpload(e, 'banner')}
+                    className="hidden"
+                    id="banner-image-upload"
+                  />
+                  <label
+                    htmlFor="banner-image-upload"
+                    className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 cursor-pointer"
+                  >
+                    <Upload className="h-4 w-4 mr-2" />
+                    Upload Image File
+                  </label>
+                </div>
+                
+                {/* Image Preview */}
+                {(() => {
+                  const imageBlob = bannerForm.watch('imageBlob');
+                  const imageUrl = bannerForm.watch('imageUrl');
+                  const hasImage = imageBlob || (imageUrl && imageUrl.trim() !== '');
+                  
+                  if (!hasImage) return null;
+                  
+                  return (
+                    <div className="mt-4">
+                      <p className="text-sm text-green-600 mb-2">
+                        ✓ Image {imageBlob ? 'uploaded' : 'loaded'} successfully
+                      </p>
+                      <div className="border rounded-lg p-2 bg-gray-50">
+                        <img
+                          src={imageBlob ? `data:image/jpeg;base64,${imageBlob}` : imageUrl || ''}
+                          alt="Banner preview"
+                          className="w-full h-32 object-cover rounded"
+                          onError={(e) => {
+                            e.currentTarget.style.display = 'none';
+                          }}
+                        />
+                      </div>
+                    </div>
+                  );
+                })()}
+              </div>
+              
               <FormField
                 control={bannerForm.control}
                 name="isActive"
