@@ -403,6 +403,23 @@ export class MongoDBStorage implements IStorage {
         isFeatured: product.isFeatured || 0
       });
       const saved = await newProduct.save();
+
+      // Handle multiple images if provided
+      if ((product as any).images && Array.isArray((product as any).images)) {
+        const images = (product as any).images;
+        for (let i = 0; i < images.length; i++) {
+          const image = images[i];
+          if (image.url || image.blob) {
+            await this.createProductImage({
+              productId: parseInt(saved._id.toString().slice(-8), 16),
+              imageUrl: image.url,
+              imageBlob: image.blob,
+              priority: image.priority || i
+            });
+          }
+        }
+      }
+
       console.log(`Product created with ID: ${saved._id}, has imageBlob: ${!!saved.imageBlob}, has imageUrl: ${!!saved.imageUrl}`);
       return this.convertProduct(saved);
     } catch (error) {
@@ -450,6 +467,26 @@ export class MongoDBStorage implements IStorage {
           updateData.subcategoryId = subcategory._id.toString();
         } else {
           throw new Error('Subcategory not found');
+        }
+      }
+    }
+
+    // Handle multiple images if provided
+    if ((product as any).images && Array.isArray((product as any).images)) {
+      // Remove existing product images
+      await ProductImageModel.deleteMany({ productId: existing._id.toString() });
+      
+      // Add new images
+      const images = (product as any).images;
+      for (let i = 0; i < images.length; i++) {
+        const image = images[i];
+        if (image.url || image.blob) {
+          await this.createProductImage({
+            productId: id,
+            imageUrl: image.url,
+            imageBlob: image.blob,
+            priority: image.priority || i
+          });
         }
       }
     }
