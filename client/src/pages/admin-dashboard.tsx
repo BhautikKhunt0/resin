@@ -21,6 +21,7 @@ import {
   Upload,
   Image as ImageIcon,
   Truck,
+  FileText,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -418,6 +419,46 @@ export default function AdminDashboard() {
     },
   });
 
+  // Page mutations
+  const createPageMutation = useMutation({
+    mutationFn: (data: any) => api.createPage(token, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/pages"] });
+      setPageDialogOpen(false);
+      pageForm.reset();
+      setEditingPage(null);
+      toast({ title: "Page created successfully" });
+    },
+    onError: () => {
+      toast({ title: "Failed to create page", variant: "destructive" });
+    },
+  });
+
+  const updatePageMutation = useMutation({
+    mutationFn: ({ id, data }: { id: number; data: any }) => api.updatePage(token, id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/pages"] });
+      setPageDialogOpen(false);
+      pageForm.reset();
+      setEditingPage(null);
+      toast({ title: "Page updated successfully" });
+    },
+    onError: () => {
+      toast({ title: "Failed to update page", variant: "destructive" });
+    },
+  });
+
+  const deletePageMutation = useMutation({
+    mutationFn: (id: number) => api.deletePage(token, id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/pages"] });
+      toast({ title: "Page deleted successfully" });
+    },
+    onError: () => {
+      toast({ title: "Failed to delete page", variant: "destructive" });
+    },
+  });
+
   // Handle individual image file uploads for product images
   const handleImageFileUpload = (event: React.ChangeEvent<HTMLInputElement>, index: number) => {
     const file = event.target.files?.[0];
@@ -616,6 +657,40 @@ export default function AdminDashboard() {
     }
   };
 
+  const handlePageSubmit = (data: PageFormData) => {
+    const submitData = {
+      ...data,
+      isActive: data.isActive ? 1 : 0,
+    };
+    if (editingPage) {
+      updatePageMutation.mutate({ id: editingPage.id, data: submitData });
+    } else {
+      createPageMutation.mutate(submitData);
+    }
+  };
+
+  const handleAddPage = () => {
+    setEditingPage(null);
+    pageForm.reset({
+      title: "",
+      slug: "",
+      content: "",
+      isActive: true,
+    });
+    setPageDialogOpen(true);
+  };
+
+  const handleEditPage = (page: Page) => {
+    setEditingPage(page);
+    pageForm.reset({
+      title: page.title,
+      slug: page.slug,
+      content: page.content,
+      isActive: page.isActive === 1,
+    });
+    setPageDialogOpen(true);
+  };
+
   const handleOrderStatusChange = (orderId: number, newStatus: string) => {
     updateOrderStatusMutation.mutate({ id: orderId, status: newStatus });
   };
@@ -644,6 +719,7 @@ export default function AdminDashboard() {
     { id: "categories", label: "Categories", icon: Tags },
     { id: "subcategories", label: "Subcategories", icon: Tags },
     { id: "banners", label: "Banners", icon: ImageIcon },
+    { id: "pages", label: "Pages", icon: FileText },
   ];
 
   return (
@@ -2138,6 +2214,92 @@ export default function AdminDashboard() {
                 </Button>
                 <Button type="submit" disabled={createBannerMutation.isPending || updateBannerMutation.isPending}>
                   {editingBanner ? "Update" : "Create"} Banner
+                </Button>
+              </div>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Page Dialog */}
+      <Dialog open={pageDialogOpen} onOpenChange={setPageDialogOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>
+              {editingPage ? "Edit Page" : "Add New Page"}
+            </DialogTitle>
+          </DialogHeader>
+          <Form {...pageForm}>
+            <form onSubmit={pageForm.handleSubmit(handlePageSubmit)} className="space-y-4">
+              <FormField
+                control={pageForm.control}
+                name="title"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Page Title</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Return Policy" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={pageForm.control}
+                name="slug"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Page Slug</FormLabel>
+                    <FormControl>
+                      <Input placeholder="return-policy" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={pageForm.control}
+                name="content"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Page Content (HTML)</FormLabel>
+                    <FormControl>
+                      <Textarea 
+                        placeholder="<h1>Page Title</h1><p>Page content...</p>"
+                        className="min-h-[300px]"
+                        {...field} 
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={pageForm.control}
+                name="isActive"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                    <div className="space-y-0.5">
+                      <FormLabel className="text-base">Active Page</FormLabel>
+                      <div className="text-sm text-muted-foreground">
+                        Display this page publicly
+                      </div>
+                    </div>
+                    <FormControl>
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+              <div className="flex justify-end space-x-2">
+                <Button type="button" variant="outline" onClick={() => setPageDialogOpen(false)}>
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={createPageMutation.isPending || updatePageMutation.isPending}>
+                  {editingPage ? "Update" : "Create"} Page
                 </Button>
               </div>
             </form>
