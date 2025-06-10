@@ -411,6 +411,35 @@ export default function AdminDashboard() {
     reader.readAsDataURL(file);
   };
 
+  // Handle single image file uploads for category/subcategory/banner/product main image
+  const handleMainImageFileUpload = (event: React.ChangeEvent<HTMLInputElement>, type: 'product' | 'category' | 'subcategory' | 'banner') => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const result = e.target?.result as string;
+      if (result) {
+        const base64Data = result.split(',')[1]; // Extract base64 part without data:image/type;base64,
+        
+        if (type === 'product') {
+          productForm.setValue('imageBlob', base64Data);
+          productForm.setValue('imageUrl', '');
+        } else if (type === 'category') {
+          categoryForm.setValue('imageBlob', base64Data);
+          categoryForm.setValue('imageUrl', '');
+        } else if (type === 'subcategory') {
+          subcategoryForm.setValue('imageBlob', base64Data);
+          subcategoryForm.setValue('imageUrl', '');
+        } else if (type === 'banner') {
+          bannerForm.setValue('imageBlob', base64Data);
+          bannerForm.setValue('imageUrl', '');
+        }
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
   // Handlers
   const handleProductSubmit = (data: ProductFormData) => {
     const productData = {
@@ -1976,6 +2005,85 @@ export default function AdminDashboard() {
                   </FormItem>
                 )}
               />
+              
+              {/* Image Upload Section */}
+              <div className="space-y-4">
+                <h3 className="text-sm font-medium text-gray-700">Category Image</h3>
+                
+                <FormField
+                  control={categoryForm.control}
+                  name="imageUrl"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Image URL</FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="https://example.com/image.jpg" 
+                          {...field}
+                          onChange={(e) => {
+                            field.onChange(e);
+                            if (e.target.value && e.target.value.trim() !== '') {
+                              categoryForm.setValue('imageBlob', '');
+                            }
+                          }}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <div className="flex items-center my-4">
+                  <div className="flex-1 border-t border-gray-200"></div>
+                  <span className="px-3 text-sm text-gray-500 bg-gray-50">OR</span>
+                  <div className="flex-1 border-t border-gray-200"></div>
+                </div>
+                
+                <div className="text-center">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => handleMainImageFileUpload(e, 'category')}
+                    className="hidden"
+                    id="category-image-upload"
+                  />
+                  <label
+                    htmlFor="category-image-upload"
+                    className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 cursor-pointer"
+                  >
+                    <Upload className="h-4 w-4 mr-2" />
+                    Upload Image File
+                  </label>
+                </div>
+                
+                {/* Image Preview */}
+                {(() => {
+                  const imageBlob = categoryForm.watch('imageBlob');
+                  const imageUrl = categoryForm.watch('imageUrl');
+                  const hasImage = imageBlob || (imageUrl && imageUrl.trim() !== '');
+                  
+                  if (!hasImage) return null;
+                  
+                  return (
+                    <div className="mt-4">
+                      <p className="text-sm text-green-600 mb-2">
+                        ✓ Image {imageBlob ? 'uploaded' : 'loaded'} successfully
+                      </p>
+                      <div className="border rounded-lg p-2 bg-gray-50">
+                        <img
+                          src={imageBlob ? `data:image/jpeg;base64,${imageBlob}` : imageUrl || ''}
+                          alt="Category preview"
+                          className="w-full h-32 object-cover rounded"
+                          onError={(e) => {
+                            e.currentTarget.style.display = 'none';
+                          }}
+                        />
+                      </div>
+                    </div>
+                  );
+                })()}
+              </div>
+              
               <div className="flex justify-end space-x-2">
                 <Button type="button" variant="outline" onClick={() => setCategoryDialogOpen(false)}>
                   Cancel
@@ -2049,6 +2157,85 @@ export default function AdminDashboard() {
                   </FormItem>
                 )}
               />
+              
+              {/* Image Upload Section */}
+              <div className="space-y-4">
+                <h3 className="text-sm font-medium text-gray-700">Subcategory Image</h3>
+                
+                <FormField
+                  control={subcategoryForm.control}
+                  name="imageUrl"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Image URL</FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="https://example.com/image.jpg" 
+                          {...field}
+                          onChange={(e) => {
+                            field.onChange(e);
+                            if (e.target.value && e.target.value.trim() !== '') {
+                              subcategoryForm.setValue('imageBlob', '');
+                            }
+                          }}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <div className="flex items-center my-4">
+                  <div className="flex-1 border-t border-gray-200"></div>
+                  <span className="px-3 text-sm text-gray-500 bg-gray-50">OR</span>
+                  <div className="flex-1 border-t border-gray-200"></div>
+                </div>
+                
+                <div className="text-center">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => handleMainImageFileUpload(e, 'subcategory')}
+                    className="hidden"
+                    id="subcategory-image-upload"
+                  />
+                  <label
+                    htmlFor="subcategory-image-upload"
+                    className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 cursor-pointer"
+                  >
+                    <Upload className="h-4 w-4 mr-2" />
+                    Upload Image File
+                  </label>
+                </div>
+                
+                {/* Image Preview */}
+                {(() => {
+                  const imageBlob = subcategoryForm.watch('imageBlob');
+                  const imageUrl = subcategoryForm.watch('imageUrl');
+                  const hasImage = imageBlob || (imageUrl && imageUrl.trim() !== '');
+                  
+                  if (!hasImage) return null;
+                  
+                  return (
+                    <div className="mt-4">
+                      <p className="text-sm text-green-600 mb-2">
+                        ✓ Image {imageBlob ? 'uploaded' : 'loaded'} successfully
+                      </p>
+                      <div className="border rounded-lg p-2 bg-gray-50">
+                        <img
+                          src={imageBlob ? `data:image/jpeg;base64,${imageBlob}` : imageUrl || ''}
+                          alt="Subcategory preview"
+                          className="w-full h-32 object-cover rounded"
+                          onError={(e) => {
+                            e.currentTarget.style.display = 'none';
+                          }}
+                        />
+                      </div>
+                    </div>
+                  );
+                })()}
+              </div>
+              
               <div className="flex justify-end space-x-2">
                 <Button type="button" variant="outline" onClick={() => setSubcategoryDialogOpen(false)}>
                   Cancel
