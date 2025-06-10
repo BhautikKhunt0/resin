@@ -73,6 +73,11 @@ const productSchema = z.object({
   price: z.string().min(1, "Price is required"),
   imageUrl: z.string().optional(),
   imageBlob: z.string().optional(),
+  images: z.array(z.object({
+    url: z.string().optional(),
+    blob: z.string().optional(),
+    priority: z.number().default(0),
+  })).optional(),
   categoryId: z.string().min(1, "Category is required"),
   subcategoryId: z.string().optional(),
   isFeatured: z.boolean().optional(),
@@ -173,6 +178,7 @@ export default function AdminDashboard() {
   const [currentImageField, setCurrentImageField] = useState<string | null>(null);
   const [orderDetailsDialogOpen, setOrderDetailsDialogOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [productImages, setProductImages] = useState<Array<{url: string; blob: string; priority: number}>>([]);
 
   const { admin, token, logout, isAuthenticated } = useAuth();
   const { toast } = useToast();
@@ -224,6 +230,7 @@ export default function AdminDashboard() {
       price: "",
       imageUrl: "",
       imageBlob: "",
+      images: [],
       categoryId: "",
       subcategoryId: "",
       isFeatured: false,
@@ -499,6 +506,26 @@ export default function AdminDashboard() {
     }
   };
 
+  // Handle individual image file uploads for product images
+  const handleImageFileUpload = (event: React.ChangeEvent<HTMLInputElement>, index: number) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const result = e.target?.result as string;
+      if (result) {
+        // Convert to base64
+        const base64 = result.split(',')[1];
+        const newImages = [...productImages];
+        newImages[index] = { ...newImages[index], blob: result, url: '' };
+        setProductImages(newImages);
+        productForm.setValue('images', newImages);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
   // Handlers
   const handleProductSubmit = (data: ProductFormData) => {
     const productData = {
@@ -508,6 +535,11 @@ export default function AdminDashboard() {
       subcategoryId: data.subcategoryId && data.subcategoryId.trim() !== "" ? parseInt(data.subcategoryId) : null,
       imageUrl: data.imageUrl || undefined,
       imageBlob: data.imageBlob || undefined,
+      images: productImages.filter(img => img.url || img.blob).map((img, index) => ({
+        url: img.url || undefined,
+        blob: img.blob ? img.blob.split(',')[1] : undefined, // Extract base64 part
+        priority: index,
+      })),
       isFeatured: data.isFeatured ? 1 : 0,
     };
 
@@ -970,88 +1002,135 @@ export default function AdminDashboard() {
                             />
                           </div>
 
-                          {/* Product Image Section */}
+                          {/* Product Images Section */}
                           <div className="space-y-6">
-                            <div className="flex items-center space-x-3 pb-4 border-b border-gray-100">
-                              <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                                <span className="text-green-600 font-semibold text-sm">2</span>
+                            <div className="flex items-center justify-between pb-4 border-b border-gray-100">
+                              <div className="flex items-center space-x-3">
+                                <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                                  <span className="text-green-600 font-semibold text-sm">2</span>
+                                </div>
+                                <h3 className="text-lg font-semibold text-gray-900">Product Images</h3>
                               </div>
-                              <h3 className="text-lg font-semibold text-gray-900">Product Image</h3>
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  const newImages = [...productImages, { url: '', blob: '', priority: productImages.length }];
+                                  setProductImages(newImages);
+                                  productForm.setValue('images', newImages);
+                                }}
+                                className="text-green-600 border-green-200 hover:bg-green-50"
+                              >
+                                <Plus className="h-4 w-4 mr-2" />
+                                Add Image
+                              </Button>
                             </div>
                             
-                            <div className="bg-gray-50 rounded-xl p-6 border-2 border-dashed border-gray-200">
-                              <FormField
-                                control={productForm.control}
-                                name="imageUrl"
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <FormLabel className="text-sm font-medium text-gray-700">Image URL</FormLabel>
-                                    <FormControl>
-                                      <Input 
-                                        placeholder="https://images.unsplash.com/photo-..." 
-                                        className="h-11 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
-                                        {...field}
-                                        onChange={(e) => {
-                                          field.onChange(e);
-                                          handleProductImageUrlChange(e.target.value);
-                                        }}
-                                      />
-                                    </FormControl>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
-                              />
-                              
-                              <div className="flex items-center my-6">
-                                <div className="flex-1 border-t border-gray-300"></div>
-                                <span className="px-4 text-sm text-gray-500 bg-gray-50 font-medium">OR</span>
-                                <div className="flex-1 border-t border-gray-300"></div>
-                              </div>
-                              
-                              <div className="text-center">
-                                <Button
-                                  type="button"
-                                  variant="outline"
-                                  className="h-12 px-8 border-2 border-gray-200 hover:border-blue-500 hover:text-blue-600 hover:bg-blue-50"
-                                  onClick={() => handleImageUpload('product')}
-                                >
-                                  <Upload className="h-5 w-5 mr-2" />
-                                  Upload Image File
-                                </Button>
-                                <p className="text-xs text-gray-500 mt-3">
-                                  Supports JPG, PNG, WebP up to 5MB
-                                </p>
-                              </div>
-                              
-                              {/* Image Preview */}
-                              {(() => {
-                                const imageBlob = productForm.watch('imageBlob');
-                                const imageUrl = productForm.watch('imageUrl');
-                                const hasImage = imageBlob || (imageUrl && imageUrl.trim() !== '');
-                                
-                                if (!hasImage) return null;
-                                
-                                return (
-                                  <div className="mt-6 p-4 bg-white rounded-lg border border-gray-200 shadow-sm">
-                                    <div className="flex items-center mb-3">
-                                      <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
-                                      <span className="text-sm font-medium text-green-700">
-                                        Image {imageBlob ? 'uploaded' : 'loaded'} successfully
-                                      </span>
+                            {/* Image Upload Areas */}
+                            <div className="space-y-4">
+                              {productImages.length === 0 ? (
+                                <div className="bg-gray-50 rounded-xl p-8 border-2 border-dashed border-gray-200 text-center">
+                                  <ImageIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                                  <h4 className="text-lg font-medium text-gray-900 mb-2">No product images yet</h4>
+                                  <p className="text-sm text-gray-500 mb-6">Add multiple images to showcase your product from different angles</p>
+                                  <Button
+                                    type="button"
+                                    variant="outline"
+                                    onClick={() => {
+                                      const newImages = [{ url: '', blob: '', priority: 0 }];
+                                      setProductImages(newImages);
+                                      productForm.setValue('images', newImages);
+                                    }}
+                                    className="text-green-600 border-green-200 hover:bg-green-50"
+                                  >
+                                    <Plus className="h-4 w-4 mr-2" />
+                                    Add First Image
+                                  </Button>
+                                </div>
+                              ) : (
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                  {productImages.map((image, index) => (
+                                    <div key={index} className="bg-white rounded-lg border border-gray-200 p-4">
+                                      <div className="flex items-center justify-between mb-4">
+                                        <div className="flex items-center space-x-2">
+                                          <span className="text-sm font-medium text-gray-700">Image {index + 1}</span>
+                                          {index === 0 && (
+                                            <Badge variant="outline" className="text-xs">Primary</Badge>
+                                          )}
+                                        </div>
+                                        <Button
+                                          type="button"
+                                          variant="ghost"
+                                          size="sm"
+                                          onClick={() => {
+                                            const newImages = productImages.filter((_, i) => i !== index);
+                                            setProductImages(newImages);
+                                            productForm.setValue('images', newImages);
+                                          }}
+                                          className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                                        >
+                                          <Trash2 className="h-4 w-4" />
+                                        </Button>
+                                      </div>
+                                      
+                                      {/* Image URL Input */}
+                                      <div className="space-y-3">
+                                        <Input
+                                          placeholder="Enter image URL"
+                                          value={image.url}
+                                          onChange={(e) => {
+                                            const newImages = [...productImages];
+                                            newImages[index] = { ...newImages[index], url: e.target.value };
+                                            setProductImages(newImages);
+                                            productForm.setValue('images', newImages);
+                                          }}
+                                          className="h-9 text-sm"
+                                        />
+                                        
+                                        <div className="flex items-center">
+                                          <div className="flex-1 border-t border-gray-300"></div>
+                                          <span className="px-2 text-xs text-gray-500 bg-white">OR</span>
+                                          <div className="flex-1 border-t border-gray-300"></div>
+                                        </div>
+                                        
+                                        <div className="text-center">
+                                          <input
+                                            type="file"
+                                            accept="image/*"
+                                            onChange={(e) => handleImageFileUpload(e, index)}
+                                            className="hidden"
+                                            id={`image-upload-${index}`}
+                                          />
+                                          <label
+                                            htmlFor={`image-upload-${index}`}
+                                            className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 cursor-pointer"
+                                          >
+                                            <Upload className="h-4 w-4 mr-2" />
+                                            Upload File
+                                          </label>
+                                        </div>
+                                      </div>
+                                      
+                                      {/* Image Preview */}
+                                      {(image.blob || image.url) && (
+                                        <div className="mt-4">
+                                          <div className="relative overflow-hidden rounded-lg bg-gray-100">
+                                            <img
+                                              src={image.blob || image.url}
+                                              alt={`Product image ${index + 1}`}
+                                              className="w-full h-32 object-cover"
+                                              onError={(e) => {
+                                                e.currentTarget.style.display = 'none';
+                                              }}
+                                            />
+                                          </div>
+                                        </div>
+                                      )}
                                     </div>
-                                    <div className="relative overflow-hidden rounded-lg bg-gray-100">
-                                      <img
-                                        src={imageBlob ? `data:image/jpeg;base64,${imageBlob}` : imageUrl || ''}
-                                        alt="Product preview"
-                                        className="w-full h-56 object-cover"
-                                        onError={(e) => {
-                                          e.currentTarget.style.display = 'none';
-                                        }}
-                                      />
-                                    </div>
-                                  </div>
-                                );
-                              })()}
+                                  ))}
+                                </div>
+                              )}
                             </div>
                           </div>
 
