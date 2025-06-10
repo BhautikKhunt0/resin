@@ -425,11 +425,8 @@ export class MongoDBStorage implements IStorage {
 
   async getProductsBySubcategory(subcategoryId: number): Promise<Product[]> {
     try {
-      // Create a more efficient ID lookup using regex pattern
-      const hexId = subcategoryId.toString(16).padStart(8, '0');
-      const subcategory = await SubcategoryModel.findOne({
-        _id: { $regex: new RegExp(hexId + '$') }
-      }).lean();
+      const subcategories = await SubcategoryModel.find().lean();
+      const subcategory = subcategories.find(sub => parseInt(sub._id.toString().slice(-8), 16) === subcategoryId);
       
       if (!subcategory) return [];
 
@@ -443,12 +440,8 @@ export class MongoDBStorage implements IStorage {
 
   async getProductById(id: number): Promise<Product | undefined> {
     try {
-      // Use efficient regex lookup instead of fetching all products
-      const hexId = id.toString(16).padStart(8, '0');
-      const product = await ProductModel.findOne({
-        _id: { $regex: new RegExp(hexId + '$') }
-      }).lean();
-      
+      const products = await ProductModel.find().lean();
+      const product = products.find(prod => parseInt(prod._id.toString().slice(-8), 16) === id);
       return product ? this.convertProduct(product) : undefined;
     } catch (error) {
       console.error('Error fetching product by ID:', error);
@@ -751,10 +744,8 @@ export class MongoDBStorage implements IStorage {
 
   async getBannerById(id: number): Promise<Banner | undefined> {
     try {
-      const hexId = id.toString(16).padStart(8, '0');
-      const banner = await BannerModel.findOne({
-        _id: { $regex: new RegExp(hexId + '$') }
-      }).lean();
+      const banners = await BannerModel.find().lean();
+      const banner = banners.find(b => parseInt(b._id.toString().slice(-8), 16) === id);
       return banner ? this.convertBanner(banner) : undefined;
     } catch (error) {
       console.error('Error fetching banner by ID:', error);
