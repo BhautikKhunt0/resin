@@ -402,13 +402,51 @@ export default function AdminDashboard() {
     reader.onload = (e) => {
       const result = e.target?.result as string;
       if (result) {
+        const base64Data = result.split(',')[1]; // Extract base64 part
         const newImages = [...productImages];
-        newImages[index] = { ...newImages[index], blob: result, url: '' };
+        newImages[index] = { ...newImages[index], blob: `data:image/jpeg;base64,${base64Data}`, url: '' };
         setProductImages(newImages);
         productForm.setValue('images', newImages);
       }
     };
     reader.readAsDataURL(file);
+  };
+
+  // Handle multiple image file uploads at once
+  const handleMultipleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (!files || files.length === 0) return;
+
+    const newImages = [...productImages];
+    
+    Array.from(files).forEach((file, fileIndex) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const result = e.target?.result as string;
+        if (result) {
+          const base64Data = result.split(',')[1]; // Extract base64 part
+          const imageIndex = productImages.length + fileIndex;
+          
+          if (newImages[imageIndex]) {
+            newImages[imageIndex] = { 
+              ...newImages[imageIndex], 
+              blob: `data:image/jpeg;base64,${base64Data}`, 
+              url: '' 
+            };
+          } else {
+            newImages.push({ 
+              url: '', 
+              blob: `data:image/jpeg;base64,${base64Data}`, 
+              priority: imageIndex 
+            });
+          }
+          
+          setProductImages([...newImages]);
+          productForm.setValue('images', [...newImages]);
+        }
+      };
+      reader.readAsDataURL(file);
+    });
   };
 
   // Handle single image file uploads for category/subcategory/banner/product main image
@@ -1095,24 +1133,41 @@ export default function AdminDashboard() {
                             <div className="flex items-center justify-between pb-4 border-b border-gray-100">
                               <div className="flex items-center space-x-3">
                                 <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                                  <span className="text-green-600 font-semibold text-sm">2</span>
+                                  <span className="text-green-600 font-semibold text-sm">3</span>
                                 </div>
                                 <h3 className="text-lg font-semibold text-gray-900">Product Images</h3>
                               </div>
-                              <Button
-                                type="button"
-                                variant="outline"
-                                size="sm"
-                                onClick={() => {
-                                  const newImages = [...productImages, { url: '', blob: '', priority: productImages.length }];
-                                  setProductImages(newImages);
-                                  productForm.setValue('images', newImages);
-                                }}
-                                className="text-green-600 border-green-200 hover:bg-green-50"
-                              >
-                                <Plus className="h-4 w-4 mr-2" />
-                                Add Image
-                              </Button>
+                              <div className="flex space-x-2">
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  multiple
+                                  onChange={handleMultipleImageUpload}
+                                  className="hidden"
+                                  id="multiple-images-upload"
+                                />
+                                <label
+                                  htmlFor="multiple-images-upload"
+                                  className="inline-flex items-center px-3 py-1.5 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 cursor-pointer"
+                                >
+                                  <Upload className="h-4 w-4 mr-2" />
+                                  Upload Multiple
+                                </label>
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => {
+                                    const newImages = [...productImages, { url: '', blob: '', priority: productImages.length }];
+                                    setProductImages(newImages);
+                                    productForm.setValue('images', newImages);
+                                  }}
+                                  className="text-green-600 border-green-200 hover:bg-green-50"
+                                >
+                                  <Plus className="h-4 w-4 mr-2" />
+                                  Add Single
+                                </Button>
+                              </div>
                             </div>
                             
                             {/* Image Upload Areas */}
@@ -1122,101 +1177,173 @@ export default function AdminDashboard() {
                                   <ImageIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                                   <h4 className="text-lg font-medium text-gray-900 mb-2">No product images yet</h4>
                                   <p className="text-sm text-gray-500 mb-6">Add multiple images to showcase your product from different angles</p>
-                                  <Button
-                                    type="button"
-                                    variant="outline"
-                                    onClick={() => {
-                                      const newImages = [{ url: '', blob: '', priority: 0 }];
-                                      setProductImages(newImages);
-                                      productForm.setValue('images', newImages);
-                                    }}
-                                    className="text-green-600 border-green-200 hover:bg-green-50"
-                                  >
-                                    <Plus className="h-4 w-4 mr-2" />
-                                    Add First Image
-                                  </Button>
+                                  <div className="flex justify-center space-x-3">
+                                    <input
+                                      type="file"
+                                      accept="image/*"
+                                      multiple
+                                      onChange={handleMultipleImageUpload}
+                                      className="hidden"
+                                      id="first-multiple-upload"
+                                    />
+                                    <label
+                                      htmlFor="first-multiple-upload"
+                                      className="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 cursor-pointer"
+                                    >
+                                      <Upload className="h-4 w-4 mr-2" />
+                                      Upload Multiple Images
+                                    </label>
+                                    <Button
+                                      type="button"
+                                      variant="outline"
+                                      onClick={() => {
+                                        const newImages = [{ url: '', blob: '', priority: 0 }];
+                                        setProductImages(newImages);
+                                        productForm.setValue('images', newImages);
+                                      }}
+                                      className="text-green-600 border-green-200 hover:bg-green-50"
+                                    >
+                                      <Plus className="h-4 w-4 mr-2" />
+                                      Add Single Image
+                                    </Button>
+                                  </div>
                                 </div>
                               ) : (
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                  {productImages.map((image, index) => (
-                                    <div key={index} className="bg-white rounded-lg border border-gray-200 p-4">
-                                      <div className="flex items-center justify-between mb-4">
-                                        <div className="flex items-center space-x-2">
-                                          <span className="text-sm font-medium text-gray-700">Image {index + 1}</span>
-                                          {index === 0 && (
-                                            <Badge variant="outline" className="text-xs">Primary</Badge>
-                                          )}
-                                        </div>
-                                        <Button
-                                          type="button"
-                                          variant="ghost"
-                                          size="sm"
-                                          onClick={() => {
-                                            const newImages = productImages.filter((_, i) => i !== index);
-                                            setProductImages(newImages);
-                                            productForm.setValue('images', newImages);
-                                          }}
-                                          className="text-red-500 hover:text-red-700 hover:bg-red-50"
-                                        >
-                                          <Trash2 className="h-4 w-4" />
-                                        </Button>
-                                      </div>
-                                      
-                                      {/* Image URL Input */}
-                                      <div className="space-y-3">
-                                        <Input
-                                          placeholder="Enter image URL"
-                                          value={image.url}
-                                          onChange={(e) => {
-                                            const newImages = [...productImages];
-                                            newImages[index] = { ...newImages[index], url: e.target.value };
-                                            setProductImages(newImages);
-                                            productForm.setValue('images', newImages);
-                                          }}
-                                          className="h-9 text-sm"
-                                        />
-                                        
-                                        <div className="flex items-center">
-                                          <div className="flex-1 border-t border-gray-300"></div>
-                                          <span className="px-2 text-xs text-gray-500 bg-white">OR</span>
-                                          <div className="flex-1 border-t border-gray-300"></div>
-                                        </div>
-                                        
-                                        <div className="text-center">
-                                          <input
-                                            type="file"
-                                            accept="image/*"
-                                            onChange={(e) => handleImageFileUpload(e, index)}
-                                            className="hidden"
-                                            id={`image-upload-${index}`}
-                                          />
-                                          <label
-                                            htmlFor={`image-upload-${index}`}
-                                            className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 cursor-pointer"
-                                          >
-                                            <Upload className="h-4 w-4 mr-2" />
-                                            Upload File
-                                          </label>
-                                        </div>
-                                      </div>
-                                      
-                                      {/* Image Preview */}
-                                      {(image.blob || image.url) && (
-                                        <div className="mt-4">
-                                          <div className="relative overflow-hidden rounded-lg bg-gray-100">
-                                            <img
-                                              src={image.blob || image.url}
-                                              alt={`Product image ${index + 1}`}
-                                              className="w-full h-32 object-cover"
-                                              onError={(e) => {
-                                                e.currentTarget.style.display = 'none';
+                                <div className="space-y-4">
+                                  <div className="flex items-center justify-between text-sm text-gray-600 mb-4">
+                                    <span>{productImages.length} image{productImages.length !== 1 ? 's' : ''} added</span>
+                                    <Button
+                                      type="button"
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => {
+                                        setProductImages([]);
+                                        productForm.setValue('images', []);
+                                      }}
+                                      className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                                    >
+                                      Clear All
+                                    </Button>
+                                  </div>
+                                  
+                                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                    {productImages.map((image, index) => (
+                                      <div key={index} className="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow">
+                                        <div className="flex items-center justify-between mb-3">
+                                          <div className="flex items-center space-x-2">
+                                            <span className="text-sm font-medium text-gray-700">Image {index + 1}</span>
+                                            {index === 0 && (
+                                              <Badge variant="outline" className="text-xs bg-blue-50 text-blue-600">Primary</Badge>
+                                            )}
+                                          </div>
+                                          <div className="flex space-x-1">
+                                            {index > 0 && (
+                                              <Button
+                                                type="button"
+                                                variant="ghost"
+                                                size="sm"
+                                                onClick={() => {
+                                                  const newImages = [...productImages];
+                                                  [newImages[index], newImages[index - 1]] = [newImages[index - 1], newImages[index]];
+                                                  setProductImages(newImages);
+                                                  productForm.setValue('images', newImages);
+                                                }}
+                                                className="text-gray-500 hover:text-gray-700 p-1 h-6 w-6"
+                                                title="Move up"
+                                              >
+                                                ↑
+                                              </Button>
+                                            )}
+                                            {index < productImages.length - 1 && (
+                                              <Button
+                                                type="button"
+                                                variant="ghost"
+                                                size="sm"
+                                                onClick={() => {
+                                                  const newImages = [...productImages];
+                                                  [newImages[index], newImages[index + 1]] = [newImages[index + 1], newImages[index]];
+                                                  setProductImages(newImages);
+                                                  productForm.setValue('images', newImages);
+                                                }}
+                                                className="text-gray-500 hover:text-gray-700 p-1 h-6 w-6"
+                                                title="Move down"
+                                              >
+                                                ↓
+                                              </Button>
+                                            )}
+                                            <Button
+                                              type="button"
+                                              variant="ghost"
+                                              size="sm"
+                                              onClick={() => {
+                                                const newImages = productImages.filter((_, i) => i !== index);
+                                                setProductImages(newImages);
+                                                productForm.setValue('images', newImages);
                                               }}
-                                            />
+                                              className="text-red-500 hover:text-red-700 hover:bg-red-50 p-1 h-6 w-6"
+                                              title="Delete image"
+                                            >
+                                              <Trash2 className="h-3 w-3" />
+                                            </Button>
                                           </div>
                                         </div>
-                                      )}
-                                    </div>
-                                  ))}
+                                      
+                                        {/* Image URL Input */}
+                                        <div className="space-y-3">
+                                          <Input
+                                            placeholder="Enter image URL"
+                                            value={image.url}
+                                            onChange={(e) => {
+                                              const newImages = [...productImages];
+                                              newImages[index] = { ...newImages[index], url: e.target.value };
+                                              setProductImages(newImages);
+                                              productForm.setValue('images', newImages);
+                                            }}
+                                            className="h-9 text-sm"
+                                          />
+                                          
+                                          <div className="flex items-center">
+                                            <div className="flex-1 border-t border-gray-300"></div>
+                                            <span className="px-2 text-xs text-gray-500 bg-white">OR</span>
+                                            <div className="flex-1 border-t border-gray-300"></div>
+                                          </div>
+                                          
+                                          <div className="text-center">
+                                            <input
+                                              type="file"
+                                              accept="image/*"
+                                              onChange={(e) => handleImageFileUpload(e, index)}
+                                              className="hidden"
+                                              id={`image-upload-${index}`}
+                                            />
+                                            <label
+                                              htmlFor={`image-upload-${index}`}
+                                              className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 cursor-pointer"
+                                            >
+                                              <Upload className="h-4 w-4 mr-2" />
+                                              Upload File
+                                            </label>
+                                          </div>
+                                        </div>
+                                        
+                                        {/* Image Preview */}
+                                        {(image.blob || image.url) && (
+                                          <div className="mt-4">
+                                            <div className="relative overflow-hidden rounded-lg bg-gray-100">
+                                              <img
+                                                src={image.blob || image.url}
+                                                alt={`Product image ${index + 1}`}
+                                                className="w-full h-32 object-cover"
+                                                onError={(e) => {
+                                                  e.currentTarget.style.display = 'none';
+                                                }}
+                                              />
+                                            </div>
+                                          </div>
+                                        )}
+                                      </div>
+                                    ))}
+                                  </div>
                                 </div>
                               )}
                             </div>
