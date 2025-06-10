@@ -437,18 +437,27 @@ export default function AdminDashboard() {
 
   const handleEditProduct = (product: Product) => {
     setEditingProduct(product);
+    
+    // Load existing images from product
+    const existingImages = (product as any).images || [];
+    const formattedImages = existingImages.map((img: any, index: number) => ({
+      url: img.imageUrl || '',
+      blob: img.imageBlob || '',
+      priority: img.priority || index
+    }));
+    
     productForm.reset({
       name: product.name,
       description: product.description,
       price: product.price,
       imageUrl: product.imageUrl || "",
       imageBlob: product.imageBlob || "",
-      images: [],
+      images: formattedImages,
       categoryId: product.categoryId.toString(),
       subcategoryId: product.subcategoryId?.toString() || "",
       isFeatured: Boolean(product.isFeatured),
     });
-    setProductImages([]);
+    setProductImages(formattedImages);
     setProductDialogOpen(true);
   };
 

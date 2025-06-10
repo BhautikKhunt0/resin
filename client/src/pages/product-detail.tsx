@@ -25,14 +25,9 @@ export default function ProductDetail() {
     enabled: !!productId,
   });
 
-  const { data: productImages = [], isLoading: imagesLoading } = useQuery<ProductImage[]>({
-    queryKey: ["/api/products", productId, "images"],
-    queryFn: () => productId ? fetch(`/api/products/${productId}/images`).then(res => res.json()) : Promise.reject(new Error("No product ID")),
-    enabled: !!productId,
-  });
-
-  // Combine product main image with additional images, prioritizing additional images
-  const allImages = productImages.length > 0 ? productImages : (product ? [{
+  // Get images from product data directly
+  const productImages = (product as any)?.images || [];
+  const allImages = productImages.length > 0 ? productImages : (product && (product.imageUrl || product.imageBlob) ? [{
     id: 0,
     productId: product.id,
     imageUrl: product.imageUrl,

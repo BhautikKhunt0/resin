@@ -440,6 +440,7 @@ export class MongoDBStorage implements IStorage {
     if (product.name !== undefined) updateData.name = product.name;
     if (product.description !== undefined) updateData.description = product.description;
     if (product.price !== undefined) updateData.price = product.price;
+    if (product.weight !== undefined) updateData.weight = product.weight;
     if (product.imageUrl !== undefined) updateData.imageUrl = product.imageUrl;
     if (product.imageBlob !== undefined) {
       updateData.imageBlob = product.imageBlob ? Buffer.from(product.imageBlob, 'base64') : null;
@@ -474,24 +475,16 @@ export class MongoDBStorage implements IStorage {
       }
     }
 
-    // Handle multiple images if provided
+    // Handle multiple images if provided - store directly in product document
     if ((product as any).images && Array.isArray((product as any).images)) {
-      // Remove existing product images
-      await ProductImageModel.deleteMany({ productId: existing._id.toString() });
-      
-      // Add new images
       const images = (product as any).images;
-      for (let i = 0; i < images.length; i++) {
-        const image = images[i];
-        if (image.url || image.blob) {
-          await this.createProductImage({
-            productId: id,
-            imageUrl: image.url,
-            imageBlob: image.blob,
-            priority: image.priority || i
-          });
-        }
-      }
+      updateData.images = images.map((image: any, index: number) => ({
+        imageUrl: image.url || image.imageUrl,
+        imageBlob: image.blob || image.imageBlob ? Buffer.from(image.blob || image.imageBlob, 'base64') : undefined,
+        priority: image.priority !== undefined ? image.priority : index
+      })).filter((img: any) => img.imageUrl || img.imageBlob);
+      
+      console.log(`Updating product ${id} with ${updateData.images.length} images`);
     }
 
     const updated = await ProductModel.findByIdAndUpdate(
@@ -501,7 +494,7 @@ export class MongoDBStorage implements IStorage {
     );
     
     if (updated) {
-      console.log(`Product updated with ID: ${updated._id}, has imageBlob: ${!!updated.imageBlob}, has imageUrl: ${!!updated.imageUrl}`);
+      console.log(`Product updated with ID: ${updated._id}, has imageBlob: ${!!updated.imageBlob}, has imageUrl: ${!!updated.imageUrl}, images count: ${updated.images?.length || 0}`);
     }
     
     return updated ? this.convertProduct(updated) : undefined;
