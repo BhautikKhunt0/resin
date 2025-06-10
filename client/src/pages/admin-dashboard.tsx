@@ -21,7 +21,6 @@ import {
   Upload,
   Image as ImageIcon,
   Truck,
-  FileText,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -65,7 +64,7 @@ import { useToast } from "@/hooks/use-toast";
 import { api } from "@/lib/api";
 import { queryClient } from "@/lib/queryClient";
 import { useLocation } from "wouter";
-import type { Product, Category, Order, Banner, Page } from "@shared/schema";
+import type { Product, Category, Order, Banner } from "@shared/schema";
 
 // Form schemas
 const productSchema = z.object({
@@ -107,18 +106,10 @@ const bannerSchema = z.object({
   isActive: z.boolean().optional(),
 });
 
-const pageSchema = z.object({
-  title: z.string().min(1, "Page title is required"),
-  slug: z.string().min(1, "Page slug is required").regex(/^[a-z0-9-]+$/, "Slug can only contain lowercase letters, numbers, and hyphens"),
-  content: z.string().min(1, "Page content is required"),
-  isActive: z.boolean().optional(),
-});
-
 type ProductFormData = z.infer<typeof productSchema>;
 type CategoryFormData = z.infer<typeof categorySchema>;
 type SubcategoryFormData = z.infer<typeof subcategorySchema>;
 type BannerFormData = z.infer<typeof bannerSchema>;
-type PageFormData = z.infer<typeof pageSchema>;
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -127,12 +118,10 @@ export default function AdminDashboard() {
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [editingSubcategory, setEditingSubcategory] = useState<any>(null);
   const [editingBanner, setEditingBanner] = useState<Banner | null>(null);
-  const [editingPage, setEditingPage] = useState<Page | null>(null);
   const [productDialogOpen, setProductDialogOpen] = useState(false);
   const [categoryDialogOpen, setCategoryDialogOpen] = useState(false);
   const [subcategoryDialogOpen, setSubcategoryDialogOpen] = useState(false);
   const [bannerDialogOpen, setBannerDialogOpen] = useState(false);
-  const [pageDialogOpen, setPageDialogOpen] = useState(false);
   const [orderDetailsDialogOpen, setOrderDetailsDialogOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [productImages, setProductImages] = useState<Array<{url: string; blob: string; priority: number}>>([]);
@@ -181,11 +170,6 @@ export default function AdminDashboard() {
     queryFn: () => api.getAdminBanners(token),
   });
 
-  const { data: pages, isLoading: pagesLoading } = useQuery<Page[]>({
-    queryKey: ["/api/admin/pages"],
-    queryFn: () => api.getAdminPages(token),
-  });
-
   // Forms
   const productForm = useForm<ProductFormData>({
     resolver: zodResolver(productSchema),
@@ -230,16 +214,6 @@ export default function AdminDashboard() {
       description: "",
       imageUrl: "",
       imageBlob: "",
-      isActive: true,
-    },
-  });
-
-  const pageForm = useForm<PageFormData>({
-    resolver: zodResolver(pageSchema),
-    defaultValues: {
-      title: "",
-      slug: "",
-      content: "",
       isActive: true,
     },
   });
@@ -419,46 +393,6 @@ export default function AdminDashboard() {
     },
   });
 
-  // Page mutations
-  const createPageMutation = useMutation({
-    mutationFn: (data: any) => api.createPage(token, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/pages"] });
-      setPageDialogOpen(false);
-      pageForm.reset();
-      setEditingPage(null);
-      toast({ title: "Page created successfully" });
-    },
-    onError: () => {
-      toast({ title: "Failed to create page", variant: "destructive" });
-    },
-  });
-
-  const updatePageMutation = useMutation({
-    mutationFn: ({ id, data }: { id: number; data: any }) => api.updatePage(token, id, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/pages"] });
-      setPageDialogOpen(false);
-      pageForm.reset();
-      setEditingPage(null);
-      toast({ title: "Page updated successfully" });
-    },
-    onError: () => {
-      toast({ title: "Failed to update page", variant: "destructive" });
-    },
-  });
-
-  const deletePageMutation = useMutation({
-    mutationFn: (id: number) => api.deletePage(token, id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/pages"] });
-      toast({ title: "Page deleted successfully" });
-    },
-    onError: () => {
-      toast({ title: "Failed to delete page", variant: "destructive" });
-    },
-  });
-
   // Handle individual image file uploads for product images
   const handleImageFileUpload = (event: React.ChangeEvent<HTMLInputElement>, index: number) => {
     const file = event.target.files?.[0];
@@ -503,27 +437,18 @@ export default function AdminDashboard() {
 
   const handleEditProduct = (product: Product) => {
     setEditingProduct(product);
-    
-    // Load existing images from product
-    const existingImages = (product as any).images || [];
-    const formattedImages = existingImages.map((img: any, index: number) => ({
-      url: img.imageUrl || '',
-      blob: img.imageBlob || '',
-      priority: img.priority || index
-    }));
-    
     productForm.reset({
       name: product.name,
       description: product.description,
       price: product.price,
       imageUrl: product.imageUrl || "",
       imageBlob: product.imageBlob || "",
-      images: formattedImages,
+      images: [],
       categoryId: product.categoryId.toString(),
       subcategoryId: product.subcategoryId?.toString() || "",
       isFeatured: Boolean(product.isFeatured),
     });
-    setProductImages(formattedImages);
+    setProductImages([]);
     setProductDialogOpen(true);
   };
 
@@ -657,40 +582,6 @@ export default function AdminDashboard() {
     }
   };
 
-  const handlePageSubmit = (data: PageFormData) => {
-    const submitData = {
-      ...data,
-      isActive: data.isActive ? 1 : 0,
-    };
-    if (editingPage) {
-      updatePageMutation.mutate({ id: editingPage.id, data: submitData });
-    } else {
-      createPageMutation.mutate(submitData);
-    }
-  };
-
-  const handleAddPage = () => {
-    setEditingPage(null);
-    pageForm.reset({
-      title: "",
-      slug: "",
-      content: "",
-      isActive: true,
-    });
-    setPageDialogOpen(true);
-  };
-
-  const handleEditPage = (page: Page) => {
-    setEditingPage(page);
-    pageForm.reset({
-      title: page.title,
-      slug: page.slug,
-      content: page.content,
-      isActive: page.isActive === 1,
-    });
-    setPageDialogOpen(true);
-  };
-
   const handleOrderStatusChange = (orderId: number, newStatus: string) => {
     updateOrderStatusMutation.mutate({ id: orderId, status: newStatus });
   };
@@ -719,7 +610,6 @@ export default function AdminDashboard() {
     { id: "categories", label: "Categories", icon: Tags },
     { id: "subcategories", label: "Subcategories", icon: Tags },
     { id: "banners", label: "Banners", icon: ImageIcon },
-    { id: "pages", label: "Pages", icon: FileText },
   ];
 
   return (
@@ -1355,13 +1245,7 @@ export default function AdminDashboard() {
                             <TableRow key={product.id} className={`border-gray-100 hover:bg-gray-50 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-gray-25'}`}>
                               <TableCell className="py-4 px-6">
                                 {(() => {
-                                  // Use first image from images array if available, otherwise fall back to main image
-                                  const productImages = (product as any)?.images || [];
-                                  const firstImage = productImages.length > 0 ? productImages[0] : null;
-                                  const imageUrl = firstImage 
-                                    ? (firstImage.imageBlob ? `data:image/jpeg;base64,${firstImage.imageBlob}` : firstImage.imageUrl)
-                                    : (product.imageBlob ? `data:image/jpeg;base64,${product.imageBlob}` : product.imageUrl);
-                                  
+                                  const imageUrl = product.imageBlob ? `data:image/jpeg;base64,${product.imageBlob}` : product.imageUrl;
                                   return imageUrl ? (
                                     <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-100 shadow-sm">
                                       <img
@@ -1927,110 +1811,6 @@ export default function AdminDashboard() {
               </Card>
             </div>
           )}
-
-          {/* Pages Tab */}
-          {activeTab === "pages" && (
-            <div className="space-y-6">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <div>
-                  <h2 className="text-2xl font-bold text-gray-900">Pages Management</h2>
-                  <p className="text-gray-600 mt-1">Manage static pages like return policy, terms of service, etc.</p>
-                </div>
-                <Button onClick={handleAddPage} className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 shadow-lg">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Page
-                </Button>
-              </div>
-
-              <Card className="border-0 shadow-lg">
-                <CardContent className="p-0">
-                  {pagesLoading ? (
-                    <div className="p-6 space-y-4">
-                      {[...Array(3)].map((_, i) => (
-                        <div key={i} className="flex items-center space-x-4">
-                          <Skeleton className="h-12 w-12 rounded-lg" />
-                          <div className="space-y-2 flex-1">
-                            <Skeleton className="h-4 w-32" />
-                            <Skeleton className="h-3 w-48" />
-                          </div>
-                          <Skeleton className="h-8 w-16" />
-                        </div>
-                      ))}
-                    </div>
-                  ) : pages && pages.length > 0 ? (
-                    <div className="overflow-x-auto">
-                      <Table>
-                        <TableHeader>
-                          <TableRow className="border-b border-gray-200">
-                            <TableHead className="py-4 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</TableHead>
-                            <TableHead className="py-4 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Slug</TableHead>
-                            <TableHead className="py-4 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</TableHead>
-                            <TableHead className="py-4 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</TableHead>
-                            <TableHead className="py-4 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {pages.map((page) => (
-                            <TableRow key={page.id} className="border-b border-gray-100 hover:bg-gray-50">
-                              <TableCell className="py-4 px-6">
-                                <div className="font-semibold text-gray-900">{page.title}</div>
-                              </TableCell>
-                              <TableCell className="py-4 px-6">
-                                <code className="text-sm bg-gray-100 px-2 py-1 rounded">{page.slug}</code>
-                              </TableCell>
-                              <TableCell className="py-4 px-6">
-                                <Badge 
-                                  variant={page.isActive ? "default" : "secondary"}
-                                  className={page.isActive ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-600"}
-                                >
-                                  {page.isActive ? "Active" : "Inactive"}
-                                </Badge>
-                              </TableCell>
-                              <TableCell className="py-4 px-6">
-                                <div className="text-sm text-gray-500">
-                                  {new Date(page.createdAt).toLocaleDateString()}
-                                </div>
-                              </TableCell>
-                              <TableCell className="py-4 px-6 text-right">
-                                <div className="flex justify-end space-x-2">
-                                  <Button 
-                                    variant="ghost" 
-                                    size="sm" 
-                                    className="h-8 w-8 p-0 text-gray-400 hover:text-blue-600 hover:bg-blue-50"
-                                    onClick={() => handleEditPage(page)}
-                                  >
-                                    <Edit className="h-4 w-4" />
-                                  </Button>
-                                  <Button 
-                                    variant="ghost" 
-                                    size="sm" 
-                                    className="h-8 w-8 p-0 text-gray-400 hover:text-red-600 hover:bg-red-50"
-                                    onClick={() => deletePageMutation.mutate(page.id)}
-                                  >
-                                    <Trash2 className="h-4 w-4" />
-                                  </Button>
-                                </div>
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                    </div>
-                  ) : (
-                    <div className="text-center py-12">
-                      <FileText className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-                      <h3 className="text-lg font-medium text-gray-900 mb-2">No pages yet</h3>
-                      <p className="text-gray-500 mb-6">Create static pages for your store policies and information</p>
-                      <Button onClick={handleAddPage} className="bg-purple-600 hover:bg-purple-700">
-                        <Plus className="h-4 w-4 mr-2" />
-                        Add Your First Page
-                      </Button>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </div>
-          )}
         </main>
       </div>
 
@@ -2318,92 +2098,6 @@ export default function AdminDashboard() {
                 </Button>
                 <Button type="submit" disabled={createBannerMutation.isPending || updateBannerMutation.isPending}>
                   {editingBanner ? "Update" : "Create"} Banner
-                </Button>
-              </div>
-            </form>
-          </Form>
-        </DialogContent>
-      </Dialog>
-
-      {/* Page Dialog */}
-      <Dialog open={pageDialogOpen} onOpenChange={setPageDialogOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>
-              {editingPage ? "Edit Page" : "Add New Page"}
-            </DialogTitle>
-          </DialogHeader>
-          <Form {...pageForm}>
-            <form onSubmit={pageForm.handleSubmit(handlePageSubmit)} className="space-y-4">
-              <FormField
-                control={pageForm.control}
-                name="title"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Page Title</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Return Policy" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={pageForm.control}
-                name="slug"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Page Slug</FormLabel>
-                    <FormControl>
-                      <Input placeholder="return-policy" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={pageForm.control}
-                name="content"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Page Content (HTML)</FormLabel>
-                    <FormControl>
-                      <Textarea 
-                        placeholder="<h1>Page Title</h1><p>Page content...</p>"
-                        className="min-h-[300px]"
-                        {...field} 
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={pageForm.control}
-                name="isActive"
-                render={({ field }) => (
-                  <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                    <div className="space-y-0.5">
-                      <FormLabel className="text-base">Active Page</FormLabel>
-                      <div className="text-sm text-muted-foreground">
-                        Display this page publicly
-                      </div>
-                    </div>
-                    <FormControl>
-                      <Switch
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-              <div className="flex justify-end space-x-2">
-                <Button type="button" variant="outline" onClick={() => setPageDialogOpen(false)}>
-                  Cancel
-                </Button>
-                <Button type="submit" disabled={createPageMutation.isPending || updatePageMutation.isPending}>
-                  {editingPage ? "Update" : "Create"} Page
                 </Button>
               </div>
             </form>

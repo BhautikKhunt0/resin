@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
-import { insertProductSchema, insertProductImageSchema, insertCategorySchema, insertSubcategorySchema, insertOrderSchema, insertBannerSchema, insertPageSchema } from "@shared/schema";
+import { insertProductSchema, insertProductImageSchema, insertCategorySchema, insertSubcategorySchema, insertOrderSchema, insertBannerSchema } from "@shared/schema";
 import { sendOrderConfirmationEmail, sendOrderStatusUpdateEmail } from "./email-service";
 
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
@@ -555,82 +555,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(204).send();
     } catch (error) {
       res.status(500).json({ message: "Failed to delete banner" });
-    }
-  });
-
-  // Public routes - Pages
-  app.get("/api/pages", async (req, res) => {
-    try {
-      const pages = await storage.getActivePages();
-      res.json(pages);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to fetch pages" });
-    }
-  });
-
-  app.get("/api/pages/:slug", async (req, res) => {
-    try {
-      const slug = req.params.slug;
-      const page = await storage.getPageBySlug(slug);
-      
-      if (!page || page.isActive !== 1) {
-        return res.status(404).json({ message: "Page not found" });
-      }
-
-      res.json(page);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to fetch page" });
-    }
-  });
-
-  // Admin routes - Pages
-  app.get("/api/admin/pages", authenticateAdmin, async (req, res) => {
-    try {
-      const pages = await storage.getPages();
-      res.json(pages);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to fetch pages" });
-    }
-  });
-
-  app.post("/api/admin/pages", authenticateAdmin, async (req, res) => {
-    try {
-      const pageData = insertPageSchema.parse(req.body);
-      const page = await storage.createPage(pageData);
-      res.status(201).json(page);
-    } catch (error) {
-      res.status(400).json({ message: "Failed to create page" });
-    }
-  });
-
-  app.put("/api/admin/pages/:id", authenticateAdmin, async (req, res) => {
-    try {
-      const pageId = parseInt(req.params.id);
-      const pageData = insertPageSchema.partial().parse(req.body);
-      const page = await storage.updatePage(pageId, pageData);
-      
-      if (!page) {
-        return res.status(404).json({ message: "Page not found" });
-      }
-
-      res.json(page);
-    } catch (error) {
-      res.status(400).json({ message: "Failed to update page" });
-    }
-  });
-
-  app.delete("/api/admin/pages/:id", authenticateAdmin, async (req, res) => {
-    try {
-      const pageId = parseInt(req.params.id);
-      const deleted = await storage.deletePage(pageId);
-      
-      if (!deleted) {
-        return res.status(404).json({ message: "Page not found" });
-      }
-
-      res.status(204).send();
-    } catch (error) {
-      res.status(500).json({ message: "Failed to delete page" });
     }
   });
 

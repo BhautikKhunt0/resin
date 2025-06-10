@@ -6,7 +6,6 @@ import {
   orders, 
   admins,
   banners,
-  pages,
   type Category,
   type Subcategory,
   type Product,
@@ -14,15 +13,13 @@ import {
   type Order,
   type Admin,
   type Banner,
-  type Page,
   type InsertCategory,
   type InsertSubcategory,
   type InsertProduct,
   type InsertProductImage,
   type InsertOrder,
   type InsertAdmin,
-  type InsertBanner,
-  type InsertPage
+  type InsertBanner
 } from "@shared/schema";
 
 export interface IStorage {
@@ -76,15 +73,6 @@ export interface IStorage {
   createBanner(banner: InsertBanner): Promise<Banner>;
   updateBanner(id: number, banner: Partial<InsertBanner>): Promise<Banner | undefined>;
   deleteBanner(id: number): Promise<boolean>;
-
-  // Pages
-  getPages(): Promise<Page[]>;
-  getActivePages(): Promise<Page[]>;
-  getPageById(id: number): Promise<Page | undefined>;
-  getPageBySlug(slug: string): Promise<Page | undefined>;
-  createPage(page: InsertPage): Promise<Page>;
-  updatePage(id: number, page: Partial<InsertPage>): Promise<Page | undefined>;
-  deletePage(id: number): Promise<boolean>;
 }
 
 export class MemStorage implements IStorage {
@@ -95,7 +83,6 @@ export class MemStorage implements IStorage {
   private orders: Map<number, Order>;
   private admins: Map<number, Admin>;
   private banners: Map<number, Banner>;
-  private pages: Map<number, Page>;
   private currentCategoryId: number;
   private currentSubcategoryId: number;
   private currentProductId: number;
@@ -103,7 +90,6 @@ export class MemStorage implements IStorage {
   private currentOrderId: number;
   private currentAdminId: number;
   private currentBannerId: number;
-  private currentPageId: number;
 
   constructor() {
     this.categories = new Map();
@@ -113,7 +99,6 @@ export class MemStorage implements IStorage {
     this.orders = new Map();
     this.admins = new Map();
     this.banners = new Map();
-    this.pages = new Map();
     this.currentCategoryId = 1;
     this.currentSubcategoryId = 1;
     this.currentProductId = 1;
@@ -121,7 +106,6 @@ export class MemStorage implements IStorage {
     this.currentOrderId = 1;
     this.currentAdminId = 1;
     this.currentBannerId = 1;
-    this.currentPageId = 1;
 
     this.seedData();
   }
@@ -149,10 +133,8 @@ export class MemStorage implements IStorage {
         name: "Premium Wireless Headphones",
         description: "High-quality sound with noise cancellation technology",
         price: "199.99",
-        weight: null,
         imageUrl: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300",
         imageBlob: null,
-        images: [],
         categoryId: electronics.id,
         subcategoryId: headphones.id,
         isFeatured: 1,
@@ -163,10 +145,8 @@ export class MemStorage implements IStorage {
         name: "Smart Watch Pro",
         description: "Advanced fitness tracking and smart notifications",
         price: "299.99",
-        weight: null,
         imageUrl: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300",
         imageBlob: null,
-        images: [],
         categoryId: electronics.id,
         subcategoryId: null,
         isFeatured: 0,
@@ -177,10 +157,8 @@ export class MemStorage implements IStorage {
         name: "Ultra-thin Laptop",
         description: "Powerful performance in a portable design",
         price: "1299.99",
-        weight: null,
         imageUrl: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300",
         imageBlob: null,
-        images: [],
         categoryId: electronics.id,
         subcategoryId: laptops.id,
         isFeatured: 1,
@@ -191,10 +169,8 @@ export class MemStorage implements IStorage {
         name: "Premium Smartphone",
         description: "Latest flagship model with advanced camera system",
         price: "899.99",
-        weight: null,
         imageUrl: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300",
         imageBlob: null,
-        images: [],
         categoryId: electronics.id,
         subcategoryId: smartphones.id,
         isFeatured: 1,
@@ -226,140 +202,6 @@ export class MemStorage implements IStorage {
     ];
 
     banners.forEach(banner => this.banners.set(banner.id, banner));
-
-    // Seed static pages
-    const staticPages: Page[] = [
-      {
-        id: this.currentPageId++,
-        title: "Return Policy",
-        slug: "return-policy",
-        content: `<h1>Return Policy</h1>
-        <p>We want you to be completely satisfied with your purchase. If you're not happy with your order, you can return it within 30 days of delivery.</p>
-        <h2>Return Process</h2>
-        <ol>
-          <li>Contact our customer service team to initiate the return process</li>
-          <li>Package the item in its original packaging</li>
-          <li>Use the prepaid return label we provide</li>
-          <li>Drop off the package at any authorized shipping location</li>
-        </ol>
-        <h2>Conditions</h2>
-        <ul>
-          <li>Items must be unused and in original condition</li>
-          <li>Original packaging and tags must be included</li>
-          <li>Some items may be subject to restocking fees</li>
-        </ul>`,
-        isActive: 1,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-      {
-        id: this.currentPageId++,
-        title: "Terms of Service",
-        slug: "terms-of-service",
-        content: `<h1>Terms of Service</h1>
-        <p>By using our website and services, you agree to comply with and be bound by the following terms and conditions.</p>
-        <h2>Use of Website</h2>
-        <p>You may use our website for lawful purposes only. You agree not to use the site in any way that could damage, disable, overburden, or impair the site.</p>
-        <h2>Product Information</h2>
-        <p>We strive to provide accurate product information, but we do not warrant that product descriptions or other content is accurate, complete, reliable, current, or error-free.</p>
-        <h2>Privacy</h2>
-        <p>Your privacy is important to us. Please review our Privacy Policy to understand how we collect and use your information.</p>`,
-        isActive: 1,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-      {
-        id: this.currentPageId++,
-        title: "Privacy Policy",
-        slug: "privacy-policy",
-        content: `<h1>Privacy Policy</h1>
-        <p>This Privacy Policy describes how we collect, use, and protect your personal information when you visit our website or make a purchase.</p>
-        <h2>Information We Collect</h2>
-        <ul>
-          <li>Personal information you provide (name, email, address, phone number)</li>
-          <li>Payment information (processed securely through third-party providers)</li>
-          <li>Usage data (how you interact with our website)</li>
-        </ul>
-        <h2>How We Use Your Information</h2>
-        <ul>
-          <li>To process and fulfill your orders</li>
-          <li>To communicate with you about your orders</li>
-          <li>To improve our website and services</li>
-          <li>To send promotional emails (with your consent)</li>
-        </ul>
-        <h2>Data Protection</h2>
-        <p>We implement appropriate security measures to protect your personal information against unauthorized access, alteration, disclosure, or destruction.</p>`,
-        isActive: 1,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-      {
-        id: this.currentPageId++,
-        title: "Shipping Information",
-        slug: "shipping-info",
-        content: `<h1>Shipping Information</h1>
-        <p>We offer several shipping options to meet your needs and timeline.</p>
-        <h2>Shipping Options</h2>
-        <table>
-          <tr>
-            <th>Shipping Method</th>
-            <th>Delivery Time</th>
-            <th>Cost</th>
-          </tr>
-          <tr>
-            <td>Standard Shipping</td>
-            <td>5-7 business days</td>
-            <td>$5.99</td>
-          </tr>
-          <tr>
-            <td>Express Shipping</td>
-            <td>2-3 business days</td>
-            <td>$12.99</td>
-          </tr>
-          <tr>
-            <td>Overnight Shipping</td>
-            <td>1 business day</td>
-            <td>$24.99</td>
-          </tr>
-        </table>
-        <h2>Free Shipping</h2>
-        <p>Enjoy free standard shipping on orders over $50!</p>
-        <h2>International Shipping</h2>
-        <p>We currently ship to the United States and Canada. International shipping rates vary by destination.</p>`,
-        isActive: 1,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-      {
-        id: this.currentPageId++,
-        title: "Customer Service",
-        slug: "customer-service",
-        content: `<h1>Customer Service</h1>
-        <p>Our customer service team is here to help you with any questions or concerns.</p>
-        <h2>Contact Information</h2>
-        <ul>
-          <li><strong>Email:</strong> support@modernshop.com</li>
-          <li><strong>Phone:</strong> 1-800-SHOP-NOW</li>
-          <li><strong>Live Chat:</strong> Available on our website</li>
-        </ul>
-        <h2>Business Hours</h2>
-        <ul>
-          <li>Monday - Friday: 9:00 AM - 8:00 PM EST</li>
-          <li>Saturday: 10:00 AM - 6:00 PM EST</li>
-          <li>Sunday: 12:00 PM - 5:00 PM EST</li>
-        </ul>
-        <h2>FAQ</h2>
-        <h3>How can I track my order?</h3>
-        <p>You will receive a tracking number via email once your order has shipped. You can use this number to track your package on our website or the carrier's website.</p>
-        <h3>Can I modify or cancel my order?</h3>
-        <p>Orders can be modified or cancelled within 1 hour of placement. After that, please contact our customer service team for assistance.</p>`,
-        isActive: 1,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-    ];
-
-    staticPages.forEach(page => this.pages.set(page.id, page));
 
     // Seed sample orders
     const sampleOrders: Order[] = [
@@ -499,18 +341,13 @@ export class MemStorage implements IStorage {
 
   async createProduct(product: InsertProduct): Promise<Product> {
     const newProduct: Product = {
+      ...product,
       id: this.currentProductId++,
-      name: product.name,
-      description: product.description,
-      price: product.price,
-      weight: product.weight || null,
+      createdAt: new Date(),
       imageUrl: product.imageUrl || null,
       imageBlob: product.imageBlob || null,
-      images: (product as any).images || [],
-      categoryId: product.categoryId,
       subcategoryId: product.subcategoryId || null,
       isFeatured: product.isFeatured || 0,
-      createdAt: new Date(),
     };
     this.products.set(newProduct.id, newProduct);
     return newProduct;
@@ -663,54 +500,6 @@ export class MemStorage implements IStorage {
 
   async deleteBanner(id: number): Promise<boolean> {
     return this.banners.delete(id);
-  }
-
-  // Pages
-  async getPages(): Promise<Page[]> {
-    return Array.from(this.pages.values());
-  }
-
-  async getActivePages(): Promise<Page[]> {
-    return Array.from(this.pages.values()).filter(page => page.isActive === 1);
-  }
-
-  async getPageById(id: number): Promise<Page | undefined> {
-    return this.pages.get(id);
-  }
-
-  async getPageBySlug(slug: string): Promise<Page | undefined> {
-    return Array.from(this.pages.values()).find(page => page.slug === slug);
-  }
-
-  async createPage(page: InsertPage): Promise<Page> {
-    const newPage: Page = {
-      id: this.currentPageId++,
-      title: page.title,
-      slug: page.slug,
-      content: page.content,
-      isActive: page.isActive ?? 1,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-    this.pages.set(newPage.id, newPage);
-    return newPage;
-  }
-
-  async updatePage(id: number, page: Partial<InsertPage>): Promise<Page | undefined> {
-    const existingPage = this.pages.get(id);
-    if (!existingPage) return undefined;
-
-    const updatedPage: Page = {
-      ...existingPage,
-      ...page,
-      updatedAt: new Date(),
-    };
-    this.pages.set(id, updatedPage);
-    return updatedPage;
-  }
-
-  async deletePage(id: number): Promise<boolean> {
-    return this.pages.delete(id);
   }
 }
 

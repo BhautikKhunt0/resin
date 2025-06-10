@@ -16,9 +16,6 @@ const categorySchema = new Schema<ICategory>({
   imageBlob: { type: Buffer }
 }, { timestamps: false });
 
-// Add indexes for better query performance
-categorySchema.index({ name: 1 });
-
 export const CategoryModel = model<ICategory>('Category', categorySchema);
 
 // Subcategory Schema
@@ -39,10 +36,6 @@ const subcategorySchema = new Schema<ISubcategory>({
   imageBlob: { type: Buffer }
 }, { timestamps: false });
 
-// Add indexes for better query performance
-subcategorySchema.index({ categoryId: 1 });
-subcategorySchema.index({ name: 1 });
-
 export const SubcategoryModel = model<ISubcategory>('Subcategory', subcategorySchema);
 
 // Product Schema
@@ -54,11 +47,6 @@ export interface IProduct extends Document {
   weight?: string;
   imageUrl?: string;
   imageBlob?: Buffer;
-  images?: Array<{
-    imageUrl?: string;
-    imageBlob?: Buffer;
-    priority: number;
-  }>;
   categoryId: string;
   subcategoryId?: string;
   isFeatured: number;
@@ -72,24 +60,10 @@ const productSchema = new Schema<IProduct>({
   weight: { type: String },
   imageUrl: { type: String },
   imageBlob: { type: Buffer },
-  images: [{
-    imageUrl: { type: String },
-    imageBlob: { type: Buffer },
-    priority: { type: Number, default: 0 }
-  }],
   categoryId: { type: String, required: true },
   subcategoryId: { type: String },
   isFeatured: { type: Number, default: 0 }
 }, { timestamps: true });
-
-// Add compound indexes for better query performance
-productSchema.index({ categoryId: 1 });
-productSchema.index({ subcategoryId: 1 });
-productSchema.index({ isFeatured: 1 });
-productSchema.index({ categoryId: 1, subcategoryId: 1 });
-productSchema.index({ categoryId: 1, isFeatured: 1 });
-productSchema.index({ name: 1 });
-productSchema.index({ createdAt: -1 });
 
 export const ProductModel = model<IProduct>('Product', productSchema);
 
@@ -182,28 +156,4 @@ const bannerSchema = new Schema<IBanner>({
   createdAt: { type: Date, default: Date.now }
 }, { timestamps: false });
 
-// Add indexes for better query performance
-bannerSchema.index({ isActive: 1 });
-bannerSchema.index({ createdAt: -1 });
-
 export const BannerModel = model<IBanner>('Banner', bannerSchema);
-
-// Page Schema
-export interface IPage extends Document {
-  _id: string;
-  title: string;
-  slug: string;
-  content: string;
-  isActive: number;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-const pageSchema = new Schema<IPage>({
-  title: { type: String, required: true },
-  slug: { type: String, required: true, unique: true },
-  content: { type: String, required: true },
-  isActive: { type: Number, default: 1 }
-}, { timestamps: true });
-
-export const PageModel = model<IPage>('Page', pageSchema);

@@ -6,15 +6,13 @@ import {
   type Order,
   type Admin,
   type Banner,
-  type Page,
   type InsertCategory,
   type InsertSubcategory,
   type InsertProduct,
   type InsertProductImage,
   type InsertOrder,
   type InsertAdmin,
-  type InsertBanner,
-  type InsertPage
+  type InsertBanner
 } from "@shared/schema";
 import { IStorage } from "./storage";
 import {
@@ -25,15 +23,13 @@ import {
   OrderModel,
   AdminModel,
   BannerModel,
-  PageModel,
   type ICategory,
   type ISubcategory,
   type IProduct,
   type IProductImage,
   type IOrder,
   type IAdmin,
-  type IBanner,
-  type IPage
+  type IBanner
 } from "@shared/mongodb-schema";
 
 export class MongoDBStorage implements IStorage {
@@ -97,14 +93,8 @@ export class MongoDBStorage implements IStorage {
       name: doc.name,
       description: doc.description,
       price: doc.price,
-      weight: doc.weight || null,
       imageUrl: doc.imageUrl || null,
       imageBlob: doc.imageBlob ? doc.imageBlob.toString('base64') : null,
-      images: doc.images ? doc.images.map(img => ({
-        imageUrl: img.imageUrl || null,
-        imageBlob: img.imageBlob ? img.imageBlob.toString('base64') : null,
-        priority: img.priority
-      })) : [],
       categoryId: parseInt(doc.categoryId.slice(-8), 16),
       subcategoryId: doc.subcategoryId ? parseInt(doc.subcategoryId.slice(-8), 16) : null,
       isFeatured: doc.isFeatured,
@@ -162,38 +152,16 @@ export class MongoDBStorage implements IStorage {
     };
   }
 
-  private convertPage(doc: IPage): Page {
-    return {
-      id: parseInt(doc._id.toString().slice(-8), 16),
-      title: doc.title,
-      slug: doc.slug,
-      content: doc.content,
-      isActive: doc.isActive,
-      createdAt: doc.createdAt,
-      updatedAt: doc.updatedAt
-    };
-  }
-
   // Categories
   async getCategories(): Promise<Category[]> {
-    try {
-      const categories = await CategoryModel.find().lean();
-      return categories.map(cat => this.convertCategory(cat));
-    } catch (error) {
-      console.error('Error fetching categories:', error);
-      throw error;
-    }
+    const categories = await CategoryModel.find();
+    return categories.map(cat => this.convertCategory(cat));
   }
 
   async getCategoryById(id: number): Promise<Category | undefined> {
-    try {
-      const categories = await CategoryModel.find().lean();
-      const category = categories.find(cat => parseInt(cat._id.toString().slice(-8), 16) === id);
-      return category ? this.convertCategory(category) : undefined;
-    } catch (error) {
-      console.error('Error fetching category by ID:', error);
-      throw error;
-    }
+    const categories = await CategoryModel.find();
+    const category = categories.find(cat => parseInt(cat._id.toString().slice(-8), 16) === id);
+    return category ? this.convertCategory(category) : undefined;
   }
 
   async createCategory(category: InsertCategory): Promise<Category> {
@@ -271,39 +239,23 @@ export class MongoDBStorage implements IStorage {
 
   // Subcategories
   async getSubcategories(): Promise<Subcategory[]> {
-    try {
-      const subcategories = await SubcategoryModel.find().lean();
-      return subcategories.map(sub => this.convertSubcategory(sub));
-    } catch (error) {
-      console.error('Error fetching subcategories:', error);
-      throw error;
-    }
+    const subcategories = await SubcategoryModel.find();
+    return subcategories.map(sub => this.convertSubcategory(sub));
   }
 
   async getSubcategoriesByCategory(categoryId: number): Promise<Subcategory[]> {
-    try {
-      const categories = await CategoryModel.find().lean();
-      const category = categories.find(cat => parseInt(cat._id.toString().slice(-8), 16) === categoryId);
-      
-      if (!category) return [];
+    const categories = await CategoryModel.find();
+    const category = categories.find(cat => parseInt(cat._id.toString().slice(-8), 16) === categoryId);
+    if (!category) return [];
 
-      const subcategories = await SubcategoryModel.find({ categoryId: category._id.toString() }).lean();
-      return subcategories.map(sub => this.convertSubcategory(sub));
-    } catch (error) {
-      console.error('Error fetching subcategories by category:', error);
-      throw error;
-    }
+    const subcategories = await SubcategoryModel.find({ categoryId: category._id.toString() });
+    return subcategories.map(sub => this.convertSubcategory(sub));
   }
 
   async getSubcategoryById(id: number): Promise<Subcategory | undefined> {
-    try {
-      const subcategories = await SubcategoryModel.find().lean();
-      const subcategory = subcategories.find(sub => parseInt(sub._id.toString().slice(-8), 16) === id);
-      return subcategory ? this.convertSubcategory(subcategory) : undefined;
-    } catch (error) {
-      console.error('Error fetching subcategory by ID:', error);
-      throw error;
-    }
+    const subcategories = await SubcategoryModel.find();
+    const subcategory = subcategories.find(sub => parseInt(sub._id.toString().slice(-8), 16) === id);
+    return subcategory ? this.convertSubcategory(subcategory) : undefined;
   }
 
   async createSubcategory(subcategory: InsertSubcategory): Promise<Subcategory> {
@@ -397,56 +349,32 @@ export class MongoDBStorage implements IStorage {
 
   // Products
   async getProducts(): Promise<Product[]> {
-    try {
-      // Use lean() for better performance when we don't need full mongoose documents
-      const products = await ProductModel.find().lean();
-      return products.map(prod => this.convertProduct(prod));
-    } catch (error) {
-      console.error('Error fetching products:', error);
-      throw error;
-    }
+    const products = await ProductModel.find();
+    return products.map(prod => this.convertProduct(prod));
   }
 
   async getProductsByCategory(categoryId: number): Promise<Product[]> {
-    try {
-      // Find category by converting numeric ID back to ObjectId pattern
-      const categories = await CategoryModel.find().lean();
-      const category = categories.find(cat => parseInt(cat._id.toString().slice(-8), 16) === categoryId);
-      
-      if (!category) return [];
+    const categories = await CategoryModel.find();
+    const category = categories.find(cat => parseInt(cat._id.toString().slice(-8), 16) === categoryId);
+    if (!category) return [];
 
-      const products = await ProductModel.find({ categoryId: category._id.toString() }).lean();
-      return products.map(prod => this.convertProduct(prod));
-    } catch (error) {
-      console.error('Error fetching products by category:', error);
-      throw error;
-    }
+    const products = await ProductModel.find({ categoryId: category._id.toString() });
+    return products.map(prod => this.convertProduct(prod));
   }
 
   async getProductsBySubcategory(subcategoryId: number): Promise<Product[]> {
-    try {
-      const subcategories = await SubcategoryModel.find().lean();
-      const subcategory = subcategories.find(sub => parseInt(sub._id.toString().slice(-8), 16) === subcategoryId);
-      
-      if (!subcategory) return [];
+    const subcategories = await SubcategoryModel.find();
+    const subcategory = subcategories.find(sub => parseInt(sub._id.toString().slice(-8), 16) === subcategoryId);
+    if (!subcategory) return [];
 
-      const products = await ProductModel.find({ subcategoryId: subcategory._id.toString() }).lean();
-      return products.map(prod => this.convertProduct(prod));
-    } catch (error) {
-      console.error('Error fetching products by subcategory:', error);
-      throw error;
-    }
+    const products = await ProductModel.find({ subcategoryId: subcategory._id.toString() });
+    return products.map(prod => this.convertProduct(prod));
   }
 
   async getProductById(id: number): Promise<Product | undefined> {
-    try {
-      const products = await ProductModel.find().lean();
-      const product = products.find(prod => parseInt(prod._id.toString().slice(-8), 16) === id);
-      return product ? this.convertProduct(product) : undefined;
-    } catch (error) {
-      console.error('Error fetching product by ID:', error);
-      throw error;
-    }
+    const products = await ProductModel.find();
+    const product = products.find(prod => parseInt(prod._id.toString().slice(-8), 16) === id);
+    return product ? this.convertProduct(product) : undefined;
   }
 
   async createProduct(product: InsertProduct): Promise<Product> {
@@ -464,32 +392,35 @@ export class MongoDBStorage implements IStorage {
         }
       }
 
-      // Handle multiple images if provided
-      let imagesArray: Array<{imageUrl?: string; imageBlob?: Buffer; priority: number}> = [];
-      if ((product as any).images && Array.isArray((product as any).images)) {
-        const images = (product as any).images;
-        imagesArray = images.map((image: any, index: number) => ({
-          imageUrl: image.url || image.imageUrl,
-          imageBlob: image.blob || image.imageBlob ? Buffer.from(image.blob || image.imageBlob, 'base64') : undefined,
-          priority: image.priority !== undefined ? image.priority : index
-        })).filter((img: any) => img.imageUrl || img.imageBlob);
-      }
-
       const newProduct = new ProductModel({
         name: product.name,
         description: product.description,
         price: product.price,
-        weight: product.weight,
         imageUrl: product.imageUrl,
         imageBlob: product.imageBlob ? Buffer.from(product.imageBlob, 'base64') : undefined,
-        images: imagesArray,
         categoryId: category._id.toString(),
         subcategoryId: subcategoryId,
         isFeatured: product.isFeatured || 0
       });
       const saved = await newProduct.save();
 
-      console.log(`Product created with ID: ${saved._id}, has imageBlob: ${!!saved.imageBlob}, has imageUrl: ${!!saved.imageUrl}, images count: ${saved.images?.length || 0}`);
+      // Handle multiple images if provided
+      if ((product as any).images && Array.isArray((product as any).images)) {
+        const images = (product as any).images;
+        for (let i = 0; i < images.length; i++) {
+          const image = images[i];
+          if (image.url || image.blob) {
+            await this.createProductImage({
+              productId: parseInt(saved._id.toString().slice(-8), 16),
+              imageUrl: image.url,
+              imageBlob: image.blob,
+              priority: image.priority || i
+            });
+          }
+        }
+      }
+
+      console.log(`Product created with ID: ${saved._id}, has imageBlob: ${!!saved.imageBlob}, has imageUrl: ${!!saved.imageUrl}`);
       return this.convertProduct(saved);
     } catch (error) {
       console.error('Error creating product:', error);
@@ -506,7 +437,6 @@ export class MongoDBStorage implements IStorage {
     if (product.name !== undefined) updateData.name = product.name;
     if (product.description !== undefined) updateData.description = product.description;
     if (product.price !== undefined) updateData.price = product.price;
-    if (product.weight !== undefined) updateData.weight = product.weight;
     if (product.imageUrl !== undefined) updateData.imageUrl = product.imageUrl;
     if (product.imageBlob !== undefined) {
       updateData.imageBlob = product.imageBlob ? Buffer.from(product.imageBlob, 'base64') : null;
@@ -541,16 +471,24 @@ export class MongoDBStorage implements IStorage {
       }
     }
 
-    // Handle multiple images if provided - store directly in product document
+    // Handle multiple images if provided
     if ((product as any).images && Array.isArray((product as any).images)) {
-      const images = (product as any).images;
-      updateData.images = images.map((image: any, index: number) => ({
-        imageUrl: image.url || image.imageUrl,
-        imageBlob: image.blob || image.imageBlob ? Buffer.from(image.blob || image.imageBlob, 'base64') : undefined,
-        priority: image.priority !== undefined ? image.priority : index
-      })).filter((img: any) => img.imageUrl || img.imageBlob);
+      // Remove existing product images
+      await ProductImageModel.deleteMany({ productId: existing._id.toString() });
       
-      console.log(`Updating product ${id} with ${updateData.images.length} images`);
+      // Add new images
+      const images = (product as any).images;
+      for (let i = 0; i < images.length; i++) {
+        const image = images[i];
+        if (image.url || image.blob) {
+          await this.createProductImage({
+            productId: id,
+            imageUrl: image.url,
+            imageBlob: image.blob,
+            priority: image.priority || i
+          });
+        }
+      }
     }
 
     const updated = await ProductModel.findByIdAndUpdate(
@@ -560,7 +498,7 @@ export class MongoDBStorage implements IStorage {
     );
     
     if (updated) {
-      console.log(`Product updated with ID: ${updated._id}, has imageBlob: ${!!updated.imageBlob}, has imageUrl: ${!!updated.imageUrl}, images count: ${updated.images?.length || 0}`);
+      console.log(`Product updated with ID: ${updated._id}, has imageBlob: ${!!updated.imageBlob}, has imageUrl: ${!!updated.imageUrl}`);
     }
     
     return updated ? this.convertProduct(updated) : undefined;
@@ -723,34 +661,19 @@ export class MongoDBStorage implements IStorage {
 
   // Banners
   async getBanners(): Promise<Banner[]> {
-    try {
-      const banners = await BannerModel.find().lean();
-      return banners.map(banner => this.convertBanner(banner));
-    } catch (error) {
-      console.error('Error fetching banners:', error);
-      throw error;
-    }
+    const banners = await BannerModel.find();
+    return banners.map(banner => this.convertBanner(banner));
   }
 
   async getActiveBanners(): Promise<Banner[]> {
-    try {
-      const banners = await BannerModel.find({ isActive: 1 }).lean();
-      return banners.map(banner => this.convertBanner(banner));
-    } catch (error) {
-      console.error('Error fetching active banners:', error);
-      throw error;
-    }
+    const banners = await BannerModel.find({ isActive: 1 });
+    return banners.map(banner => this.convertBanner(banner));
   }
 
   async getBannerById(id: number): Promise<Banner | undefined> {
-    try {
-      const banners = await BannerModel.find().lean();
-      const banner = banners.find(b => parseInt(b._id.toString().slice(-8), 16) === id);
-      return banner ? this.convertBanner(banner) : undefined;
-    } catch (error) {
-      console.error('Error fetching banner by ID:', error);
-      throw error;
-    }
+    const banners = await BannerModel.find();
+    const banner = banners.find(b => parseInt(b._id.toString().slice(-8), 16) === id);
+    return banner ? this.convertBanner(banner) : undefined;
   }
 
   async createBanner(banner: InsertBanner): Promise<Banner> {
@@ -791,67 +714,6 @@ export class MongoDBStorage implements IStorage {
     if (!existing) return false;
 
     await BannerModel.findByIdAndDelete(existing._id);
-    return true;
-  }
-
-  // Pages
-  async getPages(): Promise<Page[]> {
-    const pages = await PageModel.find();
-    return pages.map(page => this.convertPage(page));
-  }
-
-  async getActivePages(): Promise<Page[]> {
-    const pages = await PageModel.find({ isActive: 1 });
-    return pages.map(page => this.convertPage(page));
-  }
-
-  async getPageById(id: number): Promise<Page | undefined> {
-    const pages = await PageModel.find();
-    const page = pages.find(p => parseInt(p._id.toString().slice(-8), 16) === id);
-    return page ? this.convertPage(page) : undefined;
-  }
-
-  async getPageBySlug(slug: string): Promise<Page | undefined> {
-    const page = await PageModel.findOne({ slug });
-    return page ? this.convertPage(page) : undefined;
-  }
-
-  async createPage(page: InsertPage): Promise<Page> {
-    const newPage = new PageModel({
-      title: page.title,
-      slug: page.slug,
-      content: page.content,
-      isActive: page.isActive ?? 1
-    });
-    const saved = await newPage.save();
-    return this.convertPage(saved);
-  }
-
-  async updatePage(id: number, page: Partial<InsertPage>): Promise<Page | undefined> {
-    const pages = await PageModel.find();
-    const existing = pages.find(p => parseInt(p._id.toString().slice(-8), 16) === id);
-    if (!existing) return undefined;
-
-    const updateData: any = {};
-    if (page.title !== undefined) updateData.title = page.title;
-    if (page.slug !== undefined) updateData.slug = page.slug;
-    if (page.content !== undefined) updateData.content = page.content;
-    if (page.isActive !== undefined) updateData.isActive = page.isActive;
-
-    const updated = await PageModel.findByIdAndUpdate(
-      existing._id,
-      updateData,
-      { new: true }
-    );
-    return updated ? this.convertPage(updated) : undefined;
-  }
-
-  async deletePage(id: number): Promise<boolean> {
-    const pages = await PageModel.find();
-    const existing = pages.find(p => parseInt(p._id.toString().slice(-8), 16) === id);
-    if (!existing) return false;
-
-    await PageModel.findByIdAndDelete(existing._id);
     return true;
   }
 }
