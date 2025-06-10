@@ -25,7 +25,7 @@ export default function ProductDetail() {
     enabled: !!productId,
   });
 
-  // Get images from product data directly
+  // Get images from product data directly - prioritize images array over main image
   const productImages = (product as any)?.images || [];
   const allImages = productImages.length > 0 ? productImages : (product && (product.imageUrl || product.imageBlob) ? [{
     id: 0,

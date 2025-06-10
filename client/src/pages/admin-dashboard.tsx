@@ -1254,7 +1254,13 @@ export default function AdminDashboard() {
                             <TableRow key={product.id} className={`border-gray-100 hover:bg-gray-50 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-gray-25'}`}>
                               <TableCell className="py-4 px-6">
                                 {(() => {
-                                  const imageUrl = product.imageBlob ? `data:image/jpeg;base64,${product.imageBlob}` : product.imageUrl;
+                                  // Use first image from images array if available, otherwise fall back to main image
+                                  const productImages = (product as any)?.images || [];
+                                  const firstImage = productImages.length > 0 ? productImages[0] : null;
+                                  const imageUrl = firstImage 
+                                    ? (firstImage.imageBlob ? `data:image/jpeg;base64,${firstImage.imageBlob}` : firstImage.imageUrl)
+                                    : (product.imageBlob ? `data:image/jpeg;base64,${product.imageBlob}` : product.imageUrl);
+                                  
                                   return imageUrl ? (
                                     <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-100 shadow-sm">
                                       <img

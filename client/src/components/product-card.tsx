@@ -37,7 +37,13 @@ export default function ProductCard({ product }: ProductCardProps) {
         <div className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300">
           <div className="relative aspect-square overflow-hidden rounded-t-lg bg-gray-200">
             {(() => {
-              const imageUrl = product.imageBlob ? `data:image/jpeg;base64,${product.imageBlob}` : product.imageUrl;
+              // Use first image from images array if available, otherwise fall back to main image
+              const productImages = (product as any)?.images || [];
+              const firstImage = productImages.length > 0 ? productImages[0] : null;
+              const imageUrl = firstImage 
+                ? (firstImage.imageBlob ? `data:image/jpeg;base64,${firstImage.imageBlob}` : firstImage.imageUrl)
+                : (product.imageBlob ? `data:image/jpeg;base64,${product.imageBlob}` : product.imageUrl);
+              
               return imageUrl ? (
                 <img
                   src={imageUrl}
