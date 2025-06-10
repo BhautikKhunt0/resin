@@ -97,8 +97,6 @@ export default function ProductDetail() {
     );
   }
 
-
-
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -162,24 +160,24 @@ export default function ProductDetail() {
                 </div>
               )}
             </div>
-            
-            {/* Thumbnail Navigation */}
+
+            {/* Thumbnail Gallery */}
             {allImages.length > 1 && (
               <div className="grid grid-cols-4 gap-2">
-                {allImages.map((image, index) => {
-                  const imageUrl = image.imageBlob ? `data:image/jpeg;base64,${image.imageBlob}` : image.imageUrl;
+                {allImages.map((image: any, index: number) => {
+                  const thumbnailUrl = image?.imageBlob ? `data:image/jpeg;base64,${image.imageBlob}` : image?.imageUrl;
                   return (
                     <button
-                      key={image.id}
+                      key={index}
                       onClick={() => setSelectedImageIndex(index)}
-                      className={`aspect-square bg-white rounded-lg overflow-hidden shadow-sm border-2 transition-all duration-200 ${
-                        index === selectedImageIndex ? 'border-primary' : 'border-transparent hover:border-gray-300'
+                      className={`relative aspect-square bg-white rounded-lg overflow-hidden border-2 transition-all duration-200 ${
+                        selectedImageIndex === index ? 'border-primary' : 'border-gray-200 hover:border-gray-300'
                       }`}
                     >
-                      {imageUrl ? (
+                      {thumbnailUrl ? (
                         <img
-                          src={imageUrl}
-                          alt={`${product.name} - Image ${index + 1}`}
+                          src={thumbnailUrl}
+                          alt={`${product.name} ${index + 1}`}
                           className="w-full h-full object-cover"
                         />
                       ) : (
@@ -204,6 +202,9 @@ export default function ProductDetail() {
                 <span className="text-3xl font-bold text-primary">
                   ₹{parseFloat(product.price).toFixed(2)}
                 </span>
+                {product.isFeatured === 1 && (
+                  <Badge variant="secondary">Featured</Badge>
+                )}
               </div>
             </div>
 
@@ -226,29 +227,22 @@ export default function ProductDetail() {
               </CardContent>
             </Card>
 
-            {/* Features */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <Card>
-                <CardContent className="p-4 text-center">
-                  <Truck className="h-8 w-8 text-primary mx-auto mb-2" />
-                  <h4 className="font-semibold text-sm">Free Shipping</h4>
-                  <p className="text-xs text-gray-600">On orders over $50</p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="p-4 text-center">
-                  <Shield className="h-8 w-8 text-primary mx-auto mb-2" />
-                  <h4 className="font-semibold text-sm">Warranty</h4>
-                  <p className="text-xs text-gray-600">1 year coverage</p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="p-4 text-center">
-                  <Package className="h-8 w-8 text-primary mx-auto mb-2" />
-                  <h4 className="font-semibold text-sm">Easy Returns</h4>
-                  <p className="text-xs text-gray-600">30-day policy</p>
-                </CardContent>
-              </Card>
+            {/* Product Features */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="flex items-center space-x-3 p-4 bg-white rounded-lg shadow-sm">
+                <Truck className="h-8 w-8 text-primary" />
+                <div>
+                  <h4 className="font-semibold text-gray-900">Free Shipping</h4>
+                  <p className="text-sm text-gray-600">On orders over ₹500</p>
+                </div>
+              </div>
+              <div className="flex items-center space-x-3 p-4 bg-white rounded-lg shadow-sm">
+                <Shield className="h-8 w-8 text-primary" />
+                <div>
+                  <h4 className="font-semibold text-gray-900">Warranty</h4>
+                  <p className="text-sm text-gray-600">1 year warranty</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
