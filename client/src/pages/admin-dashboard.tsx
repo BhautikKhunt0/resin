@@ -257,6 +257,126 @@ export default function AdminDashboard() {
     },
   });
 
+  // Category mutations
+  const createCategoryMutation = useMutation({
+    mutationFn: (data: any) => api.createCategory(token, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/categories"] });
+      setCategoryDialogOpen(false);
+      categoryForm.reset();
+      setEditingCategory(null);
+      toast({ title: "Category created successfully" });
+    },
+    onError: () => {
+      toast({ title: "Failed to create category", variant: "destructive" });
+    },
+  });
+
+  const updateCategoryMutation = useMutation({
+    mutationFn: ({ id, data }: { id: number; data: any }) => api.updateCategory(token, id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/categories"] });
+      setCategoryDialogOpen(false);
+      categoryForm.reset();
+      setEditingCategory(null);
+      toast({ title: "Category updated successfully" });
+    },
+    onError: () => {
+      toast({ title: "Failed to update category", variant: "destructive" });
+    },
+  });
+
+  const deleteCategoryMutation = useMutation({
+    mutationFn: (id: number) => api.deleteCategory(token, id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/categories"] });
+      toast({ title: "Category deleted successfully" });
+    },
+    onError: () => {
+      toast({ title: "Failed to delete category", variant: "destructive" });
+    },
+  });
+
+  // Subcategory mutations
+  const createSubcategoryMutation = useMutation({
+    mutationFn: (data: any) => api.createSubcategory(token, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/subcategories"] });
+      setSubcategoryDialogOpen(false);
+      subcategoryForm.reset();
+      setEditingSubcategory(null);
+      toast({ title: "Subcategory created successfully" });
+    },
+    onError: () => {
+      toast({ title: "Failed to create subcategory", variant: "destructive" });
+    },
+  });
+
+  const updateSubcategoryMutation = useMutation({
+    mutationFn: ({ id, data }: { id: number; data: any }) => api.updateSubcategory(token, id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/subcategories"] });
+      setSubcategoryDialogOpen(false);
+      subcategoryForm.reset();
+      setEditingSubcategory(null);
+      toast({ title: "Subcategory updated successfully" });
+    },
+    onError: () => {
+      toast({ title: "Failed to update subcategory", variant: "destructive" });
+    },
+  });
+
+  const deleteSubcategoryMutation = useMutation({
+    mutationFn: (id: number) => api.deleteSubcategory(token, id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/subcategories"] });
+      toast({ title: "Subcategory deleted successfully" });
+    },
+    onError: () => {
+      toast({ title: "Failed to delete subcategory", variant: "destructive" });
+    },
+  });
+
+  // Banner mutations
+  const createBannerMutation = useMutation({
+    mutationFn: (data: any) => api.createBanner(token, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/banners"] });
+      setBannerDialogOpen(false);
+      bannerForm.reset();
+      setEditingBanner(null);
+      toast({ title: "Banner created successfully" });
+    },
+    onError: () => {
+      toast({ title: "Failed to create banner", variant: "destructive" });
+    },
+  });
+
+  const updateBannerMutation = useMutation({
+    mutationFn: ({ id, data }: { id: number; data: any }) => api.updateBanner(token, id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/banners"] });
+      setBannerDialogOpen(false);
+      bannerForm.reset();
+      setEditingBanner(null);
+      toast({ title: "Banner updated successfully" });
+    },
+    onError: () => {
+      toast({ title: "Failed to update banner", variant: "destructive" });
+    },
+  });
+
+  const deleteBannerMutation = useMutation({
+    mutationFn: (id: number) => api.deleteBanner(token, id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/banners"] });
+      toast({ title: "Banner deleted successfully" });
+    },
+    onError: () => {
+      toast({ title: "Failed to delete banner", variant: "destructive" });
+    },
+  });
+
   // Handle individual image file uploads for product images
   const handleImageFileUpload = (event: React.ChangeEvent<HTMLInputElement>, index: number) => {
     const file = event.target.files?.[0];
@@ -336,6 +456,81 @@ export default function AdminDashboard() {
   const handleLogout = () => {
     logout();
     setLocation("/admin/login");
+  };
+
+  const handleViewOrderDetails = (order: Order) => {
+    setSelectedOrder(order);
+    setOrderDetailsDialogOpen(true);
+  };
+
+  const handleAddCategory = () => {
+    setEditingCategory(null);
+    categoryForm.reset({
+      name: "",
+      description: "",
+      imageUrl: "",
+      imageBlob: "",
+    });
+    setCategoryDialogOpen(true);
+  };
+
+  const handleEditCategory = (category: Category) => {
+    setEditingCategory(category);
+    categoryForm.reset({
+      name: category.name,
+      description: category.description || "",
+      imageUrl: category.imageUrl || "",
+      imageBlob: category.imageBlob || "",
+    });
+    setCategoryDialogOpen(true);
+  };
+
+  const handleAddSubcategory = () => {
+    setEditingSubcategory(null);
+    subcategoryForm.reset({
+      name: "",
+      description: "",
+      categoryId: "",
+      imageUrl: "",
+      imageBlob: "",
+    });
+    setSubcategoryDialogOpen(true);
+  };
+
+  const handleEditSubcategory = (subcategory: any) => {
+    setEditingSubcategory(subcategory);
+    subcategoryForm.reset({
+      name: subcategory.name,
+      description: subcategory.description || "",
+      categoryId: subcategory.categoryId.toString(),
+      imageUrl: subcategory.imageUrl || "",
+      imageBlob: subcategory.imageBlob || "",
+    });
+    setSubcategoryDialogOpen(true);
+  };
+
+  const handleAddBanner = () => {
+    setEditingBanner(null);
+    bannerForm.reset({
+      title: "",
+      description: "",
+      imageUrl: "",
+      imageBlob: "",
+      isActive: true,
+    });
+    setBannerDialogOpen(true);
+  };
+
+  const handleEditBanner = (banner: Banner) => {
+    setEditingBanner(banner);
+    bannerForm.reset({
+      title: banner.title,
+      description: banner.description || "",
+      imageUrl: banner.imageUrl || "",
+      imageBlob: banner.imageBlob || "",
+      isActive: banner.isActive === 1,
+    });
+    setBannerDialogOpen(true);
   };
 
   // Statistics
@@ -1099,6 +1294,7 @@ export default function AdminDashboard() {
                             <TableHead className="py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">Amount</TableHead>
                             <TableHead className="py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</TableHead>
                             <TableHead className="py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">Date</TableHead>
+                            <TableHead className="py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">Actions</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -1112,7 +1308,7 @@ export default function AdminDashboard() {
                               </TableCell>
                               <TableCell className="py-4 px-6">
                                 <div className="text-sm text-gray-900">
-                                  {order.orderItems.length} item{order.orderItems.length > 1 ? 's' : ''}
+                                  {Array.isArray(order.orderItems) ? order.orderItems.length : 0} item{Array.isArray(order.orderItems) && order.orderItems.length > 1 ? 's' : ''}
                                 </div>
                               </TableCell>
                               <TableCell className="py-4 px-6">
@@ -1129,6 +1325,18 @@ export default function AdminDashboard() {
                               <TableCell className="py-4 px-6">
                                 <div className="text-sm text-gray-500">
                                   {new Date(order.createdAt).toLocaleDateString()}
+                                </div>
+                              </TableCell>
+                              <TableCell className="py-4 px-6">
+                                <div className="flex space-x-2">
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => handleViewOrderDetails(order)}
+                                    className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                                  >
+                                    <Eye className="h-4 w-4" />
+                                  </Button>
                                 </div>
                               </TableCell>
                             </TableRow>
@@ -1156,10 +1364,14 @@ export default function AdminDashboard() {
                   <h2 className="text-2xl font-bold text-gray-900">Categories Management</h2>
                   <p className="text-gray-600 mt-1">Organize your products into categories</p>
                 </div>
-                <Button className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 shadow-lg">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Category
-                </Button>
+                <Dialog open={categoryDialogOpen} onOpenChange={setCategoryDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button onClick={handleAddCategory} className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 shadow-lg">
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add Category
+                    </Button>
+                  </DialogTrigger>
+                </Dialog>
               </div>
 
               <Card className="border-0 shadow-lg">
@@ -1190,10 +1402,20 @@ export default function AdminDashboard() {
                             </div>
                           </div>
                           <div className="flex justify-end space-x-2 mt-4">
-                            <Button variant="ghost" size="sm" className="text-gray-400 hover:text-blue-600">
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              onClick={() => handleEditCategory(category)}
+                              className="text-gray-400 hover:text-blue-600"
+                            >
                               <Edit className="h-4 w-4" />
                             </Button>
-                            <Button variant="ghost" size="sm" className="text-gray-400 hover:text-red-600">
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              onClick={() => deleteCategoryMutation.mutate(category.id)}
+                              className="text-gray-400 hover:text-red-600"
+                            >
                               <Trash2 className="h-4 w-4" />
                             </Button>
                           </div>
@@ -1400,6 +1622,106 @@ export default function AdminDashboard() {
           )}
         </main>
       </div>
+
+      {/* Order Details Dialog */}
+      <Dialog open={orderDetailsDialogOpen} onOpenChange={setOrderDetailsDialogOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader className="pb-6 border-b border-gray-100">
+            <div className="flex items-center space-x-3">
+              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                <ShoppingBag className="h-6 w-6 text-green-600" />
+              </div>
+              <div>
+                <DialogTitle className="text-2xl font-bold text-gray-900">
+                  Order Details #{selectedOrder?.id}
+                </DialogTitle>
+                <p className="text-sm text-gray-500 mt-1">
+                  Placed on {selectedOrder ? new Date(selectedOrder.createdAt).toLocaleDateString() : ''}
+                </p>
+              </div>
+            </div>
+          </DialogHeader>
+          
+          {selectedOrder && (
+            <div className="py-6 space-y-6">
+              {/* Customer Information */}
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">Customer Information</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm font-medium text-gray-700">Name</p>
+                    <p className="text-gray-900">{selectedOrder.customerName}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-700">Email</p>
+                    <p className="text-gray-900">{selectedOrder.customerEmail}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-700">Phone</p>
+                    <p className="text-gray-900">{selectedOrder.customerPhone}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-700">Status</p>
+                    <Badge 
+                      variant={selectedOrder.status === "Processing" ? "default" : "secondary"}
+                      className={selectedOrder.status === "Processing" ? "bg-blue-100 text-blue-800" : "bg-gray-100 text-gray-600"}
+                    >
+                      {selectedOrder.status}
+                    </Badge>
+                  </div>
+                </div>
+                <div className="mt-4">
+                  <p className="text-sm font-medium text-gray-700">Shipping Address</p>
+                  <p className="text-gray-900">{selectedOrder.shippingAddress}</p>
+                </div>
+              </div>
+
+              {/* Order Items */}
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">Order Items</h3>
+                <Card>
+                  <CardContent className="p-0">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Product</TableHead>
+                          <TableHead>Price</TableHead>
+                          <TableHead>Quantity</TableHead>
+                          <TableHead>Total</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {Array.isArray(selectedOrder.orderItems) && selectedOrder.orderItems.map((item: any, index: number) => (
+                          <TableRow key={index}>
+                            <TableCell>
+                              <div className="font-medium">{item.name}</div>
+                            </TableCell>
+                            <TableCell>₹{parseFloat(item.price.toString()).toFixed(2)}</TableCell>
+                            <TableCell>
+                              <Badge variant="outline">{item.quantity}</Badge>
+                            </TableCell>
+                            <TableCell className="font-medium">
+                              ₹{(parseFloat(item.price.toString()) * item.quantity).toFixed(2)}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Order Summary */}
+              <div className="bg-blue-50 p-4 rounded-lg">
+                <div className="flex justify-between items-center">
+                  <span className="text-lg font-semibold text-gray-900">Total Amount</span>
+                  <span className="text-2xl font-bold text-blue-600">₹{parseFloat(selectedOrder.totalAmount).toFixed(2)}</span>
+                </div>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
