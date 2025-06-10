@@ -176,14 +176,26 @@ export class MongoDBStorage implements IStorage {
 
   // Categories
   async getCategories(): Promise<Category[]> {
-    const categories = await CategoryModel.find();
-    return categories.map(cat => this.convertCategory(cat));
+    try {
+      const categories = await CategoryModel.find().lean();
+      return categories.map(cat => this.convertCategory(cat));
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+      throw error;
+    }
   }
 
   async getCategoryById(id: number): Promise<Category | undefined> {
-    const categories = await CategoryModel.find();
-    const category = categories.find(cat => parseInt(cat._id.toString().slice(-8), 16) === id);
-    return category ? this.convertCategory(category) : undefined;
+    try {
+      const hexId = id.toString(16).padStart(8, '0');
+      const category = await CategoryModel.findOne({
+        _id: { $regex: new RegExp(hexId + '$') }
+      }).lean();
+      return category ? this.convertCategory(category) : undefined;
+    } catch (error) {
+      console.error('Error fetching category by ID:', error);
+      throw error;
+    }
   }
 
   async createCategory(category: InsertCategory): Promise<Category> {
@@ -261,23 +273,43 @@ export class MongoDBStorage implements IStorage {
 
   // Subcategories
   async getSubcategories(): Promise<Subcategory[]> {
-    const subcategories = await SubcategoryModel.find();
-    return subcategories.map(sub => this.convertSubcategory(sub));
+    try {
+      const subcategories = await SubcategoryModel.find().lean();
+      return subcategories.map(sub => this.convertSubcategory(sub));
+    } catch (error) {
+      console.error('Error fetching subcategories:', error);
+      throw error;
+    }
   }
 
   async getSubcategoriesByCategory(categoryId: number): Promise<Subcategory[]> {
-    const categories = await CategoryModel.find();
-    const category = categories.find(cat => parseInt(cat._id.toString().slice(-8), 16) === categoryId);
-    if (!category) return [];
+    try {
+      const hexId = categoryId.toString(16).padStart(8, '0');
+      const category = await CategoryModel.findOne({
+        _id: { $regex: new RegExp(hexId + '$') }
+      }).lean();
+      
+      if (!category) return [];
 
-    const subcategories = await SubcategoryModel.find({ categoryId: category._id.toString() });
-    return subcategories.map(sub => this.convertSubcategory(sub));
+      const subcategories = await SubcategoryModel.find({ categoryId: category._id.toString() }).lean();
+      return subcategories.map(sub => this.convertSubcategory(sub));
+    } catch (error) {
+      console.error('Error fetching subcategories by category:', error);
+      throw error;
+    }
   }
 
   async getSubcategoryById(id: number): Promise<Subcategory | undefined> {
-    const subcategories = await SubcategoryModel.find();
-    const subcategory = subcategories.find(sub => parseInt(sub._id.toString().slice(-8), 16) === id);
-    return subcategory ? this.convertSubcategory(subcategory) : undefined;
+    try {
+      const hexId = id.toString(16).padStart(8, '0');
+      const subcategory = await SubcategoryModel.findOne({
+        _id: { $regex: new RegExp(hexId + '$') }
+      }).lean();
+      return subcategory ? this.convertSubcategory(subcategory) : undefined;
+    } catch (error) {
+      console.error('Error fetching subcategory by ID:', error);
+      throw error;
+    }
   }
 
   async createSubcategory(subcategory: InsertSubcategory): Promise<Subcategory> {
@@ -371,32 +403,65 @@ export class MongoDBStorage implements IStorage {
 
   // Products
   async getProducts(): Promise<Product[]> {
-    const products = await ProductModel.find();
-    return products.map(prod => this.convertProduct(prod));
+    try {
+      // Use lean() for better performance when we don't need full mongoose documents
+      const products = await ProductModel.find().lean();
+      return products.map(prod => this.convertProduct(prod));
+    } catch (error) {
+      console.error('Error fetching products:', error);
+      throw error;
+    }
   }
 
   async getProductsByCategory(categoryId: number): Promise<Product[]> {
-    const categories = await CategoryModel.find();
-    const category = categories.find(cat => parseInt(cat._id.toString().slice(-8), 16) === categoryId);
-    if (!category) return [];
+    try {
+      // Create a more efficient ID lookup using regex pattern
+      const hexId = categoryId.toString(16).padStart(8, '0');
+      const category = await CategoryModel.findOne({
+        _id: { $regex: new RegExp(hexId + '$') }
+      }).lean();
+      
+      if (!category) return [];
 
-    const products = await ProductModel.find({ categoryId: category._id.toString() });
-    return products.map(prod => this.convertProduct(prod));
+      const products = await ProductModel.find({ categoryId: category._id.toString() }).lean();
+      return products.map(prod => this.convertProduct(prod));
+    } catch (error) {
+      console.error('Error fetching products by category:', error);
+      throw error;
+    }
   }
 
   async getProductsBySubcategory(subcategoryId: number): Promise<Product[]> {
-    const subcategories = await SubcategoryModel.find();
-    const subcategory = subcategories.find(sub => parseInt(sub._id.toString().slice(-8), 16) === subcategoryId);
-    if (!subcategory) return [];
+    try {
+      // Create a more efficient ID lookup using regex pattern
+      const hexId = subcategoryId.toString(16).padStart(8, '0');
+      const subcategory = await SubcategoryModel.findOne({
+        _id: { $regex: new RegExp(hexId + '$') }
+      }).lean();
+      
+      if (!subcategory) return [];
 
-    const products = await ProductModel.find({ subcategoryId: subcategory._id.toString() });
-    return products.map(prod => this.convertProduct(prod));
+      const products = await ProductModel.find({ subcategoryId: subcategory._id.toString() }).lean();
+      return products.map(prod => this.convertProduct(prod));
+    } catch (error) {
+      console.error('Error fetching products by subcategory:', error);
+      throw error;
+    }
   }
 
   async getProductById(id: number): Promise<Product | undefined> {
-    const products = await ProductModel.find();
-    const product = products.find(prod => parseInt(prod._id.toString().slice(-8), 16) === id);
-    return product ? this.convertProduct(product) : undefined;
+    try {
+      // Use efficient regex lookup instead of fetching all products
+      const hexId = id.toString(16).padStart(8, '0');
+      const product = await ProductModel.findOne({
+        _id: { $regex: new RegExp(hexId + '$') }
+      }).lean();
+      
+      return product ? this.convertProduct(product) : undefined;
+    } catch (error) {
+      console.error('Error fetching product by ID:', error);
+      throw error;
+    }
   }
 
   async createProduct(product: InsertProduct): Promise<Product> {
@@ -673,19 +738,36 @@ export class MongoDBStorage implements IStorage {
 
   // Banners
   async getBanners(): Promise<Banner[]> {
-    const banners = await BannerModel.find();
-    return banners.map(banner => this.convertBanner(banner));
+    try {
+      const banners = await BannerModel.find().lean();
+      return banners.map(banner => this.convertBanner(banner));
+    } catch (error) {
+      console.error('Error fetching banners:', error);
+      throw error;
+    }
   }
 
   async getActiveBanners(): Promise<Banner[]> {
-    const banners = await BannerModel.find({ isActive: 1 });
-    return banners.map(banner => this.convertBanner(banner));
+    try {
+      const banners = await BannerModel.find({ isActive: 1 }).lean();
+      return banners.map(banner => this.convertBanner(banner));
+    } catch (error) {
+      console.error('Error fetching active banners:', error);
+      throw error;
+    }
   }
 
   async getBannerById(id: number): Promise<Banner | undefined> {
-    const banners = await BannerModel.find();
-    const banner = banners.find(b => parseInt(b._id.toString().slice(-8), 16) === id);
-    return banner ? this.convertBanner(banner) : undefined;
+    try {
+      const hexId = id.toString(16).padStart(8, '0');
+      const banner = await BannerModel.findOne({
+        _id: { $regex: new RegExp(hexId + '$') }
+      }).lean();
+      return banner ? this.convertBanner(banner) : undefined;
+    } catch (error) {
+      console.error('Error fetching banner by ID:', error);
+      throw error;
+    }
   }
 
   async createBanner(banner: InsertBanner): Promise<Banner> {
