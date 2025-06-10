@@ -167,3 +167,23 @@ const bannerSchema = new Schema<IBanner>({
 }, { timestamps: false });
 
 export const BannerModel = model<IBanner>('Banner', bannerSchema);
+
+// Page Schema
+export interface IPage extends Document {
+  _id: string;
+  title: string;
+  slug: string;
+  content: string;
+  isActive: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+const pageSchema = new Schema<IPage>({
+  title: { type: String, required: true },
+  slug: { type: String, required: true, unique: true },
+  content: { type: String, required: true },
+  isActive: { type: Number, default: 1 }
+}, { timestamps: true });
+
+export const PageModel = model<IPage>('Page', pageSchema);

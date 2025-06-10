@@ -6,13 +6,15 @@ import {
   type Order,
   type Admin,
   type Banner,
+  type Page,
   type InsertCategory,
   type InsertSubcategory,
   type InsertProduct,
   type InsertProductImage,
   type InsertOrder,
   type InsertAdmin,
-  type InsertBanner
+  type InsertBanner,
+  type InsertPage
 } from "@shared/schema";
 import { IStorage } from "./storage";
 import {
@@ -23,13 +25,15 @@ import {
   OrderModel,
   AdminModel,
   BannerModel,
+  PageModel,
   type ICategory,
   type ISubcategory,
   type IProduct,
   type IProductImage,
   type IOrder,
   type IAdmin,
-  type IBanner
+  type IBanner,
+  type IPage
 } from "@shared/mongodb-schema";
 
 export class MongoDBStorage implements IStorage {
