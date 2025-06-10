@@ -342,6 +342,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Product Images routes
+  app.get("/api/products/:id/images", async (req, res) => {
+    try {
+      const productId = parseInt(req.params.id);
+      const images = await storage.getProductImages(productId);
+      res.json(images);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch product images" });
+    }
+  });
+
+  app.get("/api/admin/products/:id/images", authenticateAdmin, async (req, res) => {
+    try {
+      const productId = parseInt(req.params.id);
+      const images = await storage.getProductImages(productId);
+      res.json(images);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch product images" });
+    }
+  });
+
   app.delete("/api/admin/products/:id", authenticateAdmin, async (req, res) => {
     try {
       const productId = parseInt(req.params.id);
