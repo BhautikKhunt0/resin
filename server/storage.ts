@@ -6,6 +6,7 @@ import {
   orders, 
   admins,
   banners,
+  pages,
   type Category,
   type Subcategory,
   type Product,
@@ -13,13 +14,15 @@ import {
   type Order,
   type Admin,
   type Banner,
+  type Page,
   type InsertCategory,
   type InsertSubcategory,
   type InsertProduct,
   type InsertProductImage,
   type InsertOrder,
   type InsertAdmin,
-  type InsertBanner
+  type InsertBanner,
+  type InsertPage
 } from "@shared/schema";
 
 export interface IStorage {
@@ -73,6 +76,15 @@ export interface IStorage {
   createBanner(banner: InsertBanner): Promise<Banner>;
   updateBanner(id: number, banner: Partial<InsertBanner>): Promise<Banner | undefined>;
   deleteBanner(id: number): Promise<boolean>;
+
+  // Pages
+  getPages(): Promise<Page[]>;
+  getActivePages(): Promise<Page[]>;
+  getPageById(id: number): Promise<Page | undefined>;
+  getPageBySlug(slug: string): Promise<Page | undefined>;
+  createPage(page: InsertPage): Promise<Page>;
+  updatePage(id: number, page: Partial<InsertPage>): Promise<Page | undefined>;
+  deletePage(id: number): Promise<boolean>;
 }
 
 export class MemStorage implements IStorage {
@@ -83,6 +95,7 @@ export class MemStorage implements IStorage {
   private orders: Map<number, Order>;
   private admins: Map<number, Admin>;
   private banners: Map<number, Banner>;
+  private pages: Map<number, Page>;
   private currentCategoryId: number;
   private currentSubcategoryId: number;
   private currentProductId: number;
@@ -90,6 +103,7 @@ export class MemStorage implements IStorage {
   private currentOrderId: number;
   private currentAdminId: number;
   private currentBannerId: number;
+  private currentPageId: number;
 
   constructor() {
     this.categories = new Map();
@@ -99,6 +113,7 @@ export class MemStorage implements IStorage {
     this.orders = new Map();
     this.admins = new Map();
     this.banners = new Map();
+    this.pages = new Map();
     this.currentCategoryId = 1;
     this.currentSubcategoryId = 1;
     this.currentProductId = 1;
@@ -106,6 +121,7 @@ export class MemStorage implements IStorage {
     this.currentOrderId = 1;
     this.currentAdminId = 1;
     this.currentBannerId = 1;
+    this.currentPageId = 1;
 
     this.seedData();
   }
