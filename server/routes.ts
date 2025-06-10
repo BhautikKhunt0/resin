@@ -309,27 +309,94 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Admin routes - Products
   app.post("/api/admin/products", authenticateAdmin, async (req, res) => {
     try {
-      const productData = insertProductSchema.parse(req.body);
-      const product = await storage.createProduct(productData);
+      console.log('Creating product with data keys:', Object.keys(req.body));
+      
+      // Extract images from the request body
+      const { images, ...productData } = req.body;
+      
+      // Validate and parse the product data (without images)
+      const validatedProductData = insertProductSchema.parse(productData);
+      console.log('Parsed product data:', validatedProductData);
+      
+      // Create the product first
+      const product = await storage.createProduct(validatedProductData);
+      console.log('Created product with ID:', product.id);
+
+      // Handle images if provided
+      if (images && Array.isArray(images)) {
+        console.log('Processing', images.length, 'images for new product', product.id);
+        
+        // Add images
+        for (let i = 0; i < images.length; i++) {
+          const image = images[i];
+          if (image.url || image.blob) {
+            const imageData = {
+              productId: product.id,
+              imageUrl: image.url || '',
+              imageBlob: image.blob || null,
+              priority: i
+            };
+            
+            console.log('Creating product image:', { productId: product.id, hasUrl: !!image.url, hasBlob: !!image.blob, priority: i });
+            await storage.createProductImage(imageData);
+          }
+        }
+      }
+
       res.status(201).json(product);
     } catch (error) {
-      res.status(400).json({ message: "Failed to create product" });
+      console.error('Product creation error:', error);
+      res.status(400).json({ 
+        message: "Failed to create product",
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
     }
   });
 
   app.put("/api/admin/products/:id", authenticateAdmin, async (req, res) => {
     try {
       const productId = parseInt(req.params.id);
-      console.log('Updating product:', productId, 'with data:', req.body);
+      console.log('Updating product:', productId, 'with data keys:', Object.keys(req.body));
       
-      // Validate and parse the request data
-      const productData = insertProductSchema.partial().parse(req.body);
-      console.log('Parsed product data:', productData);
+      // Extract images from the request body
+      const { images, ...productData } = req.body;
       
-      const product = await storage.updateProduct(productId, productData);
+      // Validate and parse the product data (without images)
+      const validatedProductData = insertProductSchema.partial().parse(productData);
+      console.log('Parsed product data:', validatedProductData);
+      
+      // Update the product
+      const product = await storage.updateProduct(productId, validatedProductData);
       
       if (!product) {
         return res.status(404).json({ message: "Product not found" });
+      }
+
+      // Handle images if provided
+      if (images && Array.isArray(images)) {
+        console.log('Processing', images.length, 'images for product', productId);
+        
+        // Clear existing images first
+        const existingImages = await storage.getProductImages(productId);
+        for (const existingImage of existingImages) {
+          await storage.deleteProductImage(existingImage.id);
+        }
+        
+        // Add new images
+        for (let i = 0; i < images.length; i++) {
+          const image = images[i];
+          if (image.url || image.blob) {
+            const imageData = {
+              productId,
+              imageUrl: image.url || '',
+              imageBlob: image.blob || null,
+              priority: i
+            };
+            
+            console.log('Creating product image:', { productId, hasUrl: !!image.url, hasBlob: !!image.blob, priority: i });
+            await storage.createProductImage(imageData);
+          }
+        }
       }
 
       res.json(product);
