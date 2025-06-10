@@ -125,6 +125,9 @@ export default function AdminDashboard() {
   const [orderDetailsDialogOpen, setOrderDetailsDialogOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [productImages, setProductImages] = useState<Array<{url: string; blob: string; priority: number}>>([]);
+  const [orderStatusFilter, setOrderStatusFilter] = useState<string>("");
+  const [orderDateFrom, setOrderDateFrom] = useState<string>("");
+  const [orderDateTo, setOrderDateTo] = useState<string>("");
 
   const { admin, token, logout, isAuthenticated } = useAuth();
   const { toast } = useToast();
@@ -183,17 +186,6 @@ export default function AdminDashboard() {
     },
   });
 
-  const bannerForm = useForm<BannerFormData>({
-    resolver: zodResolver(bannerSchema),
-    defaultValues: {
-      title: "",
-      description: "",
-      imageUrl: "",
-      imageBlob: "",
-      isActive: true,
-    },
-  });
-
   const categoryForm = useForm<CategoryFormData>({
     resolver: zodResolver(categorySchema),
     defaultValues: {
@@ -212,6 +204,17 @@ export default function AdminDashboard() {
       categoryId: "",
       imageUrl: "",
       imageBlob: "",
+    },
+  });
+
+  const bannerForm = useForm<BannerFormData>({
+    resolver: zodResolver(bannerSchema),
+    defaultValues: {
+      title: "",
+      description: "",
+      imageUrl: "",
+      imageBlob: "",
+      isActive: true,
     },
   });
 
@@ -377,6 +380,19 @@ export default function AdminDashboard() {
     },
   });
 
+  // Order status update mutation
+  const updateOrderStatusMutation = useMutation({
+    mutationFn: ({ id, status }: { id: number; status: string }) => api.updateOrderStatus(token, id, status),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/orders"] });
+      setOrderDetailsDialogOpen(false);
+      toast({ title: "Order status updated and email sent to customer" });
+    },
+    onError: () => {
+      toast({ title: "Failed to update order status", variant: "destructive" });
+    },
+  });
+
   // Handle individual image file uploads for product images
   const handleImageFileUpload = (event: React.ChangeEvent<HTMLInputElement>, index: number) => {
     const file = event.target.files?.[0];
@@ -532,6 +548,55 @@ export default function AdminDashboard() {
     });
     setBannerDialogOpen(true);
   };
+
+  // Form submit handlers
+  const handleCategorySubmit = (data: CategoryFormData) => {
+    if (editingCategory) {
+      updateCategoryMutation.mutate({ id: editingCategory.id, data });
+    } else {
+      createCategoryMutation.mutate(data);
+    }
+  };
+
+  const handleSubcategorySubmit = (data: SubcategoryFormData) => {
+    const submitData = {
+      ...data,
+      categoryId: parseInt(data.categoryId),
+    };
+    if (editingSubcategory) {
+      updateSubcategoryMutation.mutate({ id: editingSubcategory.id, data: submitData });
+    } else {
+      createSubcategoryMutation.mutate(submitData);
+    }
+  };
+
+  const handleBannerSubmit = (data: BannerFormData) => {
+    const submitData = {
+      ...data,
+      isActive: data.isActive ? 1 : 0,
+    };
+    if (editingBanner) {
+      updateBannerMutation.mutate({ id: editingBanner.id, data: submitData });
+    } else {
+      createBannerMutation.mutate(submitData);
+    }
+  };
+
+  const handleOrderStatusChange = (orderId: number, newStatus: string) => {
+    updateOrderStatusMutation.mutate({ id: orderId, status: newStatus });
+  };
+
+  // Filter orders based on status and date
+  const filteredOrders = orders?.filter(order => {
+    const statusMatch = !orderStatusFilter || order.status === orderStatusFilter;
+    const orderDate = new Date(order.createdAt);
+    const fromDate = orderDateFrom ? new Date(orderDateFrom) : null;
+    const toDate = orderDateTo ? new Date(orderDateTo) : null;
+    
+    const dateMatch = (!fromDate || orderDate >= fromDate) && (!toDate || orderDate <= toDate);
+    
+    return statusMatch && dateMatch;
+  }) || [];
 
   // Statistics
   const totalProducts = products?.length || 0;
@@ -1269,6 +1334,63 @@ export default function AdminDashboard() {
                 </div>
               </div>
 
+              {/* Order Filters */}
+              <Card className="border-0 shadow-lg">
+                <CardContent className="p-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Filter Orders</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <label className="text-sm font-medium text-gray-700 mb-2 block">Status</label>
+                      <Select value={orderStatusFilter} onValueChange={setOrderStatusFilter}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="All Statuses" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="">All Statuses</SelectItem>
+                          <SelectItem value="Processing">Processing</SelectItem>
+                          <SelectItem value="Shipped">Shipped</SelectItem>
+                          <SelectItem value="Delivered">Delivered</SelectItem>
+                          <SelectItem value="Cancelled">Cancelled</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-700 mb-2 block">From Date</label>
+                      <Input
+                        type="date"
+                        value={orderDateFrom}
+                        onChange={(e) => setOrderDateFrom(e.target.value)}
+                        className="h-11"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-700 mb-2 block">To Date</label>
+                      <Input
+                        type="date"
+                        value={orderDateTo}
+                        onChange={(e) => setOrderDateTo(e.target.value)}
+                        className="h-11"
+                      />
+                    </div>
+                  </div>
+                  <div className="mt-4 flex gap-2">
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        setOrderStatusFilter("");
+                        setOrderDateFrom("");
+                        setOrderDateTo("");
+                      }}
+                    >
+                      Clear Filters
+                    </Button>
+                    <span className="text-sm text-gray-500 flex items-center">
+                      Showing {filteredOrders.length} of {orders?.length || 0} orders
+                    </span>
+                  </div>
+                </CardContent>
+              </Card>
+
               <Card className="border-0 shadow-lg">
                 <CardContent className="p-0">
                   {ordersLoading ? (
@@ -1284,7 +1406,7 @@ export default function AdminDashboard() {
                         </div>
                       ))}
                     </div>
-                  ) : orders && orders.length > 0 ? (
+                  ) : filteredOrders && filteredOrders.length > 0 ? (
                     <div className="overflow-hidden">
                       <Table>
                         <TableHeader className="bg-gray-50">
@@ -1298,7 +1420,7 @@ export default function AdminDashboard() {
                           </TableRow>
                         </TableHeader>
                         <TableBody>
-                          {orders.map((order, index) => (
+                          {filteredOrders.map((order, index) => (
                             <TableRow key={order.id} className={`border-gray-100 hover:bg-gray-50 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-gray-25'}`}>
                               <TableCell className="py-4 px-6">
                                 <div>
@@ -1315,12 +1437,20 @@ export default function AdminDashboard() {
                                 <div className="font-semibold text-gray-900">₹{parseFloat(order.totalAmount).toFixed(2)}</div>
                               </TableCell>
                               <TableCell className="py-4 px-6">
-                                <Badge 
-                                  variant={order.status === "Processing" ? "default" : "secondary"}
-                                  className={order.status === "Processing" ? "bg-blue-100 text-blue-800" : "bg-gray-100 text-gray-600"}
+                                <Select
+                                  value={order.status}
+                                  onValueChange={(newStatus) => handleOrderStatusChange(order.id, newStatus)}
                                 >
-                                  {order.status}
-                                </Badge>
+                                  <SelectTrigger className="w-32">
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="Processing">Processing</SelectItem>
+                                    <SelectItem value="Shipped">Shipped</SelectItem>
+                                    <SelectItem value="Delivered">Delivered</SelectItem>
+                                    <SelectItem value="Cancelled">Cancelled</SelectItem>
+                                  </SelectContent>
+                                </Select>
                               </TableCell>
                               <TableCell className="py-4 px-6">
                                 <div className="text-sm text-gray-500">
@@ -1347,8 +1477,8 @@ export default function AdminDashboard() {
                   ) : (
                     <div className="text-center py-12">
                       <ShoppingBag className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-                      <h3 className="text-lg font-medium text-gray-900 mb-2">No orders yet</h3>
-                      <p className="text-gray-500 mb-6">Orders will appear here once customers start purchasing</p>
+                      <h3 className="text-lg font-medium text-gray-900 mb-2">No orders found</h3>
+                      <p className="text-gray-500 mb-6">No orders match your current filters</p>
                     </div>
                   )}
                 </CardContent>
@@ -1720,6 +1850,197 @@ export default function AdminDashboard() {
               </div>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Category Dialog */}
+      <Dialog open={categoryDialogOpen} onOpenChange={setCategoryDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>
+              {editingCategory ? "Edit Category" : "Add New Category"}
+            </DialogTitle>
+          </DialogHeader>
+          <Form {...categoryForm}>
+            <form onSubmit={categoryForm.handleSubmit(handleCategorySubmit)} className="space-y-4">
+              <FormField
+                control={categoryForm.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Category Name</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Electronics, Clothing, etc." {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={categoryForm.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Description</FormLabel>
+                    <FormControl>
+                      <Textarea placeholder="Category description..." {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <div className="flex justify-end space-x-2">
+                <Button type="button" variant="outline" onClick={() => setCategoryDialogOpen(false)}>
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={createCategoryMutation.isPending || updateCategoryMutation.isPending}>
+                  {editingCategory ? "Update" : "Create"} Category
+                </Button>
+              </div>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Subcategory Dialog */}
+      <Dialog open={subcategoryDialogOpen} onOpenChange={setSubcategoryDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>
+              {editingSubcategory ? "Edit Subcategory" : "Add New Subcategory"}
+            </DialogTitle>
+          </DialogHeader>
+          <Form {...subcategoryForm}>
+            <form onSubmit={subcategoryForm.handleSubmit(handleSubcategorySubmit)} className="space-y-4">
+              <FormField
+                control={subcategoryForm.control}
+                name="categoryId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Parent Category</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a category" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {categories?.map((category) => (
+                          <SelectItem key={category.id} value={category.id.toString()}>
+                            {category.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={subcategoryForm.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Subcategory Name</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Smartphones, T-shirts, etc." {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={subcategoryForm.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Description</FormLabel>
+                    <FormControl>
+                      <Textarea placeholder="Subcategory description..." {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <div className="flex justify-end space-x-2">
+                <Button type="button" variant="outline" onClick={() => setSubcategoryDialogOpen(false)}>
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={createSubcategoryMutation.isPending || updateSubcategoryMutation.isPending}>
+                  {editingSubcategory ? "Update" : "Create"} Subcategory
+                </Button>
+              </div>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Banner Dialog */}
+      <Dialog open={bannerDialogOpen} onOpenChange={setBannerDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>
+              {editingBanner ? "Edit Banner" : "Add New Banner"}
+            </DialogTitle>
+          </DialogHeader>
+          <Form {...bannerForm}>
+            <form onSubmit={bannerForm.handleSubmit(handleBannerSubmit)} className="space-y-4">
+              <FormField
+                control={bannerForm.control}
+                name="title"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Banner Title</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Summer Sale - Up to 50% Off!" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={bannerForm.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Description</FormLabel>
+                    <FormControl>
+                      <Textarea placeholder="Banner description..." {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={bannerForm.control}
+                name="isActive"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                    <div className="space-y-0.5">
+                      <FormLabel className="text-base">Active Banner</FormLabel>
+                      <div className="text-sm text-muted-foreground">
+                        Display this banner on the homepage
+                      </div>
+                    </div>
+                    <FormControl>
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+              <div className="flex justify-end space-x-2">
+                <Button type="button" variant="outline" onClick={() => setBannerDialogOpen(false)}>
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={createBannerMutation.isPending || updateBannerMutation.isPending}>
+                  {editingBanner ? "Update" : "Create"} Banner
+                </Button>
+              </div>
+            </form>
+          </Form>
         </DialogContent>
       </Dialog>
     </div>
