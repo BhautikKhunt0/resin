@@ -348,6 +348,7 @@ export default function AdminDashboard() {
     { id: "products", label: "Products", icon: Package },
     { id: "orders", label: "Orders", icon: ShoppingBag },
     { id: "categories", label: "Categories", icon: Tags },
+    { id: "subcategories", label: "Subcategories", icon: Tags },
     { id: "banners", label: "Banners", icon: ImageIcon },
   ];
 
@@ -445,11 +446,6 @@ export default function AdminDashboard() {
           >
             <Menu className="h-6 w-6" />
           </button>
-          <div className="flex-1">
-            <h1 className="text-lg font-semibold text-gray-900 capitalize">
-              {activeTab === "dashboard" ? "Dashboard Overview" : `${activeTab} Management`}
-            </h1>
-          </div>
         </div>
 
         {/* Page content */}
@@ -502,6 +498,74 @@ export default function AdminDashboard() {
                   <CardContent>
                     <div className="text-3xl font-bold text-purple-900">₹{totalRevenue.toFixed(2)}</div>
                     <p className="text-xs text-purple-600 mt-1">Total sales revenue</p>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Recent Orders Section */}
+              <div className="mt-8">
+                <Card className="border-0 shadow-lg">
+                  <CardHeader className="pb-4">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-xl font-semibold text-gray-900">Recent Orders</CardTitle>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => setActiveTab("orders")}
+                        className="text-blue-600 border-blue-200 hover:bg-blue-50"
+                      >
+                        View All
+                      </Button>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="p-0">
+                    {ordersLoading ? (
+                      <div className="p-6 space-y-4">
+                        {[...Array(3)].map((_, i) => (
+                          <div key={i} className="flex items-center space-x-4">
+                            <Skeleton className="h-12 w-12 rounded-full" />
+                            <div className="space-y-2 flex-1">
+                              <Skeleton className="h-4 w-48" />
+                              <Skeleton className="h-3 w-24" />
+                            </div>
+                            <Skeleton className="h-6 w-16" />
+                          </div>
+                        ))}
+                      </div>
+                    ) : orders && orders.length > 0 ? (
+                      <div className="divide-y divide-gray-100">
+                        {orders.slice(0, 5).map((order) => (
+                          <div key={order.id} className="p-6 hover:bg-gray-50 transition-colors">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center space-x-4">
+                                <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center">
+                                  <ShoppingBag className="h-5 w-5 text-white" />
+                                </div>
+                                <div>
+                                  <p className="font-semibold text-gray-900">{order.customerName}</p>
+                                  <p className="text-sm text-gray-500">{order.customerEmail}</p>
+                                </div>
+                              </div>
+                              <div className="text-right">
+                                <p className="font-semibold text-gray-900">₹{parseFloat(order.totalAmount).toFixed(2)}</p>
+                                <Badge 
+                                  variant={order.status === "Processing" ? "default" : "secondary"}
+                                  className="mt-1"
+                                >
+                                  {order.status}
+                                </Badge>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-8">
+                        <ShoppingBag className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+                        <h3 className="text-lg font-medium text-gray-900 mb-2">No orders yet</h3>
+                        <p className="text-gray-500">Orders will appear here once customers start purchasing</p>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               </div>
@@ -988,6 +1052,341 @@ export default function AdminDashboard() {
                       <Button onClick={handleAddProduct} className="bg-blue-600 hover:bg-blue-700">
                         <Plus className="h-4 w-4 mr-2" />
                         Add Your First Product
+                      </Button>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {/* Orders Tab */}
+          {activeTab === "orders" && (
+            <div className="space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900">Orders Management</h2>
+                  <p className="text-gray-600 mt-1">View and manage customer orders</p>
+                </div>
+              </div>
+
+              <Card className="border-0 shadow-lg">
+                <CardContent className="p-0">
+                  {ordersLoading ? (
+                    <div className="p-6 space-y-4">
+                      {[...Array(5)].map((_, i) => (
+                        <div key={i} className="flex items-center space-x-4">
+                          <Skeleton className="h-16 w-16 rounded-lg" />
+                          <div className="space-y-2 flex-1">
+                            <Skeleton className="h-4 w-48" />
+                            <Skeleton className="h-3 w-24" />
+                          </div>
+                          <Skeleton className="h-8 w-20" />
+                        </div>
+                      ))}
+                    </div>
+                  ) : orders && orders.length > 0 ? (
+                    <div className="overflow-hidden">
+                      <Table>
+                        <TableHeader className="bg-gray-50">
+                          <TableRow className="border-none">
+                            <TableHead className="py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">Customer</TableHead>
+                            <TableHead className="py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">Order Details</TableHead>
+                            <TableHead className="py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">Amount</TableHead>
+                            <TableHead className="py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</TableHead>
+                            <TableHead className="py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">Date</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {orders.map((order, index) => (
+                            <TableRow key={order.id} className={`border-gray-100 hover:bg-gray-50 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-gray-25'}`}>
+                              <TableCell className="py-4 px-6">
+                                <div>
+                                  <div className="font-semibold text-gray-900 text-sm">{order.customerName}</div>
+                                  <div className="text-gray-500 text-xs mt-1">{order.customerEmail}</div>
+                                </div>
+                              </TableCell>
+                              <TableCell className="py-4 px-6">
+                                <div className="text-sm text-gray-900">
+                                  {order.orderItems.length} item{order.orderItems.length > 1 ? 's' : ''}
+                                </div>
+                              </TableCell>
+                              <TableCell className="py-4 px-6">
+                                <div className="font-semibold text-gray-900">₹{parseFloat(order.totalAmount).toFixed(2)}</div>
+                              </TableCell>
+                              <TableCell className="py-4 px-6">
+                                <Badge 
+                                  variant={order.status === "Processing" ? "default" : "secondary"}
+                                  className={order.status === "Processing" ? "bg-blue-100 text-blue-800" : "bg-gray-100 text-gray-600"}
+                                >
+                                  {order.status}
+                                </Badge>
+                              </TableCell>
+                              <TableCell className="py-4 px-6">
+                                <div className="text-sm text-gray-500">
+                                  {new Date(order.createdAt).toLocaleDateString()}
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  ) : (
+                    <div className="text-center py-12">
+                      <ShoppingBag className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+                      <h3 className="text-lg font-medium text-gray-900 mb-2">No orders yet</h3>
+                      <p className="text-gray-500 mb-6">Orders will appear here once customers start purchasing</p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {/* Categories Tab */}
+          {activeTab === "categories" && (
+            <div className="space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900">Categories Management</h2>
+                  <p className="text-gray-600 mt-1">Organize your products into categories</p>
+                </div>
+                <Button className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 shadow-lg">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Category
+                </Button>
+              </div>
+
+              <Card className="border-0 shadow-lg">
+                <CardContent className="p-0">
+                  {categoriesLoading ? (
+                    <div className="p-6 space-y-4">
+                      {[...Array(4)].map((_, i) => (
+                        <div key={i} className="flex items-center space-x-4">
+                          <Skeleton className="h-16 w-16 rounded-lg" />
+                          <div className="space-y-2 flex-1">
+                            <Skeleton className="h-4 w-32" />
+                            <Skeleton className="h-3 w-48" />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : categories && categories.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
+                      {categories.map((category) => (
+                        <div key={category.id} className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow">
+                          <div className="flex items-center space-x-4">
+                            <div className="w-12 h-12 bg-gradient-to-br from-blue-100 to-blue-200 rounded-lg flex items-center justify-center">
+                              <Tags className="h-6 w-6 text-blue-600" />
+                            </div>
+                            <div className="flex-1">
+                              <h3 className="font-semibold text-gray-900">{category.name}</h3>
+                              <p className="text-sm text-gray-500 mt-1">{category.description}</p>
+                            </div>
+                          </div>
+                          <div className="flex justify-end space-x-2 mt-4">
+                            <Button variant="ghost" size="sm" className="text-gray-400 hover:text-blue-600">
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button variant="ghost" size="sm" className="text-gray-400 hover:text-red-600">
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-12">
+                      <Tags className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+                      <h3 className="text-lg font-medium text-gray-900 mb-2">No categories yet</h3>
+                      <p className="text-gray-500 mb-6">Create categories to organize your products</p>
+                      <Button className="bg-green-600 hover:bg-green-700">
+                        <Plus className="h-4 w-4 mr-2" />
+                        Add Your First Category
+                      </Button>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {/* Subcategories Tab */}
+          {activeTab === "subcategories" && (
+            <div className="space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900">Subcategories Management</h2>
+                  <p className="text-gray-600 mt-1">Create subcategories within your main categories</p>
+                </div>
+                <Button className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 shadow-lg">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Subcategory
+                </Button>
+              </div>
+
+              <Card className="border-0 shadow-lg">
+                <CardContent className="p-0">
+                  {subcategoriesLoading ? (
+                    <div className="p-6 space-y-4">
+                      {[...Array(4)].map((_, i) => (
+                        <div key={i} className="flex items-center space-x-4">
+                          <Skeleton className="h-16 w-16 rounded-lg" />
+                          <div className="space-y-2 flex-1">
+                            <Skeleton className="h-4 w-32" />
+                            <Skeleton className="h-3 w-48" />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : subcategories && subcategories.length > 0 ? (
+                    <div className="overflow-hidden">
+                      <Table>
+                        <TableHeader className="bg-gray-50">
+                          <TableRow className="border-none">
+                            <TableHead className="py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">Name</TableHead>
+                            <TableHead className="py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">Parent Category</TableHead>
+                            <TableHead className="py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">Description</TableHead>
+                            <TableHead className="py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider text-right">Actions</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {subcategories.map((subcategory, index) => (
+                            <TableRow key={subcategory.id} className={`border-gray-100 hover:bg-gray-50 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-gray-25'}`}>
+                              <TableCell className="py-4 px-6">
+                                <div className="font-semibold text-gray-900">{subcategory.name}</div>
+                              </TableCell>
+                              <TableCell className="py-4 px-6">
+                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                  {categories?.find(c => c.id === subcategory.categoryId)?.name || 'Unknown'}
+                                </span>
+                              </TableCell>
+                              <TableCell className="py-4 px-6">
+                                <div className="text-sm text-gray-500">{subcategory.description}</div>
+                              </TableCell>
+                              <TableCell className="py-4 px-6 text-right">
+                                <div className="flex justify-end space-x-2">
+                                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-gray-400 hover:text-blue-600 hover:bg-blue-50">
+                                    <Edit className="h-4 w-4" />
+                                  </Button>
+                                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-gray-400 hover:text-red-600 hover:bg-red-50">
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  ) : (
+                    <div className="text-center py-12">
+                      <Tags className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+                      <h3 className="text-lg font-medium text-gray-900 mb-2">No subcategories yet</h3>
+                      <p className="text-gray-500 mb-6">Create subcategories to further organize your products</p>
+                      <Button className="bg-purple-600 hover:bg-purple-700">
+                        <Plus className="h-4 w-4 mr-2" />
+                        Add Your First Subcategory
+                      </Button>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {/* Banners Tab */}
+          {activeTab === "banners" && (
+            <div className="space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900">Banners Management</h2>
+                  <p className="text-gray-600 mt-1">Manage promotional banners and announcements</p>
+                </div>
+                <Button className="bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 shadow-lg">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Banner
+                </Button>
+              </div>
+
+              <Card className="border-0 shadow-lg">
+                <CardContent className="p-0">
+                  {bannersLoading ? (
+                    <div className="p-6 space-y-4">
+                      {[...Array(3)].map((_, i) => (
+                        <div key={i} className="flex items-center space-x-4">
+                          <Skeleton className="h-24 w-32 rounded-lg" />
+                          <div className="space-y-2 flex-1">
+                            <Skeleton className="h-4 w-48" />
+                            <Skeleton className="h-3 w-24" />
+                          </div>
+                          <Skeleton className="h-6 w-16" />
+                        </div>
+                      ))}
+                    </div>
+                  ) : banners && banners.length > 0 ? (
+                    <div className="overflow-hidden">
+                      <Table>
+                        <TableHeader className="bg-gray-50">
+                          <TableRow className="border-none">
+                            <TableHead className="py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">Banner</TableHead>
+                            <TableHead className="py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">Title</TableHead>
+                            <TableHead className="py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</TableHead>
+                            <TableHead className="py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">Created</TableHead>
+                            <TableHead className="py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider text-right">Actions</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {banners.map((banner, index) => (
+                            <TableRow key={banner.id} className={`border-gray-100 hover:bg-gray-50 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-gray-25'}`}>
+                              <TableCell className="py-4 px-6">
+                                <div className="w-20 h-12 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg flex items-center justify-center">
+                                  <ImageIcon className="h-6 w-6 text-gray-400" />
+                                </div>
+                              </TableCell>
+                              <TableCell className="py-4 px-6">
+                                <div>
+                                  <div className="font-semibold text-gray-900 text-sm">{banner.title}</div>
+                                  <div className="text-gray-500 text-xs mt-1 line-clamp-1">{banner.description}</div>
+                                </div>
+                              </TableCell>
+                              <TableCell className="py-4 px-6">
+                                <Badge 
+                                  variant={banner.isActive ? "default" : "secondary"}
+                                  className={banner.isActive ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-600"}
+                                >
+                                  {banner.isActive ? "Active" : "Inactive"}
+                                </Badge>
+                              </TableCell>
+                              <TableCell className="py-4 px-6">
+                                <div className="text-sm text-gray-500">
+                                  {new Date(banner.createdAt).toLocaleDateString()}
+                                </div>
+                              </TableCell>
+                              <TableCell className="py-4 px-6 text-right">
+                                <div className="flex justify-end space-x-2">
+                                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-gray-400 hover:text-blue-600 hover:bg-blue-50">
+                                    <Edit className="h-4 w-4" />
+                                  </Button>
+                                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-gray-400 hover:text-red-600 hover:bg-red-50">
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  ) : (
+                    <div className="text-center py-12">
+                      <ImageIcon className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+                      <h3 className="text-lg font-medium text-gray-900 mb-2">No banners yet</h3>
+                      <p className="text-gray-500 mb-6">Create promotional banners to showcase your offers</p>
+                      <Button className="bg-orange-600 hover:bg-orange-700">
+                        <Plus className="h-4 w-4 mr-2" />
+                        Add Your First Banner
                       </Button>
                     </div>
                   )}
