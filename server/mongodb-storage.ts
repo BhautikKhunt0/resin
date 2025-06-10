@@ -187,10 +187,8 @@ export class MongoDBStorage implements IStorage {
 
   async getCategoryById(id: number): Promise<Category | undefined> {
     try {
-      const hexId = id.toString(16).padStart(8, '0');
-      const category = await CategoryModel.findOne({
-        _id: { $regex: new RegExp(hexId + '$') }
-      }).lean();
+      const categories = await CategoryModel.find().lean();
+      const category = categories.find(cat => parseInt(cat._id.toString().slice(-8), 16) === id);
       return category ? this.convertCategory(category) : undefined;
     } catch (error) {
       console.error('Error fetching category by ID:', error);
@@ -284,10 +282,8 @@ export class MongoDBStorage implements IStorage {
 
   async getSubcategoriesByCategory(categoryId: number): Promise<Subcategory[]> {
     try {
-      const hexId = categoryId.toString(16).padStart(8, '0');
-      const category = await CategoryModel.findOne({
-        _id: { $regex: new RegExp(hexId + '$') }
-      }).lean();
+      const categories = await CategoryModel.find().lean();
+      const category = categories.find(cat => parseInt(cat._id.toString().slice(-8), 16) === categoryId);
       
       if (!category) return [];
 
@@ -301,10 +297,8 @@ export class MongoDBStorage implements IStorage {
 
   async getSubcategoryById(id: number): Promise<Subcategory | undefined> {
     try {
-      const hexId = id.toString(16).padStart(8, '0');
-      const subcategory = await SubcategoryModel.findOne({
-        _id: { $regex: new RegExp(hexId + '$') }
-      }).lean();
+      const subcategories = await SubcategoryModel.find().lean();
+      const subcategory = subcategories.find(sub => parseInt(sub._id.toString().slice(-8), 16) === id);
       return subcategory ? this.convertSubcategory(subcategory) : undefined;
     } catch (error) {
       console.error('Error fetching subcategory by ID:', error);
@@ -415,11 +409,9 @@ export class MongoDBStorage implements IStorage {
 
   async getProductsByCategory(categoryId: number): Promise<Product[]> {
     try {
-      // Create a more efficient ID lookup using regex pattern
-      const hexId = categoryId.toString(16).padStart(8, '0');
-      const category = await CategoryModel.findOne({
-        _id: { $regex: new RegExp(hexId + '$') }
-      }).lean();
+      // Find category by converting numeric ID back to ObjectId pattern
+      const categories = await CategoryModel.find().lean();
+      const category = categories.find(cat => parseInt(cat._id.toString().slice(-8), 16) === categoryId);
       
       if (!category) return [];
 

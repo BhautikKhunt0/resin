@@ -10,11 +10,15 @@ export interface ICategory extends Document {
 }
 
 const categorySchema = new Schema<ICategory>({
-  name: { type: String, required: true },
+  name: { type: String, required: true, index: true },
   description: { type: String },
   imageUrl: { type: String },
   imageBlob: { type: Buffer }
 }, { timestamps: false });
+
+// Add indexes for better query performance
+categorySchema.index({ _id: 1 });
+categorySchema.index({ name: 1 });
 
 export const CategoryModel = model<ICategory>('Category', categorySchema);
 
@@ -29,12 +33,17 @@ export interface ISubcategory extends Document {
 }
 
 const subcategorySchema = new Schema<ISubcategory>({
-  name: { type: String, required: true },
+  name: { type: String, required: true, index: true },
   description: { type: String },
-  categoryId: { type: String, required: true },
+  categoryId: { type: String, required: true, index: true },
   imageUrl: { type: String },
   imageBlob: { type: Buffer }
 }, { timestamps: false });
+
+// Add indexes for better query performance
+subcategorySchema.index({ _id: 1 });
+subcategorySchema.index({ categoryId: 1 });
+subcategorySchema.index({ name: 1 });
 
 export const SubcategoryModel = model<ISubcategory>('Subcategory', subcategorySchema);
 
@@ -59,7 +68,7 @@ export interface IProduct extends Document {
 }
 
 const productSchema = new Schema<IProduct>({
-  name: { type: String, required: true },
+  name: { type: String, required: true, index: true },
   description: { type: String, required: true },
   price: { type: String, required: true },
   weight: { type: String },
@@ -70,10 +79,20 @@ const productSchema = new Schema<IProduct>({
     imageBlob: { type: Buffer },
     priority: { type: Number, default: 0 }
   }],
-  categoryId: { type: String, required: true },
-  subcategoryId: { type: String },
-  isFeatured: { type: Number, default: 0 }
+  categoryId: { type: String, required: true, index: true },
+  subcategoryId: { type: String, index: true },
+  isFeatured: { type: Number, default: 0, index: true }
 }, { timestamps: true });
+
+// Add compound indexes for better query performance
+productSchema.index({ _id: 1 });
+productSchema.index({ categoryId: 1 });
+productSchema.index({ subcategoryId: 1 });
+productSchema.index({ isFeatured: 1 });
+productSchema.index({ categoryId: 1, subcategoryId: 1 });
+productSchema.index({ categoryId: 1, isFeatured: 1 });
+productSchema.index({ name: 1 });
+productSchema.index({ createdAt: -1 });
 
 export const ProductModel = model<IProduct>('Product', productSchema);
 
@@ -158,13 +177,18 @@ export interface IBanner extends Document {
 }
 
 const bannerSchema = new Schema<IBanner>({
-  title: { type: String, required: true },
+  title: { type: String, required: true, index: true },
   description: { type: String },
   imageUrl: { type: String },
   imageBlob: { type: Buffer },
-  isActive: { type: Number, default: 1 },
+  isActive: { type: Number, default: 1, index: true },
   createdAt: { type: Date, default: Date.now }
 }, { timestamps: false });
+
+// Add indexes for better query performance
+bannerSchema.index({ _id: 1 });
+bannerSchema.index({ isActive: 1 });
+bannerSchema.index({ createdAt: -1 });
 
 export const BannerModel = model<IBanner>('Banner', bannerSchema);
 
