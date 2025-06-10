@@ -435,20 +435,46 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleEditProduct = (product: Product) => {
+  const handleEditProduct = async (product: Product) => {
     setEditingProduct(product);
-    productForm.reset({
-      name: product.name,
-      description: product.description,
-      price: product.price,
-      imageUrl: product.imageUrl || "",
-      imageBlob: product.imageBlob || "",
-      images: [],
-      categoryId: product.categoryId.toString(),
-      subcategoryId: product.subcategoryId?.toString() || "",
-      isFeatured: Boolean(product.isFeatured),
-    });
-    setProductImages([]);
+    
+    // Load existing product images
+    try {
+      const existingImages = await api.getAdminProductImages(token, product.id);
+      const formattedImages = existingImages.map((img: any) => ({
+        url: img.imageUrl || '',
+        blob: img.imageBlob ? `data:image/jpeg;base64,${img.imageBlob}` : '',
+        priority: img.priority || 0,
+      }));
+      setProductImages(formattedImages);
+      
+      productForm.reset({
+        name: product.name,
+        description: product.description,
+        price: product.price,
+        imageUrl: product.imageUrl || "",
+        imageBlob: product.imageBlob || "",
+        images: formattedImages,
+        categoryId: product.categoryId.toString(),
+        subcategoryId: product.subcategoryId?.toString() || "",
+        isFeatured: Boolean(product.isFeatured),
+      });
+    } catch (error) {
+      console.error('Error loading product images:', error);
+      productForm.reset({
+        name: product.name,
+        description: product.description,
+        price: product.price,
+        imageUrl: product.imageUrl || "",
+        imageBlob: product.imageBlob || "",
+        images: [],
+        categoryId: product.categoryId.toString(),
+        subcategoryId: product.subcategoryId?.toString() || "",
+        isFeatured: Boolean(product.isFeatured),
+      });
+      setProductImages([]);
+    }
+    
     setProductDialogOpen(true);
   };
 

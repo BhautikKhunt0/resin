@@ -20,6 +20,7 @@ export const api = {
   getProduct: (id: number) => fetch(`/api/products/${id}`).then(res => res.json()),
   getProductsBySubcategory: (subcategoryId: number) => 
     fetch(`/api/products?subcategoryId=${subcategoryId}`).then(res => res.json()),
+  getProductImages: (id: number) => fetch(`/api/products/${id}/images`).then(res => res.json()),
 
   // Orders
   createOrder: (orderData: any) => apiRequest('POST', '/api/orders', orderData),
@@ -117,6 +118,12 @@ export const api = {
         'Authorization': `Bearer ${token}`,
       },
     }),
+  getAdminProductImages: (token: string, id: number) =>
+    fetch(`/api/admin/products/${id}/images`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    }).then(res => res.json()),
 
   // Admin - Orders
   getOrders: (token: string) =>
