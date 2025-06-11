@@ -736,4 +736,40 @@ export class MongoDBStorage implements IStorage {
     await BannerModel.findByIdAndDelete(existing._id);
     return true;
   }
+
+  // Settings
+  async getSettings(): Promise<Setting[]> {
+    const settings = await SettingModel.find();
+    return settings.map(setting => this.convertSetting(setting));
+  }
+
+  async getSettingByKey(key: string): Promise<Setting | undefined> {
+    const setting = await SettingModel.findOne({ key });
+    return setting ? this.convertSetting(setting) : undefined;
+  }
+
+  async createSetting(setting: InsertSetting): Promise<Setting> {
+    const newSetting = new SettingModel({
+      key: setting.key,
+      value: setting.value,
+      description: setting.description,
+      updatedAt: new Date()
+    });
+    const saved = await newSetting.save();
+    return this.convertSetting(saved);
+  }
+
+  async updateSetting(key: string, value: string): Promise<Setting | undefined> {
+    const updated = await SettingModel.findOneAndUpdate(
+      { key },
+      { value, updatedAt: new Date() },
+      { new: true }
+    );
+    return updated ? this.convertSetting(updated) : undefined;
+  }
+
+  async deleteSetting(key: string): Promise<boolean> {
+    const result = await SettingModel.deleteOne({ key });
+    return result.deletedCount > 0;
+  }
 }

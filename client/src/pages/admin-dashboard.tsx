@@ -21,6 +21,8 @@ import {
   Upload,
   Image as ImageIcon,
   Truck,
+  Settings,
+  MessageCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -113,10 +115,17 @@ const bannerSchema = z.object({
   isActive: z.boolean().optional(),
 });
 
+const settingSchema = z.object({
+  key: z.string().min(1, "Key is required"),
+  value: z.string().min(1, "Value is required"),
+  description: z.string().optional(),
+});
+
 type ProductFormData = z.infer<typeof productSchema>;
 type CategoryFormData = z.infer<typeof categorySchema>;
 type SubcategoryFormData = z.infer<typeof subcategorySchema>;
 type BannerFormData = z.infer<typeof bannerSchema>;
+type SettingFormData = z.infer<typeof settingSchema>;
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("dashboard");

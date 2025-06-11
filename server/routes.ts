@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
-import { insertProductSchema, insertProductImageSchema, insertCategorySchema, insertSubcategorySchema, insertOrderSchema, insertBannerSchema } from "@shared/schema";
+import { insertProductSchema, insertProductImageSchema, insertCategorySchema, insertSubcategorySchema, insertOrderSchema, insertBannerSchema, insertSettingSchema } from "@shared/schema";
 import { sendOrderConfirmationEmail, sendOrderStatusUpdateEmail } from "./email-service";
 
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
@@ -662,6 +662,78 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error) {
       res.status(400).json({ message: "Failed to process image" });
+    }
+  });
+
+  // Admin routes - Settings
+  app.get("/api/admin/settings", authenticateAdmin, async (req, res) => {
+    try {
+      const settings = await storage.getSettings();
+      res.json(settings);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch settings" });
+    }
+  });
+
+  app.get("/api/admin/settings/:key", authenticateAdmin, async (req, res) => {
+    try {
+      const setting = await storage.getSettingByKey(req.params.key);
+      if (!setting) {
+        return res.status(404).json({ message: "Setting not found" });
+      }
+      res.json(setting);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch setting" });
+    }
+  });
+
+  app.post("/api/admin/settings", authenticateAdmin, async (req, res) => {
+    try {
+      const settingData = insertSettingSchema.parse(req.body);
+      const setting = await storage.createSetting(settingData);
+      res.status(201).json(setting);
+    } catch (error) {
+      res.status(400).json({ message: "Failed to create setting" });
+    }
+  });
+
+  app.put("/api/admin/settings/:key", authenticateAdmin, async (req, res) => {
+    try {
+      const { value } = req.body;
+      if (!value) {
+        return res.status(400).json({ message: "Value is required" });
+      }
+      
+      const setting = await storage.updateSetting(req.params.key, value);
+      if (!setting) {
+        return res.status(404).json({ message: "Setting not found" });
+      }
+      
+      res.json(setting);
+    } catch (error) {
+      res.status(400).json({ message: "Failed to update setting" });
+    }
+  });
+
+  app.delete("/api/admin/settings/:key", authenticateAdmin, async (req, res) => {
+    try {
+      const deleted = await storage.deleteSetting(req.params.key);
+      if (!deleted) {
+        return res.status(404).json({ message: "Setting not found" });
+      }
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete setting" });
+    }
+  });
+
+  // Public settings route
+  app.get("/api/settings/whatsapp", async (req, res) => {
+    try {
+      const setting = await storage.getSettingByKey("whatsapp_number");
+      res.json({ whatsappNumber: setting?.value || null });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch WhatsApp setting" });
     }
   });
 

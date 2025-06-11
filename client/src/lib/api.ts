@@ -192,4 +192,46 @@ export const api = {
       },
       body: JSON.stringify({ imageData, filename }),
     }).then(res => res.json()),
+
+  // Admin - Settings
+  getAdminSettings: (token: string) =>
+    fetch('/api/admin/settings', {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    }).then(res => res.json()),
+  getAdminSetting: (token: string, key: string) =>
+    fetch(`/api/admin/settings/${key}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    }).then(res => res.json()),
+  createSetting: (token: string, data: any) =>
+    fetch('/api/admin/settings', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify(data),
+    }),
+  updateSetting: (token: string, key: string, value: string) =>
+    fetch(`/api/admin/settings/${key}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify({ value }),
+    }),
+  deleteSetting: (token: string, key: string) =>
+    fetch(`/api/admin/settings/${key}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    }),
+
+  // Public Settings
+  getWhatsAppNumber: () => fetch('/api/settings/whatsapp').then(res => res.json()),
 };
