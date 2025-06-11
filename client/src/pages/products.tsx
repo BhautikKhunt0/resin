@@ -1,13 +1,13 @@
 import { useState, useMemo, useCallback, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
-import { Filter, Search, Grid, List, X, Star, Tag, TrendingUp, DollarSign } from "lucide-react";
+import { Filter, Search, Grid, List, X, Star, Tag, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Slider } from "@/components/ui/slider";
+
 import { Separator } from "@/components/ui/separator";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -40,8 +40,7 @@ export default function Products() {
     initialCategoryId ? [parseInt(initialCategoryId)] : []
   );
   const [selectedSubcategoryIds, setSelectedSubcategoryIds] = useState<number[]>([]);
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 10000]);
-  const [debouncedPriceRange, setDebouncedPriceRange] = useState<[number, number]>([0, 10000]);
+
   const [showFeaturedOnly, setShowFeaturedOnly] = useState(false);
   const [sortBy, setSortBy] = useState<string>("name");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
@@ -63,36 +62,7 @@ export default function Products() {
     queryFn: () => api.getProducts(),
   });
 
-  // Debounce price range updates for better performance
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedPriceRange(priceRange);
-    }, 150); // Reduced delay for smoother experience
-    return () => clearTimeout(timer);
-  }, [priceRange]);
 
-  // Calculate price range from products with smart rounding
-  const productPriceRange = useMemo(() => {
-    if (!products || products.length === 0) return [0, 10000];
-    const prices = products.map(p => parseFloat(p.price));
-    const minPrice = Math.min(...prices);
-    const maxPrice = Math.max(...prices);
-    
-    // Round to nearest 50 for smoother slider experience
-    const roundedMin = Math.floor(minPrice / 50) * 50;
-    const roundedMax = Math.ceil(maxPrice / 50) * 50;
-    
-    return [roundedMin, roundedMax];
-  }, [products]);
-
-  // Initialize price range when products load
-  useEffect(() => {
-    if (products && products.length > 0 && priceRange[0] === 0 && priceRange[1] === 10000) {
-      const range = productPriceRange as [number, number];
-      setPriceRange(range);
-      setDebouncedPriceRange(range);
-    }
-  }, [products, productPriceRange, priceRange]);
 
   // Filter and sort products
   const filteredAndSortedProducts = useMemo(() => {
@@ -116,11 +86,7 @@ export default function Products() {
         return false;
       }
 
-      // Price filter
-      const price = parseFloat(product.price);
-      if (price < debouncedPriceRange[0] || price > debouncedPriceRange[1]) {
-        return false;
-      }
+
 
       // Featured filter
       if (showFeaturedOnly && !product.isFeatured) {
@@ -171,7 +137,6 @@ export default function Products() {
     setSearchQuery("");
     setSelectedCategoryIds([]);
     setSelectedSubcategoryIds([]);
-    setPriceRange(productPriceRange as [number, number]);
     setShowFeaturedOnly(false);
   };
 
@@ -179,7 +144,6 @@ export default function Products() {
     searchQuery,
     selectedCategoryIds.length > 0,
     selectedSubcategoryIds.length > 0,
-    priceRange[0] !== productPriceRange[0] || priceRange[1] !== productPriceRange[1],
     showFeaturedOnly
   ].filter(Boolean).length;
 
@@ -285,146 +249,7 @@ export default function Products() {
         </Card>
       )}
 
-      {/* Price Range */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-lg flex items-center">
-            <DollarSign className="h-5 w-5 mr-2" />
-            Price Range
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="pt-0">
-          <div className="space-y-4">
-            {/* Dual Range Slider */}
-            <div className="px-2 space-y-3">
-              <Slider
-                min={productPriceRange[0]}
-                max={productPriceRange[1]}
-                step={Math.max(1, Math.floor((productPriceRange[1] - productPriceRange[0]) / 100))}
-                value={priceRange}
-                onValueChange={(value) => setPriceRange(value as [number, number])}
-                className="w-full"
-              />
-              {/* Slider Value Labels */}
-              <div className="flex justify-between text-xs text-gray-500">
-                <span>₹{productPriceRange[0].toLocaleString()}</span>
-                <span>₹{productPriceRange[1].toLocaleString()}</span>
-              </div>
-            </div>
-            
-            {/* Manual Input Fields */}
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1">
-                <label className="text-xs font-medium text-gray-600">Min Price</label>
-                <div className="relative">
-                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">₹</span>
-                  <Input
-                    type="number"
-                    min={productPriceRange[0]}
-                    max={priceRange[1]}
-                    value={priceRange[0]}
-                    onChange={(e) => {
-                      const value = parseInt(e.target.value) || productPriceRange[0];
-                      if (value <= priceRange[1] && value >= productPriceRange[0]) {
-                        setPriceRange([value, priceRange[1]]);
-                      }
-                    }}
-                    onBlur={(e) => {
-                      // Ensure value is within bounds on blur
-                      const value = parseInt(e.target.value) || productPriceRange[0];
-                      const clampedValue = Math.max(productPriceRange[0], Math.min(value, priceRange[1]));
-                      setPriceRange([clampedValue, priceRange[1]]);
-                    }}
-                    className="pl-8 text-sm h-9 transition-all duration-200 focus:ring-2 focus:ring-blue-500"
-                    placeholder="Min"
-                  />
-                </div>
-              </div>
-              <div className="space-y-1">
-                <label className="text-xs font-medium text-gray-600">Max Price</label>
-                <div className="relative">
-                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">₹</span>
-                  <Input
-                    type="number"
-                    min={priceRange[0]}
-                    max={productPriceRange[1]}
-                    value={priceRange[1]}
-                    onChange={(e) => {
-                      const value = parseInt(e.target.value) || productPriceRange[1];
-                      if (value >= priceRange[0] && value <= productPriceRange[1]) {
-                        setPriceRange([priceRange[0], value]);
-                      }
-                    }}
-                    onBlur={(e) => {
-                      // Ensure value is within bounds on blur
-                      const value = parseInt(e.target.value) || productPriceRange[1];
-                      const clampedValue = Math.min(productPriceRange[1], Math.max(value, priceRange[0]));
-                      setPriceRange([priceRange[0], clampedValue]);
-                    }}
-                    className="pl-8 text-sm h-9 transition-all duration-200 focus:ring-2 focus:ring-blue-500"
-                    placeholder="Max"
-                  />
-                </div>
-              </div>
-            </div>
-            
-            {/* Quick Price Range Buttons */}
-            <div className="space-y-2">
-              <p className="text-xs font-medium text-gray-600">Quick Ranges</p>
-              <div className="grid grid-cols-2 gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="h-8 text-xs"
-                  onClick={() => setPriceRange([productPriceRange[0], 2000])}
-                >
-                  Under ₹2K
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="h-8 text-xs"
-                  onClick={() => setPriceRange([2000, 5000])}
-                >
-                  ₹2K - ₹5K
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="h-8 text-xs"
-                  onClick={() => setPriceRange([5000, 10000])}
-                >
-                  ₹5K - ₹10K
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="h-8 text-xs"
-                  onClick={() => setPriceRange([10000, productPriceRange[1]])}
-                >
-                  Above ₹10K
-                </Button>
-              </div>
-            </div>
-            
-            {/* Current Range Display with Enhanced Styling */}
-            <div className="relative">
-              <div className="text-center p-3 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-lg border border-blue-100 dark:border-blue-800">
-                <p className="text-sm font-semibold text-blue-700 dark:text-blue-300">
-                  Selected Range
-                </p>
-                <p className="text-lg font-bold text-blue-900 dark:text-blue-100 mt-1">
-                  ₹{priceRange[0].toLocaleString()} - ₹{priceRange[1].toLocaleString()}
-                </p>
-                <div className="flex justify-between mt-2 text-xs text-blue-600 dark:text-blue-400">
-                  <span>Min: ₹{priceRange[0].toLocaleString()}</span>
-                  <span>Max: ₹{priceRange[1].toLocaleString()}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+
 
       {/* Featured Products */}
       <Card>
