@@ -1,5 +1,15 @@
 import dotenv from "dotenv";
-dotenv.config();
+import path from "path";
+
+// Load environment variables from .env file in the root directory
+dotenv.config({ path: path.resolve(process.cwd(), '.env') });
+
+// Debug: Check if environment variables are loaded
+console.log('Environment variables loaded:');
+console.log('MONGODB_URI:', process.env.MONGODB_URI ? 'Set' : 'Not set');
+console.log('EMAIL_USER:', process.env.EMAIL_USER ? 'Set' : 'Not set');
+console.log('EMAIL_PASS:', process.env.EMAIL_PASS ? 'Set' : 'Not set');
+console.log('EMAIL_FROM:', process.env.EMAIL_FROM ? 'Set' : 'Not set');
 
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
