@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { Filter, Search, Grid, List, X, Star, Tag, TrendingUp, DollarSign } from "lucide-react";
@@ -41,6 +41,7 @@ export default function Products() {
   );
   const [selectedSubcategoryIds, setSelectedSubcategoryIds] = useState<number[]>([]);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 10000]);
+  const [debouncedPriceRange, setDebouncedPriceRange] = useState<[number, number]>([0, 10000]);
   const [showFeaturedOnly, setShowFeaturedOnly] = useState(false);
   const [sortBy, setSortBy] = useState<string>("name");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
@@ -62,12 +63,29 @@ export default function Products() {
     queryFn: () => api.getProducts(),
   });
 
+  // Debounce price range updates for better performance
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedPriceRange(priceRange);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [priceRange]);
+
   // Calculate price range from products
   const productPriceRange = useMemo(() => {
     if (!products || products.length === 0) return [0, 10000];
     const prices = products.map(p => parseFloat(p.price));
     return [Math.floor(Math.min(...prices)), Math.ceil(Math.max(...prices))];
   }, [products]);
+
+  // Initialize price range when products load
+  useEffect(() => {
+    if (products && products.length > 0 && priceRange[0] === 0 && priceRange[1] === 10000) {
+      const range = productPriceRange as [number, number];
+      setPriceRange(range);
+      setDebouncedPriceRange(range);
+    }
+  }, [products, productPriceRange, priceRange]);
 
   // Filter and sort products
   const filteredAndSortedProducts = useMemo(() => {
@@ -270,17 +288,106 @@ export default function Products() {
         </CardHeader>
         <CardContent className="pt-0">
           <div className="space-y-4">
-            <Slider
-              min={productPriceRange[0]}
-              max={productPriceRange[1]}
-              step={100}
-              value={priceRange}
-              onValueChange={(value) => setPriceRange(value as [number, number])}
-              className="w-full"
-            />
-            <div className="flex items-center justify-between text-sm text-gray-600">
-              <span>₹{priceRange[0]}</span>
-              <span>₹{priceRange[1]}</span>
+            {/* Dual Range Slider */}
+            <div className="px-2">
+              <Slider
+                min={productPriceRange[0]}
+                max={productPriceRange[1]}
+                step={50}
+                value={priceRange}
+                onValueChange={(value) => setPriceRange(value as [number, number])}
+                className="w-full"
+              />
+            </div>
+            
+            {/* Manual Input Fields */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <label className="text-xs font-medium text-gray-600">Min Price</label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">₹</span>
+                  <Input
+                    type="number"
+                    min={productPriceRange[0]}
+                    max={priceRange[1]}
+                    value={priceRange[0]}
+                    onChange={(e) => {
+                      const value = parseInt(e.target.value) || productPriceRange[0];
+                      if (value <= priceRange[1] && value >= productPriceRange[0]) {
+                        setPriceRange([value, priceRange[1]]);
+                      }
+                    }}
+                    className="pl-8 text-sm h-9"
+                    placeholder="Min"
+                  />
+                </div>
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs font-medium text-gray-600">Max Price</label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">₹</span>
+                  <Input
+                    type="number"
+                    min={priceRange[0]}
+                    max={productPriceRange[1]}
+                    value={priceRange[1]}
+                    onChange={(e) => {
+                      const value = parseInt(e.target.value) || productPriceRange[1];
+                      if (value >= priceRange[0] && value <= productPriceRange[1]) {
+                        setPriceRange([priceRange[0], value]);
+                      }
+                    }}
+                    className="pl-8 text-sm h-9"
+                    placeholder="Max"
+                  />
+                </div>
+              </div>
+            </div>
+            
+            {/* Quick Price Range Buttons */}
+            <div className="space-y-2">
+              <p className="text-xs font-medium text-gray-600">Quick Ranges</p>
+              <div className="grid grid-cols-2 gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-8 text-xs"
+                  onClick={() => setPriceRange([productPriceRange[0], 2000])}
+                >
+                  Under ₹2K
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-8 text-xs"
+                  onClick={() => setPriceRange([2000, 5000])}
+                >
+                  ₹2K - ₹5K
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-8 text-xs"
+                  onClick={() => setPriceRange([5000, 10000])}
+                >
+                  ₹5K - ₹10K
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-8 text-xs"
+                  onClick={() => setPriceRange([10000, productPriceRange[1]])}
+                >
+                  Above ₹10K
+                </Button>
+              </div>
+            </div>
+            
+            {/* Current Range Display */}
+            <div className="text-center p-2 bg-gray-50 dark:bg-gray-800 rounded-md">
+              <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                ₹{priceRange[0].toLocaleString()} - ₹{priceRange[1].toLocaleString()}
+              </p>
             </div>
           </div>
         </CardContent>
@@ -299,7 +406,7 @@ export default function Products() {
             <Checkbox
               id="featured"
               checked={showFeaturedOnly}
-              onCheckedChange={setShowFeaturedOnly}
+              onCheckedChange={(checked) => setShowFeaturedOnly(!!checked)}
             />
             <label
               htmlFor="featured"
