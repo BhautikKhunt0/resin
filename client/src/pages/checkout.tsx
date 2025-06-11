@@ -79,6 +79,7 @@ export default function Checkout() {
       name: item.name,
       price: item.price,
       quantity: item.quantity,
+      weight: item.weight,
     }));
 
     const orderData: InsertOrder = {

@@ -17,11 +17,17 @@ export default function ProductCard({ product }: ProductCardProps) {
     e.preventDefault();
     e.stopPropagation();
     
+    // Get the first weight variant or use default weight
+    const weightVariants = product.weightVariants as any[] || [];
+    const defaultWeight = weightVariants.length > 0 ? weightVariants[0].weight : product.weight || "Standard";
+    const defaultPrice = weightVariants.length > 0 ? weightVariants[0].price : parseFloat(product.price);
+    
     addItem({
       productId: product.id,
       name: product.name,
-      price: parseFloat(product.price),
+      price: defaultPrice,
       quantity: 1,
+      weight: defaultWeight,
       imageUrl: product.imageBlob ? `data:image/jpeg;base64,${product.imageBlob}` : product.imageUrl || undefined,
     });
 

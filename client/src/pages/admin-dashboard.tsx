@@ -2241,6 +2241,7 @@ export default function AdminDashboard() {
                       <TableHeader>
                         <TableRow>
                           <TableHead>Product</TableHead>
+                          <TableHead>Size</TableHead>
                           <TableHead>Price</TableHead>
                           <TableHead>Quantity</TableHead>
                           <TableHead>Total</TableHead>
@@ -2251,6 +2252,15 @@ export default function AdminDashboard() {
                           <TableRow key={index}>
                             <TableCell>
                               <div className="font-medium">{item.name}</div>
+                            </TableCell>
+                            <TableCell>
+                              {item.weight ? (
+                                <Badge variant="secondary" className="text-xs">
+                                  {item.weight}
+                                </Badge>
+                              ) : (
+                                <span className="text-gray-400 text-xs">Standard</span>
+                              )}
                             </TableCell>
                             <TableCell>₹{parseFloat(item.price.toString()).toFixed(2)}</TableCell>
                             <TableCell>
