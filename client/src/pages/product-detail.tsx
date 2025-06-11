@@ -31,15 +31,23 @@ export default function ProductDetail() {
     enabled: !!productId,
   });
 
-  // Combine product main image with additional images, prioritizing additional images
-  const allImages = productImages.length > 0 ? productImages : (product ? [{
-    id: 0,
-    productId: product.id,
-    imageUrl: product.imageUrl,
-    imageBlob: product.imageBlob,
-    priority: 0,
-    createdAt: new Date()
-  }] : []);
+  // Combine product main image with additional images
+  const allImages = [...productImages];
+  
+  // If no additional images but product has main image, include it
+  if (allImages.length === 0 && product && (product.imageUrl || product.imageBlob)) {
+    allImages.push({
+      id: 0,
+      productId: product.id,
+      imageUrl: product.imageUrl,
+      imageBlob: product.imageBlob,
+      priority: 0,
+      createdAt: new Date()
+    });
+  }
+  
+  // Sort images by priority
+  allImages.sort((a, b) => a.priority - b.priority);
 
   const handleAddToCart = () => {
     if (!product) return;
@@ -169,16 +177,16 @@ export default function ProductDetail() {
             </div>
             
             {/* Thumbnail Navigation */}
-            {allImages.length > 1 && (
-              <div className="grid grid-cols-4 gap-2">
+            {allImages.length > 0 && (
+              <div className="flex gap-2 overflow-x-auto pb-2">
                 {allImages.map((image, index) => {
                   const imageUrl = image.imageBlob ? `data:image/jpeg;base64,${image.imageBlob}` : image.imageUrl;
                   return (
                     <button
-                      key={image.id}
+                      key={image.id || index}
                       onClick={() => setSelectedImageIndex(index)}
-                      className={`aspect-square bg-white rounded-lg overflow-hidden shadow-sm border-2 transition-all duration-200 ${
-                        index === selectedImageIndex ? 'border-primary' : 'border-transparent hover:border-gray-300'
+                      className={`flex-shrink-0 w-16 h-16 bg-white rounded-md overflow-hidden shadow-sm border-2 transition-all duration-200 ${
+                        index === selectedImageIndex ? 'border-blue-500 ring-1 ring-blue-500' : 'border-gray-300 hover:border-gray-400'
                       }`}
                     >
                       {imageUrl ? (
@@ -189,7 +197,7 @@ export default function ProductDetail() {
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center bg-gray-100">
-                          <Package className="h-8 w-8 text-gray-400" />
+                          <Package className="h-4 w-4 text-gray-400" />
                         </div>
                       )}
                     </button>
