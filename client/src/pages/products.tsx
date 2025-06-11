@@ -40,9 +40,18 @@ export default function Products() {
     initialCategoryId ? [parseInt(initialCategoryId)] : []
   );
   const [selectedSubcategoryIds, setSelectedSubcategoryIds] = useState<number[]>([]);
-  const [minPrice, setMinPrice] = useState<string>("");
-  const [maxPrice, setMaxPrice] = useState<string>("");
+  const [selectedPriceRange, setSelectedPriceRange] = useState<string>("");
   const [showFeaturedOnly, setShowFeaturedOnly] = useState(false);
+
+  // Predefined price ranges
+  const priceRanges = [
+    { label: "Under ₹500", value: "0-500", min: 0, max: 500 },
+    { label: "₹500 - ₹1,000", value: "500-1000", min: 500, max: 1000 },
+    { label: "₹1,000 - ₹5,000", value: "1000-5000", min: 1000, max: 5000 },
+    { label: "₹5,000 - ₹10,000", value: "5000-10000", min: 5000, max: 10000 },
+    { label: "₹10,000 - ₹25,000", value: "10000-25000", min: 10000, max: 25000 },
+    { label: "Above ₹25,000", value: "25000+", min: 25000, max: Infinity }
+  ];
   const [sortBy, setSortBy] = useState<string>("name");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [showFilters, setShowFilters] = useState(false);
@@ -88,12 +97,14 @@ export default function Products() {
       }
 
       // Price filter
-      const price = parseFloat(product.price);
-      if (minPrice && price < parseFloat(minPrice)) {
-        return false;
-      }
-      if (maxPrice && price > parseFloat(maxPrice)) {
-        return false;
+      if (selectedPriceRange) {
+        const selectedRange = priceRanges.find(range => range.value === selectedPriceRange);
+        if (selectedRange) {
+          const price = parseFloat(product.price);
+          if (price < selectedRange.min || price > selectedRange.max) {
+            return false;
+          }
+        }
       }
 
       // Featured filter
@@ -122,7 +133,7 @@ export default function Products() {
     });
 
     return filtered;
-  }, [products, searchQuery, selectedCategoryIds, selectedSubcategoryIds, minPrice, maxPrice, showFeaturedOnly, sortBy]);
+  }, [products, searchQuery, selectedCategoryIds, selectedSubcategoryIds, selectedPriceRange, showFeaturedOnly, sortBy]);
 
   // Filter handlers
   const toggleCategory = (categoryId: number) => {
@@ -145,8 +156,7 @@ export default function Products() {
     setSearchQuery("");
     setSelectedCategoryIds([]);
     setSelectedSubcategoryIds([]);
-    setMinPrice("");
-    setMaxPrice("");
+    setSelectedPriceRange("");
     setShowFeaturedOnly(false);
   };
 
@@ -154,8 +164,7 @@ export default function Products() {
     searchQuery,
     selectedCategoryIds.length > 0,
     selectedSubcategoryIds.length > 0,
-    minPrice,
-    maxPrice,
+    selectedPriceRange,
     showFeaturedOnly
   ].filter(Boolean).length;
 
@@ -270,35 +279,24 @@ export default function Products() {
           </CardTitle>
         </CardHeader>
         <CardContent className="pt-0">
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1">
-              <label className="text-xs font-medium text-gray-600">Min Price</label>
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">₹</span>
-                <Input
-                  type="number"
-                  min="0"
-                  value={minPrice}
-                  onChange={(e) => setMinPrice(e.target.value)}
-                  className="pl-8 text-sm h-9"
-                  placeholder="0"
+          <div className="space-y-3">
+            {priceRanges.map((range) => (
+              <div key={range.value} className="flex items-center space-x-2">
+                <Checkbox
+                  id={`price-${range.value}`}
+                  checked={selectedPriceRange === range.value}
+                  onCheckedChange={(checked) => {
+                    setSelectedPriceRange(checked ? range.value : "");
+                  }}
                 />
+                <label
+                  htmlFor={`price-${range.value}`}
+                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                >
+                  {range.label}
+                </label>
               </div>
-            </div>
-            <div className="space-y-1">
-              <label className="text-xs font-medium text-gray-600">Max Price</label>
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">₹</span>
-                <Input
-                  type="number"
-                  min="0"
-                  value={maxPrice}
-                  onChange={(e) => setMaxPrice(e.target.value)}
-                  className="pl-8 text-sm h-9"
-                  placeholder="Any"
-                />
-              </div>
-            </div>
+            ))}
           </div>
         </CardContent>
       </Card>
@@ -445,21 +443,12 @@ export default function Products() {
                   </Badge>
                 ) : null;
               })}
-              {minPrice && (
+              {selectedPriceRange && (
                 <Badge variant="secondary" className="flex items-center gap-1">
-                  Min: ₹{minPrice}
+                  {priceRanges.find(range => range.value === selectedPriceRange)?.label}
                   <X 
                     className="h-3 w-3 cursor-pointer" 
-                    onClick={() => setMinPrice("")}
-                  />
-                </Badge>
-              )}
-              {maxPrice && (
-                <Badge variant="secondary" className="flex items-center gap-1">
-                  Max: ₹{maxPrice}
-                  <X 
-                    className="h-3 w-3 cursor-pointer" 
-                    onClick={() => setMaxPrice("")}
+                    onClick={() => setSelectedPriceRange("")}
                   />
                 </Badge>
               )}
