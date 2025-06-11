@@ -1802,9 +1802,13 @@ export default function AdminDashboard() {
                                         {order.orderItems.slice(0, 2).map((item: any, idx: number) => (
                                           <div key={idx} className="flex items-center gap-1">
                                             <span className="truncate max-w-[100px]">{item.name}</span>
-                                            {item.weight && (
+                                            {item.weight ? (
                                               <Badge variant="outline" className="text-xs px-1 py-0 h-4">
                                                 {item.weight}
+                                              </Badge>
+                                            ) : (
+                                              <Badge variant="outline" className="text-xs px-1 py-0 h-4 text-gray-400">
+                                                Standard
                                               </Badge>
                                             )}
                                           </div>

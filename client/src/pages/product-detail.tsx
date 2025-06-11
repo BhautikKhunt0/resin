@@ -98,27 +98,12 @@ export default function ProductDetail() {
   const handleBuyNow = () => {
     if (!product) return;
 
-    const primaryImage = allImages[0];
-    const imageUrl = primaryImage?.imageBlob ? `data:image/jpeg;base64,${primaryImage.imageBlob}` : primaryImage?.imageUrl;
-
-    const cartItem = {
-      productId: product.id,
-      name: product.name,
-      price: currentPrice,
-      quantity: quantity,
-      weight: selectedWeight,
-      imageUrl: imageUrl || undefined,
-    };
-
-    // Use buyNow function which clears cart and adds this item
-    buyNow(cartItem);
-
-    // Navigate to checkout page
+    // Navigate directly to checkout page without modifying cart
     setLocation("/checkout");
 
     toast({
       title: "Proceeding to checkout",
-      description: `${quantity} x ${product.name} (${selectedWeight}) added to cart.`,
+      description: "Redirecting to checkout with your current cart items.",
     });
   };
 
