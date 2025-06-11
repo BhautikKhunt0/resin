@@ -1,4 +1,4 @@
-import dotenv from 'dotenv';
+import dotenv from "dotenv";
 
 // Load environment variables first
 dotenv.config();
@@ -10,8 +10,8 @@ import { connectToMongoDB } from "./mongodb-connection";
 import { initializeStorage } from "./storage";
 
 const app = express();
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ extended: false, limit: '50mb' }));
+app.use(express.json({ limit: "50mb" }));
+app.use(express.urlencoded({ extended: false, limit: "50mb" }));
 
 app.use((req, res, next) => {
   const start = Date.now();
@@ -47,10 +47,10 @@ app.use((req, res, next) => {
   try {
     // Connect to MongoDB to access existing orders data
     await connectToMongoDB();
-    
+
     // Initialize and verify image storage
     await initializeStorage();
-    
+
     const server = await registerRoutes(app);
 
     app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
@@ -73,10 +73,9 @@ app.use((req, res, next) => {
     // ALWAYS serve the app on port 5000
     // this serves both the API and the client.
     // It is the only port that is not firewalled.
-    const port = 5000;
+    const port = 80;
     server.listen({
       port,
-      host: "0.0.0.0",
     });
 
     log(`serving on port ${port}`);
