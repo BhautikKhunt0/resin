@@ -374,14 +374,14 @@ export default function Products() {
                     )}
                   </Button>
                 </SheetTrigger>
-                <SheetContent side="left" className="w-80">
-                  <SheetHeader>
+                <SheetContent side="left" className="w-80 flex flex-col">
+                  <SheetHeader className="flex-shrink-0">
                     <SheetTitle>Filters</SheetTitle>
                     <SheetDescription>
                       Refine your product search
                     </SheetDescription>
                   </SheetHeader>
-                  <div className="mt-6">
+                  <div className="mt-6 flex-1 overflow-y-auto">
                     <FilterSidebar />
                   </div>
                 </SheetContent>
