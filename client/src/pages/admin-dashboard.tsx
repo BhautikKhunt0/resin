@@ -186,6 +186,11 @@ export default function AdminDashboard() {
     queryFn: () => api.getAdminBanners(token),
   });
 
+  const { data: whatsappSetting } = useQuery({
+    queryKey: ["/api/admin/settings/whatsapp_number"],
+    queryFn: () => api.getAdminSetting(token, "whatsapp_number").catch(() => null),
+  });
+
   // Forms
   const productForm = useForm<ProductFormData>({
     resolver: zodResolver(productSchema),
@@ -233,6 +238,9 @@ export default function AdminDashboard() {
       isActive: true,
     },
   });
+
+  const [whatsappNumber, setWhatsappNumber] = useState("");
+  const [isEditingWhatsapp, setIsEditingWhatsapp] = useState(false);
 
   // Mutations
   const createProductMutation = useMutation({
@@ -406,6 +414,29 @@ export default function AdminDashboard() {
     },
     onError: () => {
       toast({ title: "Failed to update order status", variant: "destructive" });
+    },
+  });
+
+  // WhatsApp settings mutations
+  const updateWhatsAppMutation = useMutation({
+    mutationFn: (number: string) => {
+      if (whatsappSetting) {
+        return api.updateSetting(token, "whatsapp_number", number);
+      } else {
+        return api.createSetting(token, {
+          key: "whatsapp_number",
+          value: number,
+          description: "WhatsApp number for order notifications"
+        });
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/settings/whatsapp_number"] });
+      setIsEditingWhatsapp(false);
+      toast({ title: "WhatsApp number updated successfully" });
+    },
+    onError: () => {
+      toast({ title: "Failed to update WhatsApp number", variant: "destructive" });
     },
   });
 
@@ -724,6 +755,7 @@ export default function AdminDashboard() {
     { id: "categories", label: "Categories", icon: Tags },
     { id: "subcategories", label: "Subcategories", icon: Tags },
     { id: "banners", label: "Banners", icon: ImageIcon },
+    { id: "settings", label: "Settings", icon: Settings },
   ];
 
   return (
@@ -2752,6 +2784,107 @@ export default function AdminDashboard() {
           </Form>
         </DialogContent>
       </Dialog>
+
+      {/* Settings Tab */}
+      {activeTab === "settings" && (
+        <div className="space-y-6">
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900">Settings</h2>
+            <p className="text-gray-600 mt-1">Manage your store settings and configuration</p>
+          </div>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <MessageCircle className="h-5 w-5 mr-2 text-green-600" />
+                WhatsApp Configuration
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    WhatsApp Number
+                  </label>
+                  <p className="text-sm text-gray-500 mb-3">
+                    This number will receive order notifications from the checkout process
+                  </p>
+                  {isEditingWhatsapp ? (
+                    <div className="flex space-x-2">
+                      <Input
+                        value={whatsappNumber}
+                        onChange={(e) => setWhatsappNumber(e.target.value)}
+                        placeholder="+1234567890"
+                        className="flex-1"
+                      />
+                      <Button
+                        onClick={() => {
+                          if (whatsappNumber.trim()) {
+                            updateWhatsAppMutation.mutate(whatsappNumber.trim());
+                          }
+                        }}
+                        disabled={updateWhatsAppMutation.isPending}
+                        size="sm"
+                      >
+                        {updateWhatsAppMutation.isPending ? "Saving..." : "Save"}
+                      </Button>
+                      <Button
+                        onClick={() => {
+                          setIsEditingWhatsapp(false);
+                          setWhatsappNumber(whatsappSetting?.value || "");
+                        }}
+                        variant="outline"
+                        size="sm"
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <span className="text-sm font-medium">
+                        {whatsappSetting?.value || "Not configured"}
+                      </span>
+                      <Button
+                        onClick={() => {
+                          setIsEditingWhatsapp(true);
+                          setWhatsappNumber(whatsappSetting?.value || "");
+                        }}
+                        variant="outline"
+                        size="sm"
+                      >
+                        <Edit className="h-4 w-4 mr-1" />
+                        Edit
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </div>
+              
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div className="flex">
+                  <div className="flex-shrink-0">
+                    <MessageCircle className="h-5 w-5 text-blue-400" />
+                  </div>
+                  <div className="ml-3">
+                    <h3 className="text-sm font-medium text-blue-800">
+                      How it works
+                    </h3>
+                    <div className="mt-2 text-sm text-blue-700">
+                      <p>When customers complete checkout, they'll be redirected to WhatsApp with their order details including:</p>
+                      <ul className="list-disc list-inside mt-2 space-y-1">
+                        <li>Customer name and contact information</li>
+                        <li>Complete product list with quantities and sizes</li>
+                        <li>Shipping address</li>
+                        <li>Total order amount</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </div>
   );
 }
