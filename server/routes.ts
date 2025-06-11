@@ -727,13 +727,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Public settings route
+  // Public settings routes
   app.get("/api/settings/whatsapp", async (req, res) => {
     try {
       const setting = await storage.getSettingByKey("whatsapp_number");
       res.json({ whatsappNumber: setting?.value || null });
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch WhatsApp setting" });
+    }
+  });
+
+  app.get("/api/settings/terms_of_service", async (req, res) => {
+    try {
+      const setting = await storage.getSettingByKey("terms_of_service");
+      if (!setting) {
+        return res.status(404).json({ message: "Terms of Service not found" });
+      }
+      res.json(setting);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch Terms of Service" });
     }
   });
 

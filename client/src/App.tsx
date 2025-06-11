@@ -17,6 +17,7 @@ import SubcategoryProducts from "@/pages/subcategory-products";
 import Checkout from "@/pages/checkout";
 import AdminLogin from "@/pages/admin-login";
 import AdminDashboard from "@/pages/admin-dashboard";
+import TermsOfService from "@/pages/terms-of-service";
 import NotFound from "@/pages/not-found";
 
 function Layout({ children }: { children: React.ReactNode }) {
@@ -80,6 +81,12 @@ function Router() {
       <Route path="/checkout">
         <Layout>
           <Checkout />
+        </Layout>
+      </Route>
+      
+      <Route path="/terms-of-service">
+        <Layout>
+          <TermsOfService />
         </Layout>
       </Route>
 
