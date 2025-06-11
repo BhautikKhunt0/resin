@@ -32,21 +32,24 @@ export default function ProductDetail() {
   });
 
   // Combine product main image with additional images
-  const allImages = [...productImages];
+  const allImages = [];
   
-  // If no additional images but product has main image, include it
-  if (allImages.length === 0 && product && (product.imageUrl || product.imageBlob)) {
+  // Always include the main product image as the first image if it exists
+  if (product && (product.imageUrl || product.imageBlob)) {
     allImages.push({
       id: 0,
       productId: product.id,
       imageUrl: product.imageUrl,
       imageBlob: product.imageBlob,
-      priority: 0,
+      priority: -1, // Ensure it's always first
       createdAt: new Date()
     });
   }
   
-  // Sort images by priority
+  // Add additional product images
+  allImages.push(...productImages);
+  
+  // Sort images by priority (main image will be first due to priority -1)
   allImages.sort((a, b) => a.priority - b.priority);
   
 
