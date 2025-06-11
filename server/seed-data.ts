@@ -154,12 +154,9 @@ export async function seedInitialData() {
     }
 
     // Create default admin user
-    const adminEmail = process.env.ADMIN_EMAIL || "admin@modernshop.com";
-    const adminPasswordHash = process.env.ADMIN_PASSWORD_HASH || "$2a$10$rVYMLOYr7zFIzaQ.Y5xBjOo0.8pq6gR7p9c9jhTWVZYFxVN.BQEhK";
-    
     await AdminModel.create({
-      email: adminEmail,
-      password: adminPasswordHash // password: admin123
+      email: "admin@modernshop.com",
+      password: "$2a$10$rVYMLOYr7zFIzaQ.Y5xBjOo0.8pq6gR7p9c9jhTWVZYFxVN.BQEhK" // password: admin123
     });
 
     console.log('✓ Initial data seeded successfully');

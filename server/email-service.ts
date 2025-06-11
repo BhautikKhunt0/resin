@@ -1,36 +1,13 @@
 import nodemailer from 'nodemailer';
 import { Order, OrderItem } from '@shared/schema';
 
-let transporter: nodemailer.Transporter | null = null;
-
-function getTransporter() {
-  if (!transporter) {
-    const EMAIL_USER = process.env.EMAIL_USER;
-    const EMAIL_PASS = process.env.EMAIL_PASS;
-    const EMAIL_FROM = process.env.EMAIL_FROM;
-
-    if (!EMAIL_USER || !EMAIL_PASS || !EMAIL_FROM) {
-      throw new Error('Email configuration environment variables are missing (EMAIL_USER, EMAIL_PASS, EMAIL_FROM)');
-    }
-
-    transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: EMAIL_USER,
-        pass: EMAIL_PASS
-      }
-    });
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: 'bhautikkhunt4117@gmail.com',
+    pass: 'itde ukag ubdv yskn'
   }
-  return transporter;
-}
-
-function getEmailFrom() {
-  const EMAIL_FROM = process.env.EMAIL_FROM;
-  if (!EMAIL_FROM) {
-    throw new Error('EMAIL_FROM environment variable is missing');
-  }
-  return EMAIL_FROM;
-}
+});
 
 interface EmailOrderItem {
   productId: number;
@@ -100,13 +77,13 @@ export async function sendOrderConfirmationEmail(order: Order) {
     `;
 
     const mailOptions = {
-      from: getEmailFrom(),
+      from: 'bhautikkhunt4117@gmail.com',
       to: order.customerEmail,
       subject: `Order Confirmation - Order #${order.id}`,
       html: htmlContent
     };
 
-    await getTransporter().sendMail(mailOptions);
+    await transporter.sendMail(mailOptions);
     console.log(`Order confirmation email sent to ${order.customerEmail}`);
   } catch (error) {
     console.error('Failed to send order confirmation email:', error);
@@ -206,13 +183,13 @@ export async function sendOrderStatusUpdateEmail(order: Order, previousStatus: s
     `;
 
     const mailOptions = {
-      from: getEmailFrom(),
+      from: 'bhautikkhunt4117@gmail.com',
       to: order.customerEmail,
       subject: `Order Status Update - Order #${order.id} - ${order.status}`,
       html: htmlContent
     };
 
-    await getTransporter().sendMail(mailOptions);
+    await transporter.sendMail(mailOptions);
     console.log(`Order status update email sent to ${order.customerEmail} - Status: ${order.status}`);
   } catch (error) {
     console.error('Failed to send order status update email:', error);

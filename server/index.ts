@@ -1,16 +1,3 @@
-import dotenv from "dotenv";
-import path from "path";
-
-// Load environment variables from .env file in the root directory
-dotenv.config({ path: path.resolve(process.cwd(), '.env') });
-
-// Debug: Check if environment variables are loaded
-console.log('Environment variables loaded:');
-console.log('MONGODB_URI:', process.env.MONGODB_URI ? 'Set' : 'Not set');
-console.log('EMAIL_USER:', process.env.EMAIL_USER ? 'Set' : 'Not set');
-console.log('EMAIL_PASS:', process.env.EMAIL_PASS ? 'Set' : 'Not set');
-console.log('EMAIL_FROM:', process.env.EMAIL_FROM ? 'Set' : 'Not set');
-
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
@@ -53,7 +40,10 @@ app.use((req, res, next) => {
 
 (async () => {
   try {
-    // Initialize storage
+    // Connect to MongoDB to access existing orders data
+    await connectToMongoDB();
+    
+    // Initialize and verify image storage
     await initializeStorage();
     
     const server = await registerRoutes(app);
