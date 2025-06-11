@@ -165,8 +165,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   };
 
   const buyNow = (item: CartItem) => {
-    // Clear current cart and add only this item
-    dispatch({ type: 'CLEAR_CART' });
+    // Add item to cart without clearing existing items
     dispatch({ type: 'ADD_ITEM', payload: item });
     // Navigate to checkout will be handled in the component
   };

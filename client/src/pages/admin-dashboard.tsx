@@ -1795,7 +1795,30 @@ export default function AdminDashboard() {
                               </TableCell>
                               <TableCell className="py-4 px-6">
                                 <div className="text-sm text-gray-900">
-                                  {Array.isArray(order.orderItems) ? order.orderItems.length : 0} item{Array.isArray(order.orderItems) && order.orderItems.length > 1 ? 's' : ''}
+                                  {Array.isArray(order.orderItems) ? (
+                                    <div className="space-y-1">
+                                      <div>{order.orderItems.length} item{order.orderItems.length > 1 ? 's' : ''}</div>
+                                      <div className="text-xs text-gray-500">
+                                        {order.orderItems.slice(0, 2).map((item: any, idx: number) => (
+                                          <div key={idx} className="flex items-center gap-1">
+                                            <span className="truncate max-w-[100px]">{item.name}</span>
+                                            {item.weight && (
+                                              <Badge variant="outline" className="text-xs px-1 py-0 h-4">
+                                                {item.weight}
+                                              </Badge>
+                                            )}
+                                          </div>
+                                        ))}
+                                        {order.orderItems.length > 2 && (
+                                          <div className="text-xs text-gray-400">
+                                            +{order.orderItems.length - 2} more
+                                          </div>
+                                        )}
+                                      </div>
+                                    </div>
+                                  ) : (
+                                    '0 items'
+                                  )}
                                 </div>
                               </TableCell>
                               <TableCell className="py-4 px-6">
