@@ -53,10 +53,7 @@ app.use((req, res, next) => {
 
 (async () => {
   try {
-    // Connect to MongoDB to access existing orders data
-    await connectToMongoDB();
-    
-    // Initialize and verify image storage
+    // Initialize storage
     await initializeStorage();
     
     const server = await registerRoutes(app);

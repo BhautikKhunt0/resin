@@ -567,17 +567,16 @@ export class MemStorage implements IStorage {
 import { MongoDBStorage } from "./mongodb-storage";
 
 // Using MongoDB storage to access existing orders data
-export const storage = new MongoDBStorage();
+export const storage = new MemStorage();
 
 // Force database reset to implement new product features
 const shouldForceReset = true;
 
-// Initialize and verify image storage
+// Initialize storage
 export async function initializeStorage(): Promise<void> {
   try {
-    if (storage instanceof MongoDBStorage) {
-      await storage.verifyImageStorage();
-    }
+    // Storage is initialized in constructor for MemStorage
+    console.log('Storage initialized successfully');
   } catch (error) {
     console.error('Failed to initialize storage:', error);
     throw error;
