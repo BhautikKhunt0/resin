@@ -24,8 +24,8 @@ export async function sendOrderConfirmationEmail(order: Order) {
       <tr>
         <td style="padding: 8px; border-bottom: 1px solid #eee;">${item.name}</td>
         <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: center;">${item.quantity}</td>
-        <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: right;">$${item.price.toFixed(2)}</td>
-        <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: right;">$${(item.price * item.quantity).toFixed(2)}</td>
+        <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: right;">₹${item.price.toFixed(2)}</td>
+        <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: right;">₹${(item.price * item.quantity).toFixed(2)}</td>
       </tr>
     `).join('');
 
@@ -65,7 +65,7 @@ export async function sendOrderConfirmationEmail(order: Order) {
           </table>
           
           <div style="text-align: right; margin-top: 20px; padding-top: 20px; border-top: 2px solid #dee2e6;">
-            <h3 style="color: #333; margin: 0;">Total Amount: $${order.totalAmount}</h3>
+            <h3 style="color: #333; margin: 0;">Total Amount: ₹${order.totalAmount}</h3>
           </div>
         </div>
 
@@ -125,8 +125,8 @@ export async function sendOrderStatusUpdateEmail(order: Order, previousStatus: s
       <tr>
         <td style="padding: 8px; border-bottom: 1px solid #eee;">${item.name}</td>
         <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: center;">${item.quantity}</td>
-        <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: right;">$${item.price.toFixed(2)}</td>
-        <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: right;">$${(item.price * item.quantity).toFixed(2)}</td>
+        <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: right;">₹${item.price.toFixed(2)}</td>
+        <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: right;">₹${(item.price * item.quantity).toFixed(2)}</td>
       </tr>
     `).join('');
 
@@ -172,7 +172,7 @@ export async function sendOrderStatusUpdateEmail(order: Order, previousStatus: s
           </table>
           
           <div style="text-align: right; margin-top: 20px; padding-top: 20px; border-top: 2px solid #dee2e6;">
-            <h3 style="color: #333; margin: 0;">Total Amount: $${order.totalAmount}</h3>
+            <h3 style="color: #333; margin: 0;">Total Amount: ₹${order.totalAmount}</h3>
           </div>
         </div>
 
