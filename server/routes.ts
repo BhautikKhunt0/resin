@@ -6,6 +6,7 @@ import bcrypt from "bcryptjs";
 import { insertProductSchema, insertProductImageSchema, insertCategorySchema, insertSubcategorySchema, insertOrderSchema, insertBannerSchema, insertSettingSchema } from "@shared/schema";
 import { sendOrderConfirmationEmail, sendOrderStatusUpdateEmail } from "./email-service";
 import { config } from "./config";
+import { seoService } from "./seo-service";
 
 
 
@@ -746,6 +747,94 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(setting);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch Terms of Service" });
+    }
+  });
+
+  // SEO Routes
+  app.get("/sitemap.xml", async (req, res) => {
+    try {
+      const [products, categories, subcategories] = await Promise.all([
+        storage.getProducts(),
+        storage.getCategories(),
+        storage.getSubcategories()
+      ]);
+
+      const sitemap = seoService.generateSitemap(products, categories, subcategories);
+      
+      res.setHeader('Content-Type', 'application/xml');
+      res.setHeader('Cache-Control', 'public, max-age=86400'); // Cache for 24 hours
+      res.send(sitemap);
+    } catch (error) {
+      console.error("Error generating sitemap:", error);
+      res.status(500).send("Error generating sitemap");
+    }
+  });
+
+  // SEO data endpoints for frontend
+  app.get("/api/seo/product/:id", async (req, res) => {
+    try {
+      const productId = parseInt(req.params.id);
+      const product = await storage.getProductById(productId);
+      
+      if (!product) {
+        return res.status(404).json({ message: "Product not found" });
+      }
+
+      const [categories, subcategories] = await Promise.all([
+        storage.getCategories(),
+        storage.getSubcategories()
+      ]);
+
+      const category = categories.find(c => c.id === product.categoryId);
+      const subcategory = subcategories.find(s => s.id === product.subcategoryId);
+
+      const seoData = seoService.generateProductSEO(product, category, subcategory);
+      res.json(seoData);
+    } catch (error) {
+      console.error("Error generating product SEO:", error);
+      res.status(500).json({ message: "Error generating SEO data" });
+    }
+  });
+
+  app.get("/api/seo/category/:id", async (req, res) => {
+    try {
+      const categoryId = parseInt(req.params.id);
+      const [category, products] = await Promise.all([
+        storage.getCategoryById(categoryId),
+        storage.getProductsByCategory(categoryId)
+      ]);
+      
+      if (!category) {
+        return res.status(404).json({ message: "Category not found" });
+      }
+
+      const seoData = seoService.generateCategorySEO(category, products);
+      res.json(seoData);
+    } catch (error) {
+      console.error("Error generating category SEO:", error);
+      res.status(500).json({ message: "Error generating SEO data" });
+    }
+  });
+
+  app.get("/api/seo/subcategory/:id", async (req, res) => {
+    try {
+      const subcategoryId = parseInt(req.params.id);
+      const [subcategory, products, categories] = await Promise.all([
+        storage.getSubcategoryById(subcategoryId),
+        storage.getProductsBySubcategory(subcategoryId),
+        storage.getCategories()
+      ]);
+      
+      if (!subcategory) {
+        return res.status(404).json({ message: "Subcategory not found" });
+      }
+
+      const category = categories.find(c => c.id === subcategory.categoryId);
+      const seoData = seoService.generateSubcategorySEO(subcategory, category, products);
+      res.json(seoData);
+    } catch (error) {
+      console.error("Error generating subcategory SEO:", error);
+      res.status(500).json({ message: "Error generating SEO data" });
     }
   });
 

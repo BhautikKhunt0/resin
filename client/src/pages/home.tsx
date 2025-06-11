@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { ChevronLeft, ChevronRight, Star, ShoppingBag, Truck, Shield, Headphones, ArrowRight, Grid3X3, Sparkles } from "lucide-react";
 import { api } from "@/lib/api";
 import ProductCard from "@/components/product-card";
+import { SEOHead } from "@/components/seo-head";
 import type { Category, Product, Banner } from "@shared/schema";
 
 export default function Home() {
