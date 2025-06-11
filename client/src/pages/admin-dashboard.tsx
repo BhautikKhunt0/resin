@@ -156,6 +156,19 @@ export default function AdminDashboard() {
     }
   }, [isAuthenticated, setLocation]);
 
+  // Initialize state values from settings
+  useEffect(() => {
+    if (whatsappSetting?.value) {
+      setWhatsappNumber(whatsappSetting.value);
+    }
+  }, [whatsappSetting]);
+
+  useEffect(() => {
+    if (termsSetting?.value) {
+      setTermsOfService(termsSetting.value);
+    }
+  }, [termsSetting]);
+
   if (!isAuthenticated || !token) {
     return null;
   }
@@ -445,6 +458,31 @@ export default function AdminDashboard() {
     onError: (error) => {
       console.error("WhatsApp update error:", error);
       toast({ title: "Failed to update WhatsApp number", variant: "destructive" });
+    },
+  });
+
+  // Terms of Service mutations
+  const updateTermsMutation = useMutation({
+    mutationFn: (content: string) => {
+      if (termsSetting && termsSetting.key) {
+        return api.updateSetting(token, "terms_of_service", content);
+      } else {
+        return api.createSetting(token, {
+          key: "terms_of_service",
+          value: content,
+          description: "Terms of Service content"
+        });
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/settings/terms_of_service"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/settings/terms_of_service"] });
+      setIsEditingTerms(false);
+      toast({ title: "Terms of Service updated successfully" });
+    },
+    onError: (error) => {
+      console.error("Terms update error:", error);
+      toast({ title: "Failed to update Terms of Service", variant: "destructive" });
     },
   });
 
