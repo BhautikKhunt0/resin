@@ -295,51 +295,20 @@ export default function Products() {
         </CardHeader>
         <CardContent className="pt-0">
           <div className="space-y-4">
-            {/* Interactive Price Range Cards */}
-            <div className="space-y-4">
-              {/* Price Range Selector with Visual Bars */}
-              <div className="relative">
-                <div className="flex justify-between text-xs font-medium text-gray-600 mb-2">
-                  <span>₹{productPriceRange[0].toLocaleString()}</span>
-                  <span>₹{productPriceRange[1].toLocaleString()}</span>
-                </div>
-                
-                {/* Visual Price Range Bar */}
-                <div className="relative h-12 bg-gradient-to-r from-green-100 via-yellow-100 to-red-100 dark:from-green-900/30 dark:via-yellow-900/30 dark:to-red-900/30 rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700">
-                  {/* Active Range Overlay */}
-                  <div 
-                    className="absolute top-0 h-full bg-gradient-to-r from-blue-500/40 to-purple-500/40 backdrop-blur-sm transition-all duration-300 rounded-xl border-2 border-blue-400"
-                    style={{
-                      left: `${((priceRange[0] - productPriceRange[0]) / (productPriceRange[1] - productPriceRange[0])) * 100}%`,
-                      width: `${((priceRange[1] - priceRange[0]) / (productPriceRange[1] - productPriceRange[0])) * 100}%`
-                    }}
-                  />
-                  
-                  {/* Price Range Indicators */}
-                  <div className="absolute inset-0 flex items-center justify-between px-4">
-                    <div className="flex items-center space-x-1">
-                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                      <span className="text-xs font-medium text-green-700 dark:text-green-300">Budget</span>
-                    </div>
-                    <div className="flex items-center space-x-1">
-                      <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
-                      <span className="text-xs font-medium text-yellow-700 dark:text-yellow-300">Mid-Range</span>
-                    </div>
-                    <div className="flex items-center space-x-1">
-                      <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-                      <span className="text-xs font-medium text-red-700 dark:text-red-300">Premium</span>
-                    </div>
-                  </div>
-                </div>
-                
-                {/* Current Selection Display */}
-                <div className="flex justify-center mt-2">
-                  <div className="px-4 py-2 bg-blue-50 dark:bg-blue-900/20 rounded-full border border-blue-200 dark:border-blue-800">
-                    <span className="text-sm font-semibold text-blue-700 dark:text-blue-300">
-                      ₹{priceRange[0].toLocaleString()} - ₹{priceRange[1].toLocaleString()}
-                    </span>
-                  </div>
-                </div>
+            {/* Dual Range Slider */}
+            <div className="px-2 space-y-3">
+              <Slider
+                min={productPriceRange[0]}
+                max={productPriceRange[1]}
+                step={Math.max(1, Math.floor((productPriceRange[1] - productPriceRange[0]) / 100))}
+                value={priceRange}
+                onValueChange={(value) => setPriceRange(value as [number, number])}
+                className="w-full"
+              />
+              {/* Slider Value Labels */}
+              <div className="flex justify-between text-xs text-gray-500">
+                <span>₹{productPriceRange[0].toLocaleString()}</span>
+                <span>₹{productPriceRange[1].toLocaleString()}</span>
               </div>
             </div>
             
@@ -399,182 +368,57 @@ export default function Products() {
               </div>
             </div>
             
-            {/* Interactive Price Range Cards */}
-            <div className="space-y-3">
-              <p className="text-xs font-medium text-gray-600">Quick Select Ranges</p>
-              <div className="grid grid-cols-1 gap-3">
-                {[
-                  { 
-                    range: [productPriceRange[0], 2000], 
-                    label: "Budget Friendly", 
-                    subtitle: "Under ₹2K",
-                    icon: "💚",
-                    color: "from-green-400 to-green-600",
-                    bgColor: "bg-green-50 dark:bg-green-900/20",
-                    borderColor: "border-green-200 dark:border-green-800"
-                  },
-                  { 
-                    range: [2000, 5000], 
-                    label: "Mid Range", 
-                    subtitle: "₹2K - ₹5K",
-                    icon: "💛",
-                    color: "from-yellow-400 to-yellow-600",
-                    bgColor: "bg-yellow-50 dark:bg-yellow-900/20",
-                    borderColor: "border-yellow-200 dark:border-yellow-800"
-                  },
-                  { 
-                    range: [5000, 10000], 
-                    label: "Premium", 
-                    subtitle: "₹5K - ₹10K",
-                    icon: "🧡",
-                    color: "from-orange-400 to-orange-600",
-                    bgColor: "bg-orange-50 dark:bg-orange-900/20",
-                    borderColor: "border-orange-200 dark:border-orange-800"
-                  },
-                  { 
-                    range: [10000, productPriceRange[1]], 
-                    label: "Luxury", 
-                    subtitle: "Above ₹10K",
-                    icon: "💜",
-                    color: "from-purple-400 to-purple-600",
-                    bgColor: "bg-purple-50 dark:bg-purple-900/20",
-                    borderColor: "border-purple-200 dark:border-purple-800"
-                  }
-                ].map((option, index) => {
-                  const isSelected = priceRange[0] === option.range[0] && priceRange[1] === option.range[1];
-                  return (
-                    <div
-                      key={index}
-                      onClick={() => setPriceRange(option.range as [number, number])}
-                      className={`
-                        relative p-4 rounded-xl border-2 cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:shadow-md
-                        ${isSelected 
-                          ? `${option.bgColor} ${option.borderColor} shadow-lg ring-2 ring-blue-400 ring-opacity-50` 
-                          : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
-                        }
-                      `}
-                    >
-                      {/* Selection Indicator */}
-                      {isSelected && (
-                        <div className="absolute top-2 right-2">
-                          <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
-                            <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                            </svg>
-                          </div>
-                        </div>
-                      )}
-                      
-                      {/* Content */}
-                      <div className="flex items-center space-x-3">
-                        <div className="text-2xl">{option.icon}</div>
-                        <div className="flex-1">
-                          <div className="flex items-center justify-between">
-                            <h4 className="font-semibold text-gray-900 dark:text-white">{option.label}</h4>
-                            <span className="text-sm font-medium text-gray-600 dark:text-gray-300">{option.subtitle}</span>
-                          </div>
-                          
-                          {/* Progress bar */}
-                          <div className="mt-2 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                            <div 
-                              className={`h-full bg-gradient-to-r ${option.color} transition-all duration-500 ${
-                                isSelected ? 'animate-pulse' : ''
-                              }`}
-                              style={{ 
-                                width: `${Math.min(100, ((option.range[1] - option.range[0]) / (productPriceRange[1] - productPriceRange[0])) * 100)}%` 
-                              }}
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
+            {/* Quick Price Range Buttons */}
+            <div className="space-y-2">
+              <p className="text-xs font-medium text-gray-600">Quick Ranges</p>
+              <div className="grid grid-cols-2 gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-8 text-xs"
+                  onClick={() => setPriceRange([productPriceRange[0], 2000])}
+                >
+                  Under ₹2K
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-8 text-xs"
+                  onClick={() => setPriceRange([2000, 5000])}
+                >
+                  ₹2K - ₹5K
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-8 text-xs"
+                  onClick={() => setPriceRange([5000, 10000])}
+                >
+                  ₹5K - ₹10K
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-8 text-xs"
+                  onClick={() => setPriceRange([10000, productPriceRange[1]])}
+                >
+                  Above ₹10K
+                </Button>
               </div>
             </div>
             
-            {/* Advanced Price Range Controls */}
-            <div className="space-y-4">
-              {/* Drag & Drop Price Adjusters */}
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label className="text-xs font-medium text-gray-600">Minimum Price</label>
-                  <div className="relative group">
-                    <div 
-                      className="w-full h-16 bg-gradient-to-r from-green-100 to-green-200 dark:from-green-900/30 dark:to-green-800/30 rounded-xl border-2 border-dashed border-green-300 dark:border-green-700 flex flex-col items-center justify-center cursor-pointer transition-all duration-300 hover:shadow-lg hover:scale-105"
-                      onClick={() => {
-                        const newMin = Math.max(productPriceRange[0], priceRange[0] - 500);
-                        setPriceRange([newMin, priceRange[1]]);
-                      }}
-                    >
-                      <div className="text-xs font-medium text-green-600 dark:text-green-400">Tap to adjust</div>
-                      <div className="text-lg font-bold text-green-700 dark:text-green-300">₹{priceRange[0].toLocaleString()}</div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-xs font-medium text-gray-600">Maximum Price</label>
-                  <div className="relative group">
-                    <div 
-                      className="w-full h-16 bg-gradient-to-r from-purple-100 to-purple-200 dark:from-purple-900/30 dark:to-purple-800/30 rounded-xl border-2 border-dashed border-purple-300 dark:border-purple-700 flex flex-col items-center justify-center cursor-pointer transition-all duration-300 hover:shadow-lg hover:scale-105"
-                      onClick={() => {
-                        const newMax = Math.min(productPriceRange[1], priceRange[1] + 500);
-                        setPriceRange([priceRange[0], newMax]);
-                      }}
-                    >
-                      <div className="text-xs font-medium text-purple-600 dark:text-purple-400">Tap to adjust</div>
-                      <div className="text-lg font-bold text-purple-700 dark:text-purple-300">₹{priceRange[1].toLocaleString()}</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Quick Adjustment Controls */}
-              <div className="flex justify-center space-x-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setPriceRange([Math.max(productPriceRange[0], priceRange[0] - 1000), priceRange[1]])}
-                  className="flex items-center space-x-1 h-8 px-3"
-                >
-                  <span className="text-xs">-₹1K</span>
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setPriceRange(productPriceRange as [number, number])}
-                  className="flex items-center space-x-1 h-8 px-3"
-                >
-                  <span className="text-xs">Reset</span>
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setPriceRange([priceRange[0], Math.min(productPriceRange[1], priceRange[1] + 1000)])}
-                  className="flex items-center space-x-1 h-8 px-3"
-                >
-                  <span className="text-xs">+₹1K</span>
-                </Button>
-              </div>
-
-              {/* Live Price Range Display */}
-              <div className="relative overflow-hidden">
-                <div className="text-center p-4 bg-gradient-to-br from-indigo-50 via-blue-50 to-cyan-50 dark:from-indigo-900/20 dark:via-blue-900/20 dark:to-cyan-900/20 rounded-xl border border-blue-200 dark:border-blue-800 shadow-sm">
-                  <div className="flex items-center justify-center space-x-2 mb-2">
-                    <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-                    <span className="text-sm font-semibold text-blue-700 dark:text-blue-300">Active Filter</span>
-                    <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-                  </div>
-                  
-                  <div className="text-2xl font-bold text-blue-900 dark:text-blue-100 mb-2">
-                    ₹{priceRange[0].toLocaleString()} - ₹{priceRange[1].toLocaleString()}
-                  </div>
-                  
-                  <div className="flex justify-between items-center text-xs text-blue-600 dark:text-blue-400">
-                    <span>Range: ₹{(priceRange[1] - priceRange[0]).toLocaleString()}</span>
-                    <span>{Math.round(((priceRange[1] - priceRange[0]) / (productPriceRange[1] - productPriceRange[0])) * 100)}% of total</span>
-                  </div>
+            {/* Current Range Display with Enhanced Styling */}
+            <div className="relative">
+              <div className="text-center p-3 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-lg border border-blue-100 dark:border-blue-800">
+                <p className="text-sm font-semibold text-blue-700 dark:text-blue-300">
+                  Selected Range
+                </p>
+                <p className="text-lg font-bold text-blue-900 dark:text-blue-100 mt-1">
+                  ₹{priceRange[0].toLocaleString()} - ₹{priceRange[1].toLocaleString()}
+                </p>
+                <div className="flex justify-between mt-2 text-xs text-blue-600 dark:text-blue-400">
+                  <span>Min: ₹{priceRange[0].toLocaleString()}</span>
+                  <span>Max: ₹{priceRange[1].toLocaleString()}</span>
                 </div>
               </div>
             </div>
