@@ -23,6 +23,7 @@ import {
   Truck,
   Settings,
   MessageCircle,
+  FileText,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -156,19 +157,6 @@ export default function AdminDashboard() {
     }
   }, [isAuthenticated, setLocation]);
 
-  // Initialize state values from settings
-  useEffect(() => {
-    if (whatsappSetting?.value) {
-      setWhatsappNumber(whatsappSetting.value);
-    }
-  }, [whatsappSetting]);
-
-  useEffect(() => {
-    if (termsSetting?.value) {
-      setTermsOfService(termsSetting.value);
-    }
-  }, [termsSetting]);
-
   if (!isAuthenticated || !token) {
     return null;
   }
@@ -208,6 +196,19 @@ export default function AdminDashboard() {
     queryKey: ["/api/admin/settings/terms_of_service"],
     queryFn: () => api.getAdminSetting(token, "terms_of_service").catch(() => null),
   });
+
+  // Initialize state values from settings
+  useEffect(() => {
+    if (whatsappSetting?.value) {
+      setWhatsappNumber(whatsappSetting.value);
+    }
+  }, [whatsappSetting]);
+
+  useEffect(() => {
+    if (termsSetting?.value) {
+      setTermsOfService(termsSetting.value);
+    }
+  }, [termsSetting]);
 
   // Forms
   const productForm = useForm<ProductFormData>({
@@ -801,7 +802,7 @@ export default function AdminDashboard() {
     { id: "categories", label: "Categories", icon: Tags },
     { id: "subcategories", label: "Subcategories", icon: Tags },
     { id: "banners", label: "Banners", icon: ImageIcon },
-    { id: "content", label: "Content", icon: Settings },
+    { id: "content", label: "Content", icon: FileText },
     { id: "settings", label: "Settings", icon: Settings },
   ];
 
@@ -2834,102 +2835,109 @@ export default function AdminDashboard() {
 
       {/* Settings Tab */}
       {activeTab === "settings" && (
-        <div className="space-y-6">
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900">Settings</h2>
-            <p className="text-gray-600 mt-1">Manage your store settings and configuration</p>
+        <div className="max-w-4xl">
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold text-gray-900">Settings</h1>
+            <p className="text-gray-600 mt-2">Manage your store settings and configuration</p>
           </div>
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <MessageCircle className="h-5 w-5 mr-2 text-green-600" />
-                WhatsApp Configuration
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="flex-1">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+          <div className="space-y-6">
+            <Card className="border-0 shadow-lg">
+              <CardHeader className="bg-gradient-to-r from-green-50 to-green-100 border-b border-green-200">
+                <CardTitle className="flex items-center text-green-800">
+                  <MessageCircle className="h-5 w-5 mr-2" />
+                  WhatsApp Configuration
+                </CardTitle>
+                <p className="text-green-600 text-sm mt-1">Configure WhatsApp integration for order notifications</p>
+              </CardHeader>
+              <CardContent className="p-6 space-y-6">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-800 mb-2">
                     WhatsApp Number
                   </label>
-                  <p className="text-sm text-gray-500 mb-3">
+                  <p className="text-sm text-gray-600 mb-4">
                     This number will receive order notifications from the checkout process
                   </p>
                   {isEditingWhatsapp ? (
-                    <div className="flex space-x-2">
+                    <div className="space-y-3">
                       <Input
                         value={whatsappNumber}
                         onChange={(e) => setWhatsappNumber(e.target.value)}
                         placeholder="+1234567890"
-                        className="flex-1"
+                        className="text-base"
                       />
-                      <Button
-                        onClick={() => {
-                          if (whatsappNumber.trim()) {
-                            updateWhatsAppMutation.mutate(whatsappNumber.trim());
-                          }
-                        }}
-                        disabled={updateWhatsAppMutation.isPending}
-                        size="sm"
-                      >
-                        {updateWhatsAppMutation.isPending ? "Saving..." : "Save"}
-                      </Button>
-                      <Button
-                        onClick={() => {
-                          setIsEditingWhatsapp(false);
-                          setWhatsappNumber(whatsappSetting?.value || "");
-                        }}
-                        variant="outline"
-                        size="sm"
-                      >
-                        Cancel
-                      </Button>
+                      <div className="flex space-x-3">
+                        <Button
+                          onClick={() => {
+                            if (whatsappNumber.trim()) {
+                              updateWhatsAppMutation.mutate(whatsappNumber.trim());
+                            }
+                          }}
+                          disabled={updateWhatsAppMutation.isPending}
+                          className="bg-green-600 hover:bg-green-700"
+                        >
+                          {updateWhatsAppMutation.isPending ? "Saving..." : "Save Changes"}
+                        </Button>
+                        <Button
+                          onClick={() => {
+                            setIsEditingWhatsapp(false);
+                            setWhatsappNumber(whatsappSetting?.value || "");
+                          }}
+                          variant="outline"
+                        >
+                          Cancel
+                        </Button>
+                      </div>
                     </div>
                   ) : (
-                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                      <span className="text-sm font-medium">
-                        {whatsappSetting?.value || "Not configured"}
-                      </span>
-                      <Button
-                        onClick={() => {
-                          setIsEditingWhatsapp(true);
-                          setWhatsappNumber(whatsappSetting?.value || "");
-                        }}
-                        variant="outline"
-                        size="sm"
-                      >
-                        <Edit className="h-4 w-4 mr-1" />
-                        Edit
-                      </Button>
+                    <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="text-sm text-gray-500 mb-1">Current Number</div>
+                          <div className="text-lg font-medium text-gray-900">
+                            {whatsappSetting?.value || "Not configured"}
+                          </div>
+                        </div>
+                        <Button
+                          onClick={() => {
+                            setIsEditingWhatsapp(true);
+                            setWhatsappNumber(whatsappSetting?.value || "");
+                          }}
+                          variant="outline"
+                          className="border-green-300 text-green-700 hover:bg-green-50"
+                        >
+                          <Edit className="h-4 w-4 mr-2" />
+                          Edit Number
+                        </Button>
+                      </div>
                     </div>
                   )}
                 </div>
-              </div>
-              
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <div className="flex">
-                  <div className="flex-shrink-0">
-                    <MessageCircle className="h-5 w-5 text-blue-400" />
-                  </div>
-                  <div className="ml-3">
-                    <h3 className="text-sm font-medium text-blue-800">
-                      How it works
-                    </h3>
-                    <div className="mt-2 text-sm text-blue-700">
-                      <p>When customers complete checkout, they'll be redirected to WhatsApp with their order details including:</p>
-                      <ul className="list-disc list-inside mt-2 space-y-1">
-                        <li>Customer name and contact information</li>
-                        <li>Complete product list with quantities and sizes</li>
-                        <li>Shipping address</li>
-                        <li>Total order amount</li>
-                      </ul>
+                
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <div className="flex">
+                    <div className="flex-shrink-0">
+                      <MessageCircle className="h-5 w-5 text-blue-500" />
+                    </div>
+                    <div className="ml-3">
+                      <h3 className="text-sm font-semibold text-blue-800 mb-2">
+                        How it works
+                      </h3>
+                      <div className="text-sm text-blue-700">
+                        <p className="mb-2">When customers complete checkout, they'll be redirected to WhatsApp with their order details including:</p>
+                        <ul className="list-disc list-inside space-y-1">
+                          <li>Customer name and contact information</li>
+                          <li>Complete product list with quantities and sizes</li>
+                          <li>Shipping address</li>
+                          <li>Total order amount</li>
+                        </ul>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       )}
 
