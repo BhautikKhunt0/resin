@@ -445,6 +445,24 @@ export default function Products() {
                   </Badge>
                 ) : null;
               })}
+              {minPrice && (
+                <Badge variant="secondary" className="flex items-center gap-1">
+                  Min: ₹{minPrice}
+                  <X 
+                    className="h-3 w-3 cursor-pointer" 
+                    onClick={() => setMinPrice("")}
+                  />
+                </Badge>
+              )}
+              {maxPrice && (
+                <Badge variant="secondary" className="flex items-center gap-1">
+                  Max: ₹{maxPrice}
+                  <X 
+                    className="h-3 w-3 cursor-pointer" 
+                    onClick={() => setMaxPrice("")}
+                  />
+                </Badge>
+              )}
               {showFeaturedOnly && (
                 <Badge variant="secondary" className="flex items-center gap-1">
                   Featured Only
