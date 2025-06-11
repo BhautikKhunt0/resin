@@ -60,44 +60,39 @@ export default function Categories() {
 
       {/* Subcategories Grid */}
       {subcategoriesLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-3 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-8">
           {Array.from({ length: 8 }).map((_, i) => (
-            <Skeleton key={i} className="h-48 w-full" />
+            <div key={i} className="space-y-4">
+              <Skeleton className="aspect-square rounded-xl w-full h-24 md:h-40" />
+              <Skeleton className="h-4 w-3/4 mx-auto" />
+            </div>
           ))}
         </div>
       ) : subcategories && subcategories.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-3 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-8">
           {subcategories.map((subcategory) => (
-            <Link key={subcategory.id} href={`/subcategory/${subcategory.id}/products`}>
-              <Card className="group cursor-pointer hover:shadow-lg transition-all duration-300 hover:-translate-y-1 overflow-hidden">
-{(() => {
-                  const imageUrl = subcategory.imageBlob ? `data:image/jpeg;base64,${subcategory.imageBlob}` : subcategory.imageUrl;
-                  return imageUrl ? (
-                    <div className="relative aspect-square w-full overflow-hidden">
+            <Link key={subcategory.id} href={`/subcategory/${subcategory.id}/products`} className="block">
+              <div className="group cursor-pointer w-full flex flex-col items-center">
+                <div className="aspect-square rounded-xl overflow-hidden bg-gray-100 mb-2 md:mb-4 group-hover:shadow-xl transition-all duration-300 h-24 md:h-40">
+                  {(() => {
+                    const imageUrl = subcategory.imageBlob ? `data:image/jpeg;base64,${subcategory.imageBlob}` : subcategory.imageUrl;
+                    return imageUrl ? (
                       <img
                         src={imageUrl}
                         alt={subcategory.name}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                       />
-                      <div className="absolute inset-0 bg-black bg-opacity-20 group-hover:bg-opacity-30 transition-all duration-300"></div>
-                    </div>
-                  ) : (
-                    <div className="aspect-square w-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-                      <Grid3X3 className="h-16 w-16 text-white group-hover:scale-110 transition-transform duration-300" />
-                    </div>
-                  );
-                })()}
-                <CardContent className="p-6 text-center">
-                  <h3 className="font-semibold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors text-lg">
-                    {subcategory.name}
-                  </h3>
-                  {subcategory.description && (
-                    <p className="text-gray-600 text-sm line-clamp-2">
-                      {subcategory.description}
-                    </p>
-                  )}
-                </CardContent>
-              </Card>
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-100 to-purple-100">
+                        <Grid3X3 className="w-16 h-16 text-gray-400" />
+                      </div>
+                    );
+                  })()}
+                </div>
+                <h3 className="text-xs md:text-base font-semibold text-gray-900 group-hover:text-blue-600 transition-colors text-center w-full">
+                  {subcategory.name}
+                </h3>
+              </div>
             </Link>
           ))}
         </div>
