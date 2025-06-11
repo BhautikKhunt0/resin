@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useRoute } from "wouter";
 import { useState } from "react";
-import { ArrowLeft, ShoppingCart, Package, Truck, Shield, ChevronLeft, ChevronRight, Minus, Plus, Check, Star } from "lucide-react";
+import { ArrowLeft, ShoppingCart, Package, Truck, Shield, ChevronLeft, ChevronRight, Minus, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -27,9 +27,9 @@ export default function ProductDetail() {
     enabled: !!productId,
   });
 
-  const { data: productImages = [] } = useQuery<ProductImage[]>({
+  const { data: productImages = [], isLoading: imagesLoading } = useQuery<ProductImage[]>({
     queryKey: ["/api/products", productId, "images"],
-    queryFn: () => productId ? api.getProductImages(productId) : Promise.reject(new Error("No product ID")),
+    queryFn: () => productId ? fetch(`/api/products/${productId}/images`).then(res => res.json()) : Promise.reject(new Error("No product ID")),
     enabled: !!productId,
   });
 
@@ -76,21 +76,21 @@ export default function ProductDetail() {
   const handleAddToCart = () => {
     if (!product) return;
 
-    const imageUrl = allImages[0]?.imageUrl || 
-                    (allImages[0]?.imageBlob ? `data:image/jpeg;base64,${allImages[0].imageBlob}` : undefined);
+    const primaryImage = allImages[0];
+    const imageUrl = primaryImage?.imageBlob ? `data:image/jpeg;base64,${primaryImage.imageBlob}` : primaryImage?.imageUrl;
 
     addItem({
       productId: product.id,
       name: product.name,
       price: currentPrice,
-      quantity,
+      quantity: quantity,
       weight: selectedWeight,
-      imageUrl
+      imageUrl: imageUrl || undefined,
     });
 
     toast({
       title: "Added to cart",
-      description: `${quantity} × ${product.name} added to your cart`,
+      description: `${quantity} x ${product.name} (${selectedWeight}) has been added to your cart.`,
     });
   };
 
@@ -104,22 +104,15 @@ export default function ProductDetail() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-white">
+      <div className="min-h-screen bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <Skeleton className="h-8 w-32 mb-8" />
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-            <div className="space-y-4">
-              <Skeleton className="w-full h-[500px] rounded-lg" />
-              <div className="flex space-x-3">
-                {[...Array(3)].map((_, i) => (
-                  <Skeleton key={i} className="w-20 h-20 rounded-lg" />
-                ))}
-              </div>
-            </div>
+            <Skeleton className="w-full h-96 rounded-lg" />
             <div className="space-y-6">
               <Skeleton className="h-8 w-3/4" />
               <Skeleton className="h-6 w-1/2" />
-              <Skeleton className="h-4 w-full" />
-              <Skeleton className="h-4 w-5/6" />
+              <Skeleton className="h-32 w-full" />
               <Skeleton className="h-12 w-full" />
             </div>
           </div>
@@ -130,139 +123,171 @@ export default function ProductDetail() {
 
   if (error || !product) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <Package className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-          <h2 className="text-2xl font-semibold text-gray-900 mb-2">Product not found</h2>
-          <p className="text-gray-600 mb-6">The product you're looking for doesn't exist.</p>
-          <Link href="/">
-            <Button>
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Products
-            </Button>
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">Product Not Found</h1>
+          <p className="text-gray-600 mb-8">The product you're looking for doesn't exist.</p>
+          <Link href="/products">
+            <Button>Browse Products</Button>
           </Link>
         </div>
       </div>
     );
   }
 
-  return (
-    <div className="min-h-screen bg-white">
-      {/* Breadcrumb */}
-      <div className="bg-gray-50 border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center text-sm text-gray-600">
-            <Link href="/" className="hover:text-gray-900">Home</Link>
-            <span className="mx-2">/</span>
-            <Link href="/" className="hover:text-gray-900">Wall Art</Link>
-            <span className="mx-2">/</span>
-            <span className="text-gray-900">{product.name}</span>
-          </div>
-        </div>
-      </div>
 
+
+  return (
+    <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Back Button */}
+        <Link href="/products">
+          <Button variant="ghost" className="mb-8">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Products
+          </Button>
+        </Link>
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-          {/* Image Gallery */}
+          {/* Product Image Gallery */}
           <div className="space-y-4">
-            {/* Main Image */}
-            <div className="relative bg-gray-50 rounded-lg overflow-hidden">
+            {/* Main Image Display */}
+            <div className="relative aspect-square bg-white rounded-lg overflow-hidden shadow-sm">
               {allImages.length > 0 ? (
-                <div className="relative">
-                  <img
-                    src={allImages[selectedImageIndex]?.imageUrl || 
-                         (allImages[selectedImageIndex]?.imageBlob ? 
-                          `data:image/jpeg;base64,${allImages[selectedImageIndex].imageBlob}` : 
-                          '/api/placeholder/600/500')}
-                    alt={product.name}
-                    className="w-full h-[500px] object-cover"
-                  />
+                <>
+                  {(() => {
+                    const currentImage = allImages[selectedImageIndex];
+                    if (!currentImage) {
+                      return (
+                        <div className="w-full h-full flex items-center justify-center bg-gray-100">
+                          <Package className="h-24 w-24 text-gray-400" />
+                        </div>
+                      );
+                    }
+                    
+                    let imageUrl = '';
+                    if (currentImage.imageBlob) {
+                      // Handle base64 data from MongoDB
+                      if (currentImage.imageBlob.startsWith('data:')) {
+                        imageUrl = currentImage.imageBlob;
+                      } else {
+                        imageUrl = `data:image/jpeg;base64,${currentImage.imageBlob}`;
+                      }
+                    } else if (currentImage.imageUrl) {
+                      imageUrl = currentImage.imageUrl;
+                    }
+                    
+
+                    
+                    return imageUrl ? (
+                      <img
+                        src={imageUrl}
+                        alt={product.name}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none';
+                        }}
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-gray-100">
+                        <Package className="h-24 w-24 text-gray-400" />
+                      </div>
+                    );
+                  })()}
+                  
+                  {/* Navigation Arrows */}
                   {allImages.length > 1 && (
                     <>
                       <button
                         onClick={prevImage}
-                        className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full shadow-lg transition-all"
+                        className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-20 hover:bg-opacity-30 text-white p-2 rounded-full transition-all duration-200"
                       >
-                        <ChevronLeft className="h-5 w-5 text-gray-700" />
+                        <ChevronLeft className="w-6 h-6" />
                       </button>
                       <button
                         onClick={nextImage}
-                        className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full shadow-lg transition-all"
+                        className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-20 hover:bg-opacity-30 text-white p-2 rounded-full transition-all duration-200"
                       >
-                        <ChevronRight className="h-5 w-5 text-gray-700" />
+                        <ChevronRight className="w-6 h-6" />
                       </button>
+                      
+                      {/* Image Counter */}
+                      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-50 text-white px-3 py-1 rounded-full text-sm">
+                        {selectedImageIndex + 1} / {allImages.length}
+                      </div>
                     </>
                   )}
-                </div>
+                </>
               ) : (
-                <div className="h-[500px] flex items-center justify-center">
-                  <Package className="h-16 w-16 text-gray-300" />
+                <div className="w-full h-full flex items-center justify-center bg-gray-100">
+                  <Package className="h-24 w-24 text-gray-400" />
                 </div>
               )}
             </div>
-
-            {/* Thumbnail Images */}
-            {allImages.length > 1 && (
-              <div className="flex space-x-3">
-                {allImages.slice(0, 4).map((image, index) => (
-                  <button
-                    key={image.id}
-                    onClick={() => setSelectedImageIndex(index)}
-                    className={`w-20 h-20 rounded-lg overflow-hidden border-2 transition-all ${
-                      selectedImageIndex === index 
-                        ? 'border-blue-500 ring-2 ring-blue-200' 
-                        : 'border-gray-200 hover:border-gray-300'
-                    }`}
-                  >
-                    <img
-                      src={image.imageUrl || 
-                           (image.imageBlob ? `data:image/jpeg;base64,${image.imageBlob}` : '/api/placeholder/80/80')}
-                      alt={`${product.name} ${index + 1}`}
-                      className="w-full h-full object-cover"
-                    />
-                  </button>
-                ))}
+            
+            {/* Thumbnail Navigation */}
+            {allImages.length > 0 && (
+              <div className="flex gap-2 overflow-x-auto pb-2">
+                {allImages.map((image, index) => {
+                  let imageUrl = '';
+                  if (image.imageBlob) {
+                    if (image.imageBlob.startsWith('data:')) {
+                      imageUrl = image.imageBlob;
+                    } else {
+                      imageUrl = `data:image/jpeg;base64,${image.imageBlob}`;
+                    }
+                  } else if (image.imageUrl) {
+                    imageUrl = image.imageUrl;
+                  }
+                  
+                  return (
+                    <button
+                      key={image.id || index}
+                      onClick={() => setSelectedImageIndex(index)}
+                      className={`flex-shrink-0 w-16 h-16 bg-white rounded-md overflow-hidden shadow-sm border-2 transition-all duration-200 ${
+                        index === selectedImageIndex ? 'border-blue-500 ring-1 ring-blue-500' : 'border-gray-300 hover:border-gray-400'
+                      }`}
+                    >
+                      {imageUrl ? (
+                        <img
+                          src={imageUrl}
+                          alt={`${product.name} - Image ${index + 1}`}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            e.currentTarget.style.display = 'none';
+                          }}
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-gray-100">
+                          <Package className="h-4 w-4 text-gray-400" />
+                        </div>
+                      )}
+                    </button>
+                  );
+                })}
               </div>
             )}
           </div>
 
-          {/* Product Information */}
+          {/* Product Info */}
           <div className="space-y-6">
-            {/* Title and Stock */}
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">{product.name}</h1>
-              <div className="flex items-center space-x-2">
-                <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200">
-                  <Check className="h-3 w-3 mr-1" />
+              <h1 className="text-3xl font-bold text-gray-900 mb-4">
+                {product.name}
+              </h1>
+              <div className="flex items-center space-x-4 mb-4">
+                <span className="text-3xl font-bold text-primary">
+                  ₹{currentPrice.toFixed(2)}
+                </span>
+                <Badge variant="secondary" className="text-green-600 bg-green-100">
                   In Stock
                 </Badge>
               </div>
             </div>
 
-            {/* Description */}
             <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-3">Description</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Description</h3>
               <p className="text-gray-600 leading-relaxed">{product.description}</p>
-            </div>
-
-            {/* Quantity */}
-            <div>
-              <h3 className="text-sm font-medium text-gray-900 mb-3">Quantity</h3>
-              <div className="flex items-center space-x-3">
-                <button
-                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                  className="w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-50 transition-colors"
-                >
-                  <Minus className="h-4 w-4" />
-                </button>
-                <span className="text-lg font-medium w-8 text-center">{quantity}</span>
-                <button
-                  onClick={() => setQuantity(quantity + 1)}
-                  className="w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-50 transition-colors"
-                >
-                  <Plus className="h-4 w-4" />
-                </button>
-              </div>
             </div>
 
             {/* Size Options */}
@@ -274,9 +299,9 @@ export default function ProductDetail() {
                     <button
                       key={variant.weight}
                       onClick={() => setSelectedWeight(variant.weight)}
-                      className={`p-4 rounded-lg border-2 transition-all duration-200 text-center ${
+                      className={`p-3 rounded-lg border-2 transition-all duration-200 text-center ${
                         selectedWeight === variant.weight
-                          ? 'border-blue-500 bg-blue-50'
+                          ? 'border-blue-500 bg-blue-50 shadow-lg'
                           : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
                       }`}
                     >
@@ -294,49 +319,84 @@ export default function ProductDetail() {
               </div>
             )}
 
-            {/* Action Buttons */}
-            <div className="space-y-4">
+            {/* Quantity Selector */}
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Quantity</h3>
               <div className="flex items-center space-x-4">
+                <div className="flex items-center border-2 border-gray-200 rounded-lg overflow-hidden">
+                  <button
+                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                    className="p-3 hover:bg-gray-100 transition-colors disabled:opacity-50"
+                    disabled={quantity <= 1}
+                  >
+                    <Minus className="h-4 w-4" />
+                  </button>
+                  <span className="px-6 py-3 font-semibold text-xl bg-gray-50 min-w-[80px] text-center border-x-2 border-gray-200">
+                    {quantity}
+                  </span>
+                  <button
+                    onClick={() => setQuantity(quantity + 1)}
+                    className="p-3 hover:bg-gray-100 transition-colors"
+                  >
+                    <Plus className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Add to Cart Section */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                <span className="text-sm text-gray-600">
+                  <Shield className="h-4 w-4 inline mr-1" />
+                  Secure checkout • Free shipping over ₹2,000
+                </span>
+              </div>
+              
+              <div className="space-y-3">
                 <Button
+                  size="lg"
+                  className="w-full h-14 text-lg font-semibold bg-blue-600 hover:bg-blue-700"
                   onClick={handleAddToCart}
-                  className="flex-1 h-12 bg-gray-800 hover:bg-gray-900 text-white font-medium"
                 >
-                  <ShoppingCart className="h-5 w-5 mr-2" />
+                  <ShoppingCart className="h-5 w-5 mr-3" />
                   Add to Cart
                 </Button>
-                <Button 
-                  className="h-12 px-8 bg-orange-400 hover:bg-orange-500 text-white font-medium"
+                
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="w-full h-14 text-lg font-semibold border-2 border-orange-400 text-orange-600 hover:bg-orange-50"
+                  onClick={handleAddToCart}
                 >
                   Buy Now
                 </Button>
               </div>
-              
-              <div className="flex items-center justify-center text-sm text-gray-600">
-                <Shield className="h-4 w-4 mr-2" />
-                Secure checkout • Free shipping over ₹2,000
-              </div>
             </div>
 
             {/* Features */}
-            <div className="border-t pt-6">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="flex items-center space-x-3">
-                  <Truck className="h-5 w-5 text-gray-400" />
-                  <span className="text-sm text-gray-600">Free Delivery</span>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <Shield className="h-5 w-5 text-gray-400" />
-                  <span className="text-sm text-gray-600">Secure Payment</span>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <Package className="h-5 w-5 text-gray-400" />
-                  <span className="text-sm text-gray-600">Easy Returns</span>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <Star className="h-5 w-5 text-gray-400" />
-                  <span className="text-sm text-gray-600">Premium Quality</span>
-                </div>
-              </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <Card>
+                <CardContent className="p-4 text-center">
+                  <Truck className="h-8 w-8 text-primary mx-auto mb-2" />
+                  <h4 className="font-semibold text-sm">Free Shipping</h4>
+                  <p className="text-xs text-gray-600">On orders over $50</p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-4 text-center">
+                  <Shield className="h-8 w-8 text-primary mx-auto mb-2" />
+                  <h4 className="font-semibold text-sm">Warranty</h4>
+                  <p className="text-xs text-gray-600">1 year coverage</p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-4 text-center">
+                  <Package className="h-8 w-8 text-primary mx-auto mb-2" />
+                  <h4 className="font-semibold text-sm">Easy Returns</h4>
+                  <p className="text-xs text-gray-600">30-day policy</p>
+                </CardContent>
+              </Card>
             </div>
           </div>
         </div>
