@@ -1,11 +1,19 @@
 import nodemailer from 'nodemailer';
 import { Order, OrderItem } from '@shared/schema';
 
+const EMAIL_USER = process.env.EMAIL_USER;
+const EMAIL_PASS = process.env.EMAIL_PASS;
+const EMAIL_FROM = process.env.EMAIL_FROM;
+
+if (!EMAIL_USER || !EMAIL_PASS || !EMAIL_FROM) {
+  throw new Error('Email configuration environment variables are missing (EMAIL_USER, EMAIL_PASS, EMAIL_FROM)');
+}
+
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
-    user: 'bhautikkhunt4117@gmail.com',
-    pass: 'itde ukag ubdv yskn'
+    user: EMAIL_USER,
+    pass: EMAIL_PASS
   }
 });
 
@@ -77,7 +85,7 @@ export async function sendOrderConfirmationEmail(order: Order) {
     `;
 
     const mailOptions = {
-      from: 'bhautikkhunt4117@gmail.com',
+      from: EMAIL_FROM,
       to: order.customerEmail,
       subject: `Order Confirmation - Order #${order.id}`,
       html: htmlContent
@@ -183,7 +191,7 @@ export async function sendOrderStatusUpdateEmail(order: Order, previousStatus: s
     `;
 
     const mailOptions = {
-      from: 'bhautikkhunt4117@gmail.com',
+      from: EMAIL_FROM,
       to: order.customerEmail,
       subject: `Order Status Update - Order #${order.id} - ${order.status}`,
       html: htmlContent

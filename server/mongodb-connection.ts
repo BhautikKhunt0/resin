@@ -1,10 +1,14 @@
 import mongoose from 'mongoose';
 
-const MONGODB_URI = 'mongodb+srv://bhautikkhunt0393:bhautik%400393@resinadmin.ddio6d8.mongodb.net/ecommerce';
+const MONGODB_URI = process.env.MONGODB_URI;
+
+if (!MONGODB_URI) {
+  throw new Error('MONGODB_URI environment variable is not defined');
+}
 
 export async function connectToMongoDB() {
   try {
-    await mongoose.connect(MONGODB_URI);
+    await mongoose.connect(MONGODB_URI as string);
     console.log('Connected to MongoDB successfully');
     console.log('Using existing MongoDB data - no seeding performed');
   } catch (error) {
