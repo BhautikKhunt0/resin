@@ -111,7 +111,7 @@ export default function Products() {
 
       // Price filter
       const price = parseFloat(product.price);
-      if (price < priceRange[0] || price > priceRange[1]) {
+      if (price < debouncedPriceRange[0] || price > debouncedPriceRange[1]) {
         return false;
       }
 
