@@ -111,7 +111,7 @@ export default function Header() {
     >
       <Button 
         variant="ghost" 
-        className="text-sm font-medium text-gray-600 hover:text-gray-900 h-auto p-0 bg-transparent border-0 shadow-none flex items-center gap-1"
+        className="text-sm font-medium text-pink-100 hover:text-white h-auto p-0 bg-transparent border-0 shadow-none flex items-center gap-1"
       >
         <Grid3X3 className="h-4 w-4" />
         Collections
@@ -228,14 +228,14 @@ export default function Header() {
   );
 
   return (
-    <header className="bg-white shadow-sm border-b sticky top-0 z-50">
+    <header className="bg-gradient-to-r from-pink-600 to-pink-700 shadow-lg sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Mobile Menu Button - Left side */}
           <Button
             variant="ghost"
             size="sm"
-            className="md:hidden"
+            className="md:hidden text-white hover:bg-pink-600/20 hover:text-white"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           >
             {isMobileMenuOpen ? (
@@ -247,9 +247,13 @@ export default function Header() {
 
           {/* Logo - Center on mobile, left on desktop */}
           <Link href="/">
-            <h1 className="text-xl md:text-2xl font-bold text-pink-700 cursor-pointer">
-              The Resin Studio
-            </h1>
+            <div className="flex items-center space-x-3 cursor-pointer">
+              <img 
+                src="/attached_assets/image_1749644860677.png" 
+                alt="The Resin Studio" 
+                className="h-10 w-auto object-contain"
+              />
+            </div>
           </Link>
 
           {/* Desktop Navigation */}
@@ -259,8 +263,8 @@ export default function Header() {
                 <span
                   className={`text-sm font-medium transition-colors cursor-pointer ${
                     location === item.href
-                      ? "text-primary"
-                      : "text-gray-600 hover:text-gray-900"
+                      ? "text-white border-b-2 border-white pb-1"
+                      : "text-pink-100 hover:text-white"
                   }`}
                 >
                   {item.label}
@@ -276,11 +280,11 @@ export default function Header() {
               variant="ghost"
               size="sm"
               onClick={toggleCart}
-              className="relative p-2 md:hidden"
+              className="relative p-2 md:hidden text-white hover:bg-pink-600/20 hover:text-white"
             >
               <ShoppingCart className="h-5 w-5" />
               {totalItems > 0 && (
-                <span className="absolute -top-1 -right-1 bg-primary text-white text-xs rounded-full h-5 w-5 flex items-center justify-center animate-cart-bounce">
+                <span className="absolute -top-1 -right-1 bg-white text-pink-700 text-xs rounded-full h-5 w-5 flex items-center justify-center animate-cart-bounce font-semibold">
                   {totalItems}
                 </span>
               )}
@@ -291,18 +295,18 @@ export default function Header() {
                 variant="ghost"
                 size="sm"
                 onClick={toggleCart}
-                className="relative p-2"
+                className="relative p-2 text-white hover:bg-pink-600/20 hover:text-white"
               >
                 <ShoppingCart className="h-5 w-5" />
                 {totalItems > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-primary text-white text-xs rounded-full h-5 w-5 flex items-center justify-center animate-cart-bounce">
+                  <span className="absolute -top-1 -right-1 bg-white text-pink-700 text-xs rounded-full h-5 w-5 flex items-center justify-center animate-cart-bounce font-semibold">
                     {totalItems}
                   </span>
                 )}
               </Button>
 
               <Link href="/admin/login">
-                <Button variant="ghost" size="sm">
+                <Button variant="ghost" size="sm" className="text-white hover:bg-pink-600/20 hover:text-white">
                   Admin
                 </Button>
               </Link>
@@ -312,15 +316,15 @@ export default function Header() {
 
         {/* Mobile Navigation */}
         {isMobileMenuOpen && (
-          <div className="md:hidden border-t py-4">
+          <div className="md:hidden border-t border-pink-500/30 py-4">
             <nav className="space-y-2">
               {navItems.map((item) => (
                 <Link key={item.href} href={item.href}>
                   <span
                     className={`block px-3 py-2 text-base font-medium transition-colors cursor-pointer ${
                       location === item.href
-                        ? "text-primary bg-gray-50"
-                        : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                        ? "text-white bg-pink-600/20 border-l-4 border-white"
+                        : "text-pink-100 hover:text-white hover:bg-pink-600/20"
                     }`}
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
@@ -331,8 +335,8 @@ export default function Header() {
               
               {/* Mobile Collections Section */}
               <div className="px-3 py-2">
-                <div className="flex items-center gap-2 mb-3 text-base font-medium text-gray-900">
-                  <Grid3X3 className="h-5 w-5 text-primary" />
+                <div className="flex items-center gap-2 mb-3 text-base font-medium text-white">
+                  <Grid3X3 className="h-5 w-5 text-white" />
                   Collections
                 </div>
                 <div className="space-y-1">
