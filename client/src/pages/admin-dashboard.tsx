@@ -2281,7 +2281,7 @@ export default function AdminDashboard() {
                               <div className="font-medium">{item.name}</div>
                             </TableCell>
                             <TableCell>
-                              {item.weight ? (
+                              {item.weight && item.weight !== '' && item.weight !== 'undefined' && item.weight !== 'null' ? (
                                 <Badge variant="secondary" className="text-xs">
                                   {item.weight}
                                 </Badge>
