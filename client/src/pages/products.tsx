@@ -40,7 +40,8 @@ export default function Products() {
     initialCategoryId ? [parseInt(initialCategoryId)] : []
   );
   const [selectedSubcategoryIds, setSelectedSubcategoryIds] = useState<number[]>([]);
-
+  const [minPrice, setMinPrice] = useState<string>("");
+  const [maxPrice, setMaxPrice] = useState<string>("");
   const [showFeaturedOnly, setShowFeaturedOnly] = useState(false);
   const [sortBy, setSortBy] = useState<string>("name");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
@@ -86,7 +87,14 @@ export default function Products() {
         return false;
       }
 
-
+      // Price filter
+      const price = parseFloat(product.price);
+      if (minPrice && price < parseFloat(minPrice)) {
+        return false;
+      }
+      if (maxPrice && price > parseFloat(maxPrice)) {
+        return false;
+      }
 
       // Featured filter
       if (showFeaturedOnly && !product.isFeatured) {
@@ -114,7 +122,7 @@ export default function Products() {
     });
 
     return filtered;
-  }, [products, searchQuery, selectedCategoryIds, selectedSubcategoryIds, showFeaturedOnly, sortBy]);
+  }, [products, searchQuery, selectedCategoryIds, selectedSubcategoryIds, minPrice, maxPrice, showFeaturedOnly, sortBy]);
 
   // Filter handlers
   const toggleCategory = (categoryId: number) => {
@@ -137,6 +145,8 @@ export default function Products() {
     setSearchQuery("");
     setSelectedCategoryIds([]);
     setSelectedSubcategoryIds([]);
+    setMinPrice("");
+    setMaxPrice("");
     setShowFeaturedOnly(false);
   };
 
@@ -144,6 +154,8 @@ export default function Products() {
     searchQuery,
     selectedCategoryIds.length > 0,
     selectedSubcategoryIds.length > 0,
+    minPrice,
+    maxPrice,
     showFeaturedOnly
   ].filter(Boolean).length;
 
@@ -249,7 +261,47 @@ export default function Products() {
         </Card>
       )}
 
-
+      {/* Price Range */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-lg flex items-center">
+            <TrendingUp className="h-5 w-5 mr-2" />
+            Price Range
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="pt-0">
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-gray-600">Min Price</label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">₹</span>
+                <Input
+                  type="number"
+                  min="0"
+                  value={minPrice}
+                  onChange={(e) => setMinPrice(e.target.value)}
+                  className="pl-8 text-sm h-9"
+                  placeholder="0"
+                />
+              </div>
+            </div>
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-gray-600">Max Price</label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">₹</span>
+                <Input
+                  type="number"
+                  min="0"
+                  value={maxPrice}
+                  onChange={(e) => setMaxPrice(e.target.value)}
+                  className="pl-8 text-sm h-9"
+                  placeholder="Any"
+                />
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Featured Products */}
       <Card>
