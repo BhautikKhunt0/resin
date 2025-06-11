@@ -1682,85 +1682,167 @@ export default function AdminDashboard() {
                       ))}
                     </div>
                   ) : products && products.length > 0 ? (
-                    <div className="overflow-hidden">
-                      <Table>
-                        <TableHeader className="bg-gray-50">
-                          <TableRow className="border-none">
-                            <TableHead className="py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">Image</TableHead>
-                            <TableHead className="py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">Name</TableHead>
-                            <TableHead className="py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">Category</TableHead>
-                            <TableHead className="py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">Price</TableHead>
-                            <TableHead className="py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">Featured</TableHead>
-                            <TableHead className="py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider text-right">Actions</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {products.map((product, index) => (
-                            <TableRow key={product.id} className={`border-gray-100 hover:bg-gray-50 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-gray-25'}`}>
-                              <TableCell className="py-4 px-6">
-                                {(() => {
-                                  const imageUrl = product.imageBlob ? `data:image/jpeg;base64,${product.imageBlob}` : product.imageUrl;
-                                  return imageUrl ? (
-                                    <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-100 shadow-sm">
-                                      <img
-                                        src={imageUrl}
-                                        alt={product.name}
-                                        className="w-full h-full object-cover"
-                                      />
-                                    </div>
-                                  ) : (
-                                    <div className="w-16 h-16 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg flex items-center justify-center shadow-sm">
-                                      <Package className="h-8 w-8 text-gray-400" />
-                                    </div>
-                                  );
-                                })()}
-                              </TableCell>
-                              <TableCell className="py-4 px-6">
-                                <div>
-                                  <div className="font-semibold text-gray-900 text-sm">{product.name}</div>
-                                  <div className="text-gray-500 text-xs mt-1 line-clamp-2">{product.description}</div>
-                                </div>
-                              </TableCell>
-                              <TableCell className="py-4 px-6">
-                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                  {categories?.find(c => c.id === product.categoryId)?.name || 'Unknown'}
-                                </span>
-                              </TableCell>
-                              <TableCell className="py-4 px-6">
-                                <div className="font-semibold text-gray-900">₹{parseFloat(product.price).toFixed(2)}</div>
-                              </TableCell>
-                              <TableCell className="py-4 px-6">
-                                <Badge 
-                                  variant={product.isFeatured ? "default" : "secondary"}
-                                  className={product.isFeatured ? "bg-green-100 text-green-800 hover:bg-green-100" : "bg-gray-100 text-gray-600 hover:bg-gray-100"}
-                                >
-                                  {product.isFeatured ? "Featured" : "Standard"}
-                                </Badge>
-                              </TableCell>
-                              <TableCell className="py-4 px-6 text-right">
-                                <div className="flex justify-end space-x-2">
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => handleEditProduct(product)}
-                                    className="h-8 w-8 p-0 text-gray-400 hover:text-blue-600 hover:bg-blue-50"
-                                  >
-                                    <Edit className="h-4 w-4" />
-                                  </Button>
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => deleteProductMutation.mutate(product.id)}
-                                    className="h-8 w-8 p-0 text-gray-400 hover:text-red-600 hover:bg-red-50"
-                                  >
-                                    <Trash2 className="h-4 w-4" />
-                                  </Button>
-                                </div>
-                              </TableCell>
+                    <div>
+                      {/* Desktop Table View - Hidden on Mobile */}
+                      <div className="hidden lg:block overflow-hidden">
+                        <Table>
+                          <TableHeader className="bg-gray-50">
+                            <TableRow className="border-none">
+                              <TableHead className="py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">Image</TableHead>
+                              <TableHead className="py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">Name</TableHead>
+                              <TableHead className="py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">Category</TableHead>
+                              <TableHead className="py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">Price</TableHead>
+                              <TableHead className="py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">Featured</TableHead>
+                              <TableHead className="py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider text-right">Actions</TableHead>
                             </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
+                          </TableHeader>
+                          <TableBody>
+                            {products.map((product, index) => (
+                              <TableRow key={product.id} className={`border-gray-100 hover:bg-gray-50 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-gray-25'}`}>
+                                <TableCell className="py-4 px-6">
+                                  {(() => {
+                                    const imageUrl = product.imageBlob ? `data:image/jpeg;base64,${product.imageBlob}` : product.imageUrl;
+                                    return imageUrl ? (
+                                      <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-100 shadow-sm">
+                                        <img
+                                          src={imageUrl}
+                                          alt={product.name}
+                                          className="w-full h-full object-cover"
+                                        />
+                                      </div>
+                                    ) : (
+                                      <div className="w-16 h-16 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg flex items-center justify-center shadow-sm">
+                                        <Package className="h-8 w-8 text-gray-400" />
+                                      </div>
+                                    );
+                                  })()}
+                                </TableCell>
+                                <TableCell className="py-4 px-6">
+                                  <div>
+                                    <div className="font-semibold text-gray-900 text-sm">{product.name}</div>
+                                    <div className="text-gray-500 text-xs mt-1 line-clamp-2">{product.description}</div>
+                                  </div>
+                                </TableCell>
+                                <TableCell className="py-4 px-6">
+                                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                    {categories?.find(c => c.id === product.categoryId)?.name || 'Unknown'}
+                                  </span>
+                                </TableCell>
+                                <TableCell className="py-4 px-6">
+                                  <div className="font-semibold text-gray-900">₹{parseFloat(product.price).toFixed(2)}</div>
+                                </TableCell>
+                                <TableCell className="py-4 px-6">
+                                  <Badge 
+                                    variant={product.isFeatured ? "default" : "secondary"}
+                                    className={product.isFeatured ? "bg-green-100 text-green-800 hover:bg-green-100" : "bg-gray-100 text-gray-600 hover:bg-gray-100"}
+                                  >
+                                    {product.isFeatured ? "Featured" : "Standard"}
+                                  </Badge>
+                                </TableCell>
+                                <TableCell className="py-4 px-6 text-right">
+                                  <div className="flex justify-end space-x-2">
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => handleEditProduct(product)}
+                                      className="h-8 w-8 p-0 text-gray-400 hover:text-blue-600 hover:bg-blue-50"
+                                    >
+                                      <Edit className="h-4 w-4" />
+                                    </Button>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => deleteProductMutation.mutate(product.id)}
+                                      className="h-8 w-8 p-0 text-gray-400 hover:text-red-600 hover:bg-red-50"
+                                    >
+                                      <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                  </div>
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </div>
+
+                      {/* Mobile Card View - Visible on Mobile */}
+                      <div className="lg:hidden space-y-4 p-4">
+                        {products.map((product) => {
+                          const imageUrl = product.imageBlob ? `data:image/jpeg;base64,${product.imageBlob}` : product.imageUrl;
+                          return (
+                            <Card key={product.id} className="border border-gray-200 hover:shadow-md transition-shadow">
+                              <CardContent className="p-4">
+                                <div className="flex space-x-4">
+                                  {/* Product Image */}
+                                  <div className="flex-shrink-0">
+                                    {imageUrl ? (
+                                      <div className="w-20 h-20 rounded-lg overflow-hidden bg-gray-100 shadow-sm">
+                                        <img
+                                          src={imageUrl}
+                                          alt={product.name}
+                                          className="w-full h-full object-cover"
+                                        />
+                                      </div>
+                                    ) : (
+                                      <div className="w-20 h-20 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg flex items-center justify-center shadow-sm">
+                                        <Package className="h-8 w-8 text-gray-400" />
+                                      </div>
+                                    )}
+                                  </div>
+
+                                  {/* Product Details */}
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-start justify-between">
+                                      <div className="flex-1 min-w-0">
+                                        <h3 className="font-semibold text-gray-900 text-sm truncate">{product.name}</h3>
+                                        <p className="text-gray-500 text-xs mt-1 line-clamp-2">{product.description}</p>
+                                        
+                                        <div className="flex items-center space-x-2 mt-2">
+                                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                            {categories?.find(c => c.id === product.categoryId)?.name || 'Unknown'}
+                                          </span>
+                                          {product.isFeatured && (
+                                            <Badge 
+                                              variant="default"
+                                              className="bg-green-100 text-green-800 hover:bg-green-100 text-xs"
+                                            >
+                                              Featured
+                                            </Badge>
+                                          )}
+                                        </div>
+                                      </div>
+                                    </div>
+                                    
+                                    <div className="flex items-center justify-between mt-3">
+                                      <div className="font-semibold text-lg text-gray-900">₹{parseFloat(product.price).toFixed(2)}</div>
+                                      <div className="flex space-x-2">
+                                        <Button
+                                          variant="outline"
+                                          size="sm"
+                                          onClick={() => handleEditProduct(product)}
+                                          className="h-8 px-3 text-blue-600 border-blue-200 hover:bg-blue-50"
+                                        >
+                                          <Edit className="h-3 w-3 mr-1" />
+                                          Edit
+                                        </Button>
+                                        <Button
+                                          variant="outline"
+                                          size="sm"
+                                          onClick={() => deleteProductMutation.mutate(product.id)}
+                                          className="h-8 px-3 text-red-600 border-red-200 hover:bg-red-50"
+                                        >
+                                          <Trash2 className="h-3 w-3 mr-1" />
+                                          Delete
+                                        </Button>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          );
+                        })}
+                      </div>
                     </div>
                   ) : (
                     <div className="text-center py-12">
@@ -1861,99 +1943,193 @@ export default function AdminDashboard() {
                       ))}
                     </div>
                   ) : filteredOrders && filteredOrders.length > 0 ? (
-                    <div className="overflow-hidden">
-                      <Table>
-                        <TableHeader className="bg-gray-50">
-                          <TableRow className="border-none">
-                            <TableHead className="py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">Customer</TableHead>
-                            <TableHead className="py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">Order Details</TableHead>
-                            <TableHead className="py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">Amount</TableHead>
-                            <TableHead className="py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</TableHead>
-                            <TableHead className="py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">Date</TableHead>
-                            <TableHead className="py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">Actions</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {filteredOrders.map((order, index) => (
-                            <TableRow key={order.id} className={`border-gray-100 hover:bg-gray-50 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-gray-25'}`}>
-                              <TableCell className="py-4 px-6">
-                                <div>
-                                  <div className="font-semibold text-gray-900 text-sm">{order.customerName}</div>
-                                  <div className="text-gray-500 text-xs mt-1">{order.customerEmail}</div>
+                    <div>
+                      {/* Desktop Table View - Hidden on Mobile */}
+                      <div className="hidden lg:block overflow-hidden">
+                        <Table>
+                          <TableHeader className="bg-gray-50">
+                            <TableRow className="border-none">
+                              <TableHead className="py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">Customer</TableHead>
+                              <TableHead className="py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">Order Details</TableHead>
+                              <TableHead className="py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">Amount</TableHead>
+                              <TableHead className="py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</TableHead>
+                              <TableHead className="py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">Date</TableHead>
+                              <TableHead className="py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">Actions</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {filteredOrders.map((order, index) => (
+                              <TableRow key={order.id} className={`border-gray-100 hover:bg-gray-50 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-gray-25'}`}>
+                                <TableCell className="py-4 px-6">
+                                  <div>
+                                    <div className="font-semibold text-gray-900 text-sm">{order.customerName}</div>
+                                    <div className="text-gray-500 text-xs mt-1">{order.customerEmail}</div>
+                                  </div>
+                                </TableCell>
+                                <TableCell className="py-4 px-6">
+                                  <div className="text-sm text-gray-900">
+                                    {Array.isArray(order.orderItems) ? (
+                                      <div className="space-y-1">
+                                        <div>{order.orderItems.length} item{order.orderItems.length > 1 ? 's' : ''}</div>
+                                        <div className="text-xs text-gray-500">
+                                          {order.orderItems.slice(0, 2).map((item: any, idx: number) => (
+                                            <div key={idx} className="flex items-center gap-1">
+                                              <span className="truncate max-w-[100px]">{item.name}</span>
+                                              {item.weight ? (
+                                                <Badge variant="outline" className="text-xs px-1 py-0 h-4">
+                                                  {item.weight}
+                                                </Badge>
+                                              ) : (
+                                                <Badge variant="outline" className="text-xs px-1 py-0 h-4 text-gray-400">
+                                                  Standard
+                                                </Badge>
+                                              )}
+                                            </div>
+                                          ))}
+                                          {order.orderItems.length > 2 && (
+                                            <div className="text-xs text-gray-400">
+                                              +{order.orderItems.length - 2} more
+                                            </div>
+                                          )}
+                                        </div>
+                                      </div>
+                                    ) : (
+                                      '0 items'
+                                    )}
+                                  </div>
+                                </TableCell>
+                                <TableCell className="py-4 px-6">
+                                  <div className="font-semibold text-gray-900">₹{parseFloat(order.totalAmount).toFixed(2)}</div>
+                                </TableCell>
+                                <TableCell className="py-4 px-6">
+                                  <Select
+                                    value={order.status}
+                                    onValueChange={(newStatus) => handleOrderStatusChange(order.id, newStatus)}
+                                  >
+                                    <SelectTrigger className="w-32">
+                                      <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      <SelectItem value="Processing">Processing</SelectItem>
+                                      <SelectItem value="Shipped">Shipped</SelectItem>
+                                      <SelectItem value="Delivered">Delivered</SelectItem>
+                                      <SelectItem value="Cancelled">Cancelled</SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                </TableCell>
+                                <TableCell className="py-4 px-6">
+                                  <div className="text-sm text-gray-500">
+                                    {new Date(order.createdAt).toLocaleDateString()}
+                                  </div>
+                                </TableCell>
+                                <TableCell className="py-4 px-6">
+                                  <div className="flex space-x-2">
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => handleViewOrderDetails(order)}
+                                      className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                                    >
+                                      <Eye className="h-4 w-4" />
+                                    </Button>
+                                  </div>
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </div>
+
+                      {/* Mobile Card View - Visible on Mobile */}
+                      <div className="lg:hidden space-y-4 p-4">
+                        {filteredOrders.map((order) => (
+                          <Card key={order.id} className="border border-gray-200 hover:shadow-md transition-shadow">
+                            <CardContent className="p-4">
+                              <div className="space-y-4">
+                                {/* Order Header */}
+                                <div className="flex items-start justify-between">
+                                  <div className="flex-1 min-w-0">
+                                    <h3 className="font-semibold text-gray-900 text-sm truncate">{order.customerName}</h3>
+                                    <p className="text-gray-500 text-xs mt-1">{order.customerEmail}</p>
+                                    <p className="text-gray-400 text-xs mt-1">{order.customerPhone}</p>
+                                  </div>
+                                  <div className="text-right">
+                                    <div className="font-semibold text-lg text-gray-900">₹{parseFloat(order.totalAmount).toFixed(2)}</div>
+                                    <div className="text-xs text-gray-500 mt-1">
+                                      {new Date(order.createdAt).toLocaleDateString()}
+                                    </div>
+                                  </div>
                                 </div>
-                              </TableCell>
-                              <TableCell className="py-4 px-6">
-                                <div className="text-sm text-gray-900">
-                                  {Array.isArray(order.orderItems) ? (
-                                    <div className="space-y-1">
-                                      <div>{order.orderItems.length} item{order.orderItems.length > 1 ? 's' : ''}</div>
-                                      <div className="text-xs text-gray-500">
-                                        {order.orderItems.slice(0, 2).map((item: any, idx: number) => (
-                                          <div key={idx} className="flex items-center gap-1">
-                                            <span className="truncate max-w-[100px]">{item.name}</span>
-                                            {item.weight ? (
+
+                                {/* Order Items */}
+                                <div className="bg-gray-50 rounded-lg p-3">
+                                  <div className="text-sm font-medium text-gray-900 mb-2">
+                                    Order Items ({Array.isArray(order.orderItems) ? order.orderItems.length : 0})
+                                  </div>
+                                  {Array.isArray(order.orderItems) && order.orderItems.length > 0 ? (
+                                    <div className="space-y-2">
+                                      {order.orderItems.slice(0, 3).map((item: any, idx: number) => (
+                                        <div key={idx} className="flex items-center justify-between text-xs">
+                                          <div className="flex items-center space-x-2">
+                                            <span className="text-gray-700 truncate max-w-[120px]">{item.name}</span>
+                                            {item.weight && (
                                               <Badge variant="outline" className="text-xs px-1 py-0 h-4">
                                                 {item.weight}
                                               </Badge>
-                                            ) : (
-                                              <Badge variant="outline" className="text-xs px-1 py-0 h-4 text-gray-400">
-                                                Standard
-                                              </Badge>
                                             )}
                                           </div>
-                                        ))}
-                                        {order.orderItems.length > 2 && (
-                                          <div className="text-xs text-gray-400">
-                                            +{order.orderItems.length - 2} more
+                                          <div className="text-gray-500">
+                                            {item.quantity}x ₹{parseFloat(item.price).toFixed(2)}
                                           </div>
-                                        )}
-                                      </div>
+                                        </div>
+                                      ))}
+                                      {order.orderItems.length > 3 && (
+                                        <div className="text-xs text-gray-400 text-center pt-1">
+                                          +{order.orderItems.length - 3} more items
+                                        </div>
+                                      )}
                                     </div>
                                   ) : (
-                                    '0 items'
+                                    <div className="text-xs text-gray-500">No items</div>
                                   )}
                                 </div>
-                              </TableCell>
-                              <TableCell className="py-4 px-6">
-                                <div className="font-semibold text-gray-900">₹{parseFloat(order.totalAmount).toFixed(2)}</div>
-                              </TableCell>
-                              <TableCell className="py-4 px-6">
-                                <Select
-                                  value={order.status}
-                                  onValueChange={(newStatus) => handleOrderStatusChange(order.id, newStatus)}
-                                >
-                                  <SelectTrigger className="w-32">
-                                    <SelectValue />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    <SelectItem value="Processing">Processing</SelectItem>
-                                    <SelectItem value="Shipped">Shipped</SelectItem>
-                                    <SelectItem value="Delivered">Delivered</SelectItem>
-                                    <SelectItem value="Cancelled">Cancelled</SelectItem>
-                                  </SelectContent>
-                                </Select>
-                              </TableCell>
-                              <TableCell className="py-4 px-6">
-                                <div className="text-sm text-gray-500">
-                                  {new Date(order.createdAt).toLocaleDateString()}
+
+                                {/* Status and Actions */}
+                                <div className="flex items-center justify-between pt-2 border-t border-gray-100">
+                                  <div className="flex-1">
+                                    <label className="text-xs font-medium text-gray-700 block mb-1">Status</label>
+                                    <Select
+                                      value={order.status}
+                                      onValueChange={(newStatus) => handleOrderStatusChange(order.id, newStatus)}
+                                    >
+                                      <SelectTrigger className="w-full h-8">
+                                        <SelectValue />
+                                      </SelectTrigger>
+                                      <SelectContent>
+                                        <SelectItem value="Processing">Processing</SelectItem>
+                                        <SelectItem value="Shipped">Shipped</SelectItem>
+                                        <SelectItem value="Delivered">Delivered</SelectItem>
+                                        <SelectItem value="Cancelled">Cancelled</SelectItem>
+                                      </SelectContent>
+                                    </Select>
+                                  </div>
+                                  <div className="ml-4">
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => handleViewOrderDetails(order)}
+                                      className="h-8 px-3 text-blue-600 border-blue-200 hover:bg-blue-50"
+                                    >
+                                      <Eye className="h-3 w-3 mr-1" />
+                                      View
+                                    </Button>
+                                  </div>
                                 </div>
-                              </TableCell>
-                              <TableCell className="py-4 px-6">
-                                <div className="flex space-x-2">
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => handleViewOrderDetails(order)}
-                                    className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                                  >
-                                    <Eye className="h-4 w-4" />
-                                  </Button>
-                                </div>
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
                     </div>
                   ) : (
                     <div className="text-center py-12">
@@ -2078,50 +2254,52 @@ export default function AdminDashboard() {
                       ))}
                     </div>
                   ) : subcategories && subcategories.length > 0 ? (
-                    <div className="overflow-hidden">
-                      <Table>
-                        <TableHeader className="bg-gray-50">
-                          <TableRow className="border-none">
-                            <TableHead className="py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">Name</TableHead>
-                            <TableHead className="py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">Parent Category</TableHead>
-                            <TableHead className="py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">Description</TableHead>
-                            <TableHead className="py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider text-right">Actions</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {subcategories.map((subcategory, index) => (
-                            <TableRow key={subcategory.id} className={`border-gray-100 hover:bg-gray-50 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-gray-25'}`}>
-                              <TableCell className="py-4 px-6">
-                                <div className="font-semibold text-gray-900">{subcategory.name}</div>
-                              </TableCell>
-                              <TableCell className="py-4 px-6">
-                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                  {categories?.find(c => c.id === subcategory.categoryId)?.name || 'Unknown'}
-                                </span>
-                              </TableCell>
-                              <TableCell className="py-4 px-6">
-                                <div className="text-sm text-gray-500">{subcategory.description}</div>
-                              </TableCell>
-                              <TableCell className="py-4 px-6 text-right">
-                                <div className="flex justify-end space-x-2">
-                                  <Button 
-                                    variant="ghost" 
-                                    size="sm" 
-                                    className="h-8 w-8 p-0 text-gray-400 hover:text-blue-600 hover:bg-blue-50"
-                                    onClick={() => {
-                                      setEditingSubcategory(subcategory);
-                                      subcategoryForm.reset({
-                                        name: subcategory.name,
-                                        description: subcategory.description || "",
-                                        categoryId: subcategory.categoryId.toString(),
-                                        imageUrl: subcategory.imageUrl || "",
-                                        imageBlob: subcategory.imageBlob || "",
-                                      });
-                                      setSubcategoryDialogOpen(true);
-                                    }}
-                                  >
-                                    <Edit className="h-4 w-4" />
-                                  </Button>
+                    <div>
+                      {/* Desktop Table View - Hidden on Mobile */}
+                      <div className="hidden lg:block overflow-hidden">
+                        <Table>
+                          <TableHeader className="bg-gray-50">
+                            <TableRow className="border-none">
+                              <TableHead className="py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">Name</TableHead>
+                              <TableHead className="py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">Parent Category</TableHead>
+                              <TableHead className="py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">Description</TableHead>
+                              <TableHead className="py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider text-right">Actions</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {subcategories.map((subcategory, index) => (
+                              <TableRow key={subcategory.id} className={`border-gray-100 hover:bg-gray-50 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-gray-25'}`}>
+                                <TableCell className="py-4 px-6">
+                                  <div className="font-semibold text-gray-900">{subcategory.name}</div>
+                                </TableCell>
+                                <TableCell className="py-4 px-6">
+                                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                    {categories?.find(c => c.id === subcategory.categoryId)?.name || 'Unknown'}
+                                  </span>
+                                </TableCell>
+                                <TableCell className="py-4 px-6">
+                                  <div className="text-sm text-gray-500">{subcategory.description}</div>
+                                </TableCell>
+                                <TableCell className="py-4 px-6 text-right">
+                                  <div className="flex justify-end space-x-2">
+                                    <Button 
+                                      variant="ghost" 
+                                      size="sm" 
+                                      className="h-8 w-8 p-0 text-gray-400 hover:text-blue-600 hover:bg-blue-50"
+                                      onClick={() => {
+                                        setEditingSubcategory(subcategory);
+                                        subcategoryForm.reset({
+                                          name: subcategory.name,
+                                          description: subcategory.description || "",
+                                          categoryId: subcategory.categoryId.toString(),
+                                          imageUrl: subcategory.imageUrl || "",
+                                          imageBlob: subcategory.imageBlob || "",
+                                        });
+                                        setSubcategoryDialogOpen(true);
+                                      }}
+                                    >
+                                      <Edit className="h-4 w-4" />
+                                    </Button>
                                   <Button 
                                     variant="ghost" 
                                     size="sm" 
@@ -2137,6 +2315,63 @@ export default function AdminDashboard() {
                         </TableBody>
                       </Table>
                     </div>
+
+                    {/* Mobile Card View - Visible on Mobile */}
+                    <div className="lg:hidden space-y-4 p-4">
+                      {subcategories.map((subcategory) => (
+                        <Card key={subcategory.id} className="border border-gray-200 hover:shadow-md transition-shadow">
+                          <CardContent className="p-4">
+                            <div className="space-y-3">
+                              <div className="flex items-start justify-between">
+                                <div className="flex-1 min-w-0">
+                                  <h3 className="font-semibold text-gray-900 text-sm">{subcategory.name}</h3>
+                                  <p className="text-gray-500 text-xs mt-1 line-clamp-2">{subcategory.description}</p>
+                                </div>
+                              </div>
+
+                              <div className="flex items-center space-x-2">
+                                <span className="text-xs font-medium text-gray-600">Category:</span>
+                                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                  {categories?.find(c => c.id === subcategory.categoryId)?.name || 'Unknown'}
+                                </span>
+                              </div>
+
+                              <div className="flex space-x-2 pt-2 border-t border-gray-100">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => {
+                                    setEditingSubcategory(subcategory);
+                                    subcategoryForm.reset({
+                                      name: subcategory.name,
+                                      description: subcategory.description || "",
+                                      categoryId: subcategory.categoryId.toString(),
+                                      imageUrl: subcategory.imageUrl || "",
+                                      imageBlob: subcategory.imageBlob || "",
+                                    });
+                                    setSubcategoryDialogOpen(true);
+                                  }}
+                                  className="h-8 px-3 text-blue-600 border-blue-200 hover:bg-blue-50"
+                                >
+                                  <Edit className="h-3 w-3 mr-1" />
+                                  Edit
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => deleteSubcategoryMutation.mutate(subcategory.id)}
+                                  className="h-8 px-3 text-red-600 border-red-200 hover:bg-red-50"
+                                >
+                                  <Trash2 className="h-3 w-3 mr-1" />
+                                  Delete
+                                </Button>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
                   ) : (
                     <div className="text-center py-12">
                       <Tags className="h-12 w-12 text-gray-300 mx-auto mb-4" />
