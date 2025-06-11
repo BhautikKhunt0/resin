@@ -45,6 +45,7 @@ export interface IProduct extends Document {
   description: string;
   price: string;
   weight?: string;
+  weightVariants?: Array<{ weight: string; price: number; }>;
   imageUrl?: string;
   imageBlob?: Buffer;
   categoryId: string;

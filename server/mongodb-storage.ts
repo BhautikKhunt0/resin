@@ -94,6 +94,7 @@ export class MongoDBStorage implements IStorage {
       description: doc.description,
       price: doc.price,
       weight: doc.weight || null,
+      weightVariants: doc.weightVariants || null,
       imageUrl: doc.imageUrl || null,
       imageBlob: doc.imageBlob ? doc.imageBlob.toString('base64') : null,
       categoryId: parseInt(doc.categoryId.slice(-8), 16),

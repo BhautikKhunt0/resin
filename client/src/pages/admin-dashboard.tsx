@@ -67,10 +67,17 @@ import { useLocation } from "wouter";
 import type { Product, Category, Order, Banner } from "@shared/schema";
 
 // Form schemas
+const weightVariantSchema = z.object({
+  weight: z.string().min(1, "Weight is required"),
+  price: z.number().min(0, "Price must be positive"),
+});
+
 const productSchema = z.object({
   name: z.string().min(1, "Product name is required"),
   description: z.string().min(1, "Description is required"),
   price: z.string().min(1, "Price is required"),
+  weight: z.string().optional(),
+  weightVariants: z.array(weightVariantSchema).optional(),
   imageUrl: z.string().optional(),
   imageBlob: z.string().optional(),
   images: z.array(z.object({
@@ -1018,6 +1025,84 @@ export default function AdminDashboard() {
                                   </FormItem>
                                 )}
                               />
+                            </div>
+
+                            {/* Weight Variants Section */}
+                            <div>
+                              <div className="flex items-center justify-between mb-4">
+                                <div>
+                                  <FormLabel className="text-sm font-medium text-gray-700">Weight Variants</FormLabel>
+                                  <p className="text-xs text-gray-500 mt-1">Add different weight options with custom pricing</p>
+                                </div>
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => {
+                                    const currentVariants = productForm.getValues('weightVariants') || [];
+                                    productForm.setValue('weightVariants', [...currentVariants, { weight: '', price: 0 }]);
+                                  }}
+                                  className="h-8"
+                                >
+                                  <Plus className="h-3 w-3 mr-1" />
+                                  Add Variant
+                                </Button>
+                              </div>
+                              
+                              <div className="space-y-3">
+                                {(productForm.watch('weightVariants') || []).map((variant, index) => (
+                                  <div key={index} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                                    <div className="flex-1">
+                                      <Input
+                                        placeholder="e.g., 50g, 100g, 200g"
+                                        value={variant.weight}
+                                        onChange={(e) => {
+                                          const variants = productForm.getValues('weightVariants') || [];
+                                          variants[index] = { ...variants[index], weight: e.target.value };
+                                          productForm.setValue('weightVariants', variants);
+                                        }}
+                                        className="h-9"
+                                      />
+                                    </div>
+                                    <div className="flex-1">
+                                      <div className="relative">
+                                        <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">₹</span>
+                                        <Input
+                                          type="number"
+                                          step="0.01"
+                                          placeholder="Price"
+                                          value={variant.price || ''}
+                                          onChange={(e) => {
+                                            const variants = productForm.getValues('weightVariants') || [];
+                                            variants[index] = { ...variants[index], price: parseFloat(e.target.value) || 0 };
+                                            productForm.setValue('weightVariants', variants);
+                                          }}
+                                          className="h-9 pl-8"
+                                        />
+                                      </div>
+                                    </div>
+                                    <Button
+                                      type="button"
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => {
+                                        const variants = productForm.getValues('weightVariants') || [];
+                                        const newVariants = variants.filter((_, i) => i !== index);
+                                        productForm.setValue('weightVariants', newVariants);
+                                      }}
+                                      className="h-8 w-8 p-0 text-red-500 hover:text-red-700 hover:bg-red-50"
+                                    >
+                                      <Trash2 className="h-3 w-3" />
+                                    </Button>
+                                  </div>
+                                ))}
+                                
+                                {(!productForm.watch('weightVariants') || productForm.watch('weightVariants')?.length === 0) && (
+                                  <div className="text-center py-8 text-gray-500 text-sm border-2 border-dashed border-gray-200 rounded-lg">
+                                    No weight variants added. The default price will be used for all orders.
+                                  </div>
+                                )}
+                              </div>
                             </div>
 
                             <FormField

@@ -277,8 +277,11 @@ export default function ProductDetail() {
               </h1>
               <div className="flex items-center space-x-4 mb-4">
                 <span className="text-3xl font-bold text-primary">
-                  ₹{parseFloat(product.price).toFixed(2)}
+                  ₹{currentPrice.toFixed(2)}
                 </span>
+                <Badge variant="secondary" className="text-green-600 bg-green-100">
+                  In Stock
+                </Badge>
               </div>
             </div>
 
@@ -287,9 +290,66 @@ export default function ProductDetail() {
               <p className="text-gray-600 leading-relaxed">{product.description}</p>
             </div>
 
+            {/* Weight Options */}
+            {weightVariants.length > 1 && (
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Size Options</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  {weightVariants.map((variant) => (
+                    <button
+                      key={variant.weight}
+                      onClick={() => setSelectedWeight(variant.weight)}
+                      className={`p-4 rounded-lg border-2 transition-all duration-200 text-center ${
+                        selectedWeight === variant.weight
+                          ? 'border-primary bg-primary/5 shadow-md'
+                          : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                      }`}
+                    >
+                      <div className="font-semibold text-gray-900 mb-1">
+                        {variant.weight}
+                      </div>
+                      <div className="text-primary font-bold">
+                        ₹{variant.price.toFixed(2)}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Quantity Selector */}
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Quantity</h3>
+              <div className="flex items-center space-x-4">
+                <div className="flex items-center border rounded-lg">
+                  <button
+                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                    className="p-2 hover:bg-gray-100 transition-colors"
+                    disabled={quantity <= 1}
+                  >
+                    <Minus className="h-4 w-4" />
+                  </button>
+                  <span className="px-4 py-2 font-semibold text-lg min-w-[60px] text-center">
+                    {quantity}
+                  </span>
+                  <button
+                    onClick={() => setQuantity(quantity + 1)}
+                    className="p-2 hover:bg-gray-100 transition-colors"
+                  >
+                    <Plus className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
+            </div>
+
             {/* Add to Cart */}
             <Card>
               <CardContent className="p-6">
+                <div className="flex justify-between items-center mb-4">
+                  <span className="text-sm text-gray-600">
+                    Secure checkout • Free shipping over ₹2,000
+                  </span>
+                </div>
                 <Button
                   size="lg"
                   className="w-full"
