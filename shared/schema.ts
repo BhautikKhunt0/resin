@@ -88,6 +88,10 @@ export const insertProductSchema = createInsertSchema(products).omit({
 }).extend({
   categoryId: z.number().int().min(1).max(Number.MAX_SAFE_INTEGER),
   subcategoryId: z.number().int().min(1).max(Number.MAX_SAFE_INTEGER).optional().nullable(),
+  weightVariants: z.array(z.object({
+    weight: z.string(),
+    price: z.number()
+  })).optional(),
 });
 
 export const insertOrderSchema = createInsertSchema(orders).omit({

@@ -494,6 +494,7 @@ export default function AdminDashboard() {
       subcategoryId: data.subcategoryId && data.subcategoryId.trim() !== "" ? parseInt(data.subcategoryId) : null,
       imageUrl: data.imageUrl || undefined,
       imageBlob: data.imageBlob || undefined,
+      weightVariants: data.weightVariants || [],
       images: productImages.filter(img => img.url || img.blob).map((img, index) => ({
         url: img.url || undefined,
         blob: img.blob ? img.blob.split(',')[1] : undefined, // Extract base64 part
@@ -526,6 +527,8 @@ export default function AdminDashboard() {
         name: product.name,
         description: product.description,
         price: product.price,
+        weight: product.weight || "",
+        weightVariants: product.weightVariants as any[] || [],
         imageUrl: product.imageUrl || "",
         imageBlob: product.imageBlob || "",
         images: formattedImages,
@@ -539,6 +542,8 @@ export default function AdminDashboard() {
         name: product.name,
         description: product.description,
         price: product.price,
+        weight: product.weight || "",
+        weightVariants: product.weightVariants as any[] || [],
         imageUrl: product.imageUrl || "",
         imageBlob: product.imageBlob || "",
         images: [],
