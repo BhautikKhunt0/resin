@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useQuery } from "@tanstack/react-query";
 import type { Category, Subcategory } from "@shared/schema";
+import logoImage from "@assets/image_1749645267461.png";
 
 export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -228,7 +229,7 @@ export default function Header() {
   );
 
   return (
-    <header className="bg-gradient-to-r from-pink-600 to-pink-700 shadow-lg sticky top-0 z-50">
+    <header className="shadow-lg sticky top-0 z-50" style={{ backgroundColor: '#A12971' }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Mobile Menu Button - Left side */}
@@ -249,7 +250,7 @@ export default function Header() {
           <Link href="/">
             <div className="flex items-center space-x-3 cursor-pointer">
               <img 
-                src="/attached_assets/image_1749644860677.png" 
+                src={logoImage} 
                 alt="The Resin Studio" 
                 className="h-10 w-auto object-contain"
               />
