@@ -67,15 +67,22 @@ export default function Products() {
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedPriceRange(priceRange);
-    }, 300);
+    }, 150); // Reduced delay for smoother experience
     return () => clearTimeout(timer);
   }, [priceRange]);
 
-  // Calculate price range from products
+  // Calculate price range from products with smart rounding
   const productPriceRange = useMemo(() => {
     if (!products || products.length === 0) return [0, 10000];
     const prices = products.map(p => parseFloat(p.price));
-    return [Math.floor(Math.min(...prices)), Math.ceil(Math.max(...prices))];
+    const minPrice = Math.min(...prices);
+    const maxPrice = Math.max(...prices);
+    
+    // Round to nearest 50 for smoother slider experience
+    const roundedMin = Math.floor(minPrice / 50) * 50;
+    const roundedMax = Math.ceil(maxPrice / 50) * 50;
+    
+    return [roundedMin, roundedMax];
   }, [products]);
 
   // Initialize price range when products load
@@ -289,15 +296,20 @@ export default function Products() {
         <CardContent className="pt-0">
           <div className="space-y-4">
             {/* Dual Range Slider */}
-            <div className="px-2">
+            <div className="px-2 space-y-3">
               <Slider
                 min={productPriceRange[0]}
                 max={productPriceRange[1]}
-                step={50}
+                step={Math.max(1, Math.floor((productPriceRange[1] - productPriceRange[0]) / 100))}
                 value={priceRange}
                 onValueChange={(value) => setPriceRange(value as [number, number])}
                 className="w-full"
               />
+              {/* Slider Value Labels */}
+              <div className="flex justify-between text-xs text-gray-500">
+                <span>₹{productPriceRange[0].toLocaleString()}</span>
+                <span>₹{productPriceRange[1].toLocaleString()}</span>
+              </div>
             </div>
             
             {/* Manual Input Fields */}
@@ -317,7 +329,13 @@ export default function Products() {
                         setPriceRange([value, priceRange[1]]);
                       }
                     }}
-                    className="pl-8 text-sm h-9"
+                    onBlur={(e) => {
+                      // Ensure value is within bounds on blur
+                      const value = parseInt(e.target.value) || productPriceRange[0];
+                      const clampedValue = Math.max(productPriceRange[0], Math.min(value, priceRange[1]));
+                      setPriceRange([clampedValue, priceRange[1]]);
+                    }}
+                    className="pl-8 text-sm h-9 transition-all duration-200 focus:ring-2 focus:ring-blue-500"
                     placeholder="Min"
                   />
                 </div>
@@ -337,7 +355,13 @@ export default function Products() {
                         setPriceRange([priceRange[0], value]);
                       }
                     }}
-                    className="pl-8 text-sm h-9"
+                    onBlur={(e) => {
+                      // Ensure value is within bounds on blur
+                      const value = parseInt(e.target.value) || productPriceRange[1];
+                      const clampedValue = Math.min(productPriceRange[1], Math.max(value, priceRange[0]));
+                      setPriceRange([priceRange[0], clampedValue]);
+                    }}
+                    className="pl-8 text-sm h-9 transition-all duration-200 focus:ring-2 focus:ring-blue-500"
                     placeholder="Max"
                   />
                 </div>
@@ -383,11 +407,20 @@ export default function Products() {
               </div>
             </div>
             
-            {/* Current Range Display */}
-            <div className="text-center p-2 bg-gray-50 dark:bg-gray-800 rounded-md">
-              <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                ₹{priceRange[0].toLocaleString()} - ₹{priceRange[1].toLocaleString()}
-              </p>
+            {/* Current Range Display with Enhanced Styling */}
+            <div className="relative">
+              <div className="text-center p-3 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-lg border border-blue-100 dark:border-blue-800">
+                <p className="text-sm font-semibold text-blue-700 dark:text-blue-300">
+                  Selected Range
+                </p>
+                <p className="text-lg font-bold text-blue-900 dark:text-blue-100 mt-1">
+                  ₹{priceRange[0].toLocaleString()} - ₹{priceRange[1].toLocaleString()}
+                </p>
+                <div className="flex justify-between mt-2 text-xs text-blue-600 dark:text-blue-400">
+                  <span>Min: ₹{priceRange[0].toLocaleString()}</span>
+                  <span>Max: ₹{priceRange[1].toLocaleString()}</span>
+                </div>
+              </div>
             </div>
           </div>
         </CardContent>
