@@ -51,7 +51,10 @@ export default function CartSidebar() {
                     )}
                     <div className="flex-1">
                       <h4 className="font-medium text-gray-900">{item.name}</h4>
-                      <p className="text-gray-600 text-sm">${item.price}</p>
+                      <p className="text-gray-600 text-sm">₹{item.price.toFixed(2)}</p>
+                      {item.weight && (
+                        <p className="text-blue-600 text-xs font-medium">Size: {item.weight}</p>
+                      )}
                       <div className="flex items-center space-x-2 mt-2">
                         <Button
                           variant="outline"
@@ -98,7 +101,7 @@ export default function CartSidebar() {
               <div className="flex justify-between items-center mb-4">
                 <span className="text-lg font-semibold">Total:</span>
                 <span className="text-xl font-bold text-primary">
-                  ${totalPrice.toFixed(2)}
+                  ₹{totalPrice.toFixed(2)}
                 </span>
               </div>
               <Link href="/checkout">

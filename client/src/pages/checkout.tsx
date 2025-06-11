@@ -234,12 +234,15 @@ export default function Checkout() {
                         )}
                         <div className="flex-1">
                           <h4 className="font-medium text-sm">{item.name}</h4>
+                          {item.weight && (
+                            <p className="text-blue-600 text-xs font-medium mb-1">Size: {item.weight}</p>
+                          )}
                           <p className="text-gray-600 text-sm">
-                            Qty: {item.quantity} × ${item.price.toFixed(2)}
+                            Qty: {item.quantity} × ₹{item.price.toFixed(2)}
                           </p>
                         </div>
                         <span className="font-medium">
-                          ${(item.price * item.quantity).toFixed(2)}
+                          ₹{(item.price * item.quantity).toFixed(2)}
                         </span>
                       </div>
                     ))}
@@ -251,20 +254,20 @@ export default function Checkout() {
                   <div className="space-y-2">
                     <div className="flex justify-between">
                       <span>Subtotal</span>
-                      <span>${totalPrice.toFixed(2)}</span>
+                      <span>₹{totalPrice.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between">
                       <span>Shipping</span>
-                      <span>{shipping === 0 ? "Free" : `$${shipping.toFixed(2)}`}</span>
+                      <span>{shipping === 0 ? "Free" : `₹${shipping.toFixed(2)}`}</span>
                     </div>
                     <div className="flex justify-between">
                       <span>Tax</span>
-                      <span>${tax.toFixed(2)}</span>
+                      <span>₹{tax.toFixed(2)}</span>
                     </div>
                     <hr />
                     <div className="flex justify-between text-lg font-semibold">
                       <span>Total</span>
-                      <span className="text-primary">${finalTotal.toFixed(2)}</span>
+                      <span className="text-primary">₹{finalTotal.toFixed(2)}</span>
                     </div>
                   </div>
 
@@ -274,7 +277,7 @@ export default function Checkout() {
                       <Truck className="h-4 w-4 inline mr-2" />
                       {shipping === 0 
                         ? "🎉 You qualify for free shipping!" 
-                        : `Add $${(50 - totalPrice).toFixed(2)} more for free shipping`
+                        : `Add ₹${(50 - totalPrice).toFixed(2)} more for free shipping`
                       }
                     </p>
                   </div>
