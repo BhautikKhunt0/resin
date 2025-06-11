@@ -95,6 +95,33 @@ export default function ProductDetail() {
     });
   };
 
+  const handleBuyNow = () => {
+    if (!product) return;
+
+    const primaryImage = allImages[0];
+    const imageUrl = primaryImage?.imageBlob ? `data:image/jpeg;base64,${primaryImage.imageBlob}` : primaryImage?.imageUrl;
+
+    const cartItem = {
+      productId: product.id,
+      name: product.name,
+      price: currentPrice,
+      quantity: quantity,
+      weight: selectedWeight,
+      imageUrl: imageUrl || undefined,
+    };
+
+    // Use buyNow function which clears cart and adds this item
+    buyNow(cartItem);
+
+    // Navigate to checkout page
+    setLocation("/checkout");
+
+    toast({
+      title: "Proceeding to checkout",
+      description: `${quantity} x ${product.name} (${selectedWeight}) added to cart.`,
+    });
+  };
+
   const nextImage = () => {
     setSelectedImageIndex((prev) => (prev + 1) % allImages.length);
   };
@@ -367,7 +394,7 @@ export default function ProductDetail() {
                 <Button
                   size="lg"
                   className="flex-1 h-12 text-base font-semibold bg-orange-500 hover:bg-orange-600 text-white"
-                  onClick={handleAddToCart}
+                  onClick={handleBuyNow}
                 >
                   Buy Now
                 </Button>
