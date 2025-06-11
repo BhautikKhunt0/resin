@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { useCart } from "@/lib/cart-context";
 import { useToast } from "@/hooks/use-toast";
 import { api } from "@/lib/api";
+import { SEOHead } from "@/components/seo-head";
 import { Link } from "wouter";
 import type { Product, ProductImage, WeightVariant } from "@shared/schema";
 
@@ -36,6 +37,12 @@ export default function ProductDetail() {
   const { data: productImages = [], isLoading: imagesLoading } = useQuery<ProductImage[]>({
     queryKey: ["/api/products", productId, "images"],
     queryFn: () => productId ? fetch(`/api/products/${productId}/images`).then(res => res.json()) : Promise.reject(new Error("No product ID")),
+    enabled: !!productId,
+  });
+
+  const { data: seoData } = useQuery({
+    queryKey: ["/api/seo/product", productId],
+    queryFn: () => productId ? fetch(`/api/seo/product/${productId}`).then(res => res.json()) : Promise.reject(new Error("No product ID")),
     enabled: !!productId,
   });
 
@@ -157,6 +164,17 @@ export default function ProductDetail() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {seoData && (
+        <SEOHead
+          title={seoData.title}
+          description={seoData.description}
+          keywords={seoData.keywords}
+          ogTitle={seoData.ogTitle}
+          ogDescription={seoData.ogDescription}
+          ogImage={seoData.ogImage}
+          canonicalUrl={seoData.canonicalUrl}
+        />
+      )}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Back Button */}
         <Link href="/products">

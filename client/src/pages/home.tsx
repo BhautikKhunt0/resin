@@ -63,7 +63,14 @@ export default function Home() {
 
   return (
     <div className="min-h-screen">
-
+      <SEOHead
+        title="The Resin Studio - Premium Resin Art & Crafts | Handmade Custom Designs"
+        description="Discover premium resin art and crafts at The Resin Studio. Shop unique handmade resin products, custom designs, and high-quality art pieces. Free shipping on orders over $50."
+        keywords="resin art, handmade crafts, custom resin designs, resin products, art studio, handcrafted items"
+        ogTitle="The Resin Studio - Premium Resin Art & Crafts"
+        ogDescription="Shop unique handmade resin art and custom designs. Premium quality crafts with free shipping."
+        canonicalUrl="/"
+      />
 
       {/* Banner Section */}
       {!bannersLoading && banners && banners.length > 0 && (

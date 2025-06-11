@@ -27,6 +27,7 @@ import {
 } from "@/components/ui/sheet";
 import { api } from "@/lib/api";
 import ProductCard from "@/components/product-card";
+import { SEOHead } from "@/components/seo-head";
 import type { Category, Product, Subcategory } from "@shared/schema";
 
 export default function Products() {
@@ -347,6 +348,14 @@ export default function Products() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
+      <SEOHead
+        title="All Products - Resin Art & Crafts | The Resin Studio"
+        description="Browse our complete collection of handmade resin art and crafts. Unique designs, premium quality, and custom options available. Free shipping on orders over $50."
+        keywords="resin products, handmade crafts, art collection, custom resin art, handcrafted items"
+        ogTitle="All Products - The Resin Studio"
+        ogDescription="Complete collection of premium resin art and handmade crafts"
+        canonicalUrl="/products"
+      />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
