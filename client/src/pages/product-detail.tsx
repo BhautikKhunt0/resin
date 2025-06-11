@@ -48,6 +48,15 @@ export default function ProductDetail() {
   
   // Sort images by priority
   allImages.sort((a, b) => a.priority - b.priority);
+  
+  // Debug logging
+  console.log('Product:', product?.name);
+  console.log('Product Images from API:', productImages.length);
+  console.log('All Images:', allImages.length);
+  console.log('Selected Index:', selectedImageIndex);
+  if (allImages.length > 0) {
+    console.log('Current Image:', allImages[selectedImageIndex]);
+  }
 
   const handleAddToCart = () => {
     if (!product) return;
