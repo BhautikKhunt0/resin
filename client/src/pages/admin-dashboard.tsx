@@ -191,6 +191,11 @@ export default function AdminDashboard() {
     queryFn: () => api.getAdminSetting(token, "whatsapp_number").catch(() => null),
   });
 
+  const { data: termsSetting } = useQuery({
+    queryKey: ["/api/admin/settings/terms_of_service"],
+    queryFn: () => api.getAdminSetting(token, "terms_of_service").catch(() => null),
+  });
+
   // Forms
   const productForm = useForm<ProductFormData>({
     resolver: zodResolver(productSchema),
@@ -241,6 +246,8 @@ export default function AdminDashboard() {
 
   const [whatsappNumber, setWhatsappNumber] = useState("");
   const [isEditingWhatsapp, setIsEditingWhatsapp] = useState(false);
+  const [termsOfService, setTermsOfService] = useState("");
+  const [isEditingTerms, setIsEditingTerms] = useState(false);
 
   // Mutations
   const createProductMutation = useMutation({
@@ -756,6 +763,7 @@ export default function AdminDashboard() {
     { id: "categories", label: "Categories", icon: Tags },
     { id: "subcategories", label: "Subcategories", icon: Tags },
     { id: "banners", label: "Banners", icon: ImageIcon },
+    { id: "content", label: "Content", icon: Settings },
     { id: "settings", label: "Settings", icon: Settings },
   ];
 
@@ -2877,6 +2885,119 @@ export default function AdminDashboard() {
                         <li>Complete product list with quantities and sizes</li>
                         <li>Shipping address</li>
                         <li>Total order amount</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Content Management Tab */}
+      {activeTab === "content" && (
+        <div className="space-y-6">
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900">Content Management</h2>
+            <p className="text-gray-600 mt-1">Manage website content and legal pages</p>
+          </div>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Terms of Service</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Terms of Service Content
+                  </label>
+                  <p className="text-sm text-gray-500 mb-3">
+                    This content will be displayed on the Terms of Service page
+                  </p>
+                  {isEditingTerms ? (
+                    <div className="space-y-3">
+                      <Textarea
+                        value={termsOfService}
+                        onChange={(e) => setTermsOfService(e.target.value)}
+                        placeholder="Enter your Terms of Service content..."
+                        className="min-h-[400px] font-mono text-sm"
+                        rows={20}
+                      />
+                      <div className="flex space-x-2">
+                        <Button
+                          onClick={() => {
+                            if (termsOfService.trim()) {
+                              updateTermsMutation.mutate(termsOfService.trim());
+                            }
+                          }}
+                          disabled={updateTermsMutation.isPending}
+                          size="sm"
+                        >
+                          {updateTermsMutation.isPending ? "Saving..." : "Save"}
+                        </Button>
+                        <Button
+                          onClick={() => {
+                            setIsEditingTerms(false);
+                            setTermsOfService(termsSetting?.value || "");
+                          }}
+                          variant="outline"
+                          size="sm"
+                        >
+                          Cancel
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      <div className="p-4 bg-gray-50 rounded-lg border max-h-60 overflow-y-auto">
+                        <div className="text-sm text-gray-700 whitespace-pre-wrap">
+                          {termsSetting?.value || "No Terms of Service content configured"}
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-3">
+                        <Button
+                          onClick={() => {
+                            setIsEditingTerms(true);
+                            setTermsOfService(termsSetting?.value || "");
+                          }}
+                          variant="outline"
+                          size="sm"
+                        >
+                          <Edit className="h-4 w-4 mr-1" />
+                          Edit
+                        </Button>
+                        <Button
+                          onClick={() => window.open('/terms-of-service', '_blank')}
+                          variant="outline"
+                          size="sm"
+                        >
+                          <Eye className="h-4 w-4 mr-1" />
+                          Preview
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+              
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div className="flex">
+                  <div className="flex-shrink-0">
+                    <Settings className="h-5 w-5 text-blue-400" />
+                  </div>
+                  <div className="ml-3">
+                    <h3 className="text-sm font-medium text-blue-800">
+                      Formatting Tips
+                    </h3>
+                    <div className="mt-2 text-sm text-blue-700">
+                      <p>You can use simple formatting in your content:</p>
+                      <ul className="list-disc list-inside mt-2 space-y-1">
+                        <li><strong># Title</strong> for main headings</li>
+                        <li><strong>## Subtitle</strong> for section headings</li>
+                        <li><strong>**bold text**</strong> for emphasis</li>
+                        <li><strong>*italic text*</strong> for emphasis</li>
                       </ul>
                     </div>
                   </div>

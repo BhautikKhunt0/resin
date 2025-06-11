@@ -82,7 +82,7 @@ If you have any questions about these Terms of Service, please contact us at adm
 *Last updated: ${new Date().toLocaleDateString()}*
   `.trim();
 
-  const content = termsContent?.value || defaultContent;
+  const content = (termsContent as any)?.value || defaultContent;
 
   return (
     <div className="min-h-screen bg-gray-50 py-12">
