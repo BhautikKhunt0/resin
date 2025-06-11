@@ -578,6 +578,7 @@ export async function initializeStorage(): Promise<void> {
     if (storage instanceof MongoDBStorage) {
       await storage.verifyImageStorage();
     }
+    // MemStorage initializes automatically in constructor
   } catch (error) {
     console.error('Failed to initialize storage:', error);
     throw error;
