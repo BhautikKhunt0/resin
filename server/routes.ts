@@ -5,8 +5,7 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import { insertProductSchema, insertProductImageSchema, insertCategorySchema, insertSubcategorySchema, insertOrderSchema, insertBannerSchema, insertSettingSchema } from "@shared/schema";
 import { sendOrderConfirmationEmail, sendOrderStatusUpdateEmail } from "./email-service";
-
-const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
+import { config } from "./config";
 
 
 
@@ -20,7 +19,7 @@ const authenticateAdmin = (req: any, res: any, next: any) => {
   }
 
   try {
-    const decoded = jwt.verify(token, JWT_SECRET);
+    const decoded = jwt.verify(token, config.jwt.secret);
     req.admin = decoded;
     next();
   } catch (error) {
@@ -187,7 +186,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const token = jwt.sign(
         { id: admin.id, email: admin.email },
-        JWT_SECRET,
+        config.jwt.secret,
         { expiresIn: "24h" }
       );
 
