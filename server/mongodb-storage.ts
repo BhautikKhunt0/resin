@@ -399,6 +399,7 @@ export class MongoDBStorage implements IStorage {
         description: product.description,
         price: product.price,
         weight: product.weight,
+        weightVariants: product.weightVariants,
         imageUrl: product.imageUrl,
         imageBlob: product.imageBlob ? Buffer.from(product.imageBlob, 'base64') : undefined,
         categoryId: category._id.toString(),
@@ -441,6 +442,7 @@ export class MongoDBStorage implements IStorage {
     if (product.description !== undefined) updateData.description = product.description;
     if (product.price !== undefined) updateData.price = product.price;
     if (product.weight !== undefined) updateData.weight = product.weight;
+    if (product.weightVariants !== undefined) updateData.weightVariants = product.weightVariants;
     if (product.imageUrl !== undefined) updateData.imageUrl = product.imageUrl;
     if (product.imageBlob !== undefined) {
       updateData.imageBlob = product.imageBlob ? Buffer.from(product.imageBlob, 'base64') : null;
