@@ -272,34 +272,51 @@ export default function ProductDetail() {
           {/* Product Info */}
           <div className="space-y-6">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-4">
+              <h1 className="text-3xl font-bold text-gray-900 mb-6">
                 {product.name}
               </h1>
-              <div className="flex items-center space-x-4 mb-4">
-                <span className="text-3xl font-bold text-primary">
-                  ₹{currentPrice.toFixed(2)}
-                </span>
-                <Badge variant="secondary" className="text-green-600 bg-green-100">
-                  In Stock
-                </Badge>
-              </div>
             </div>
 
             <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Description</h3>
-              <p className="text-gray-600 leading-relaxed">{product.description}</p>
+              <h3 className="text-lg font-semibold text-gray-900 mb-3">Description</h3>
+              <p className="text-gray-600 leading-relaxed mb-6">{product.description}</p>
+            </div>
+
+            {/* Quantity Selector */}
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-3">Quantity</h3>
+              <div className="flex items-center space-x-4 mb-6">
+                <div className="flex items-center border-2 border-gray-200 rounded-lg overflow-hidden">
+                  <button
+                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                    className="px-4 py-2 hover:bg-gray-100 transition-colors disabled:opacity-50"
+                    disabled={quantity <= 1}
+                  >
+                    <Minus className="h-4 w-4" />
+                  </button>
+                  <span className="px-6 py-2 font-semibold text-lg bg-gray-50 min-w-[60px] text-center border-x-2 border-gray-200">
+                    {quantity}
+                  </span>
+                  <button
+                    onClick={() => setQuantity(quantity + 1)}
+                    className="px-4 py-2 hover:bg-gray-100 transition-colors"
+                  >
+                    <Plus className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
             </div>
 
             {/* Size Options */}
             {weightVariants.length > 0 && (
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Size Options</h3>
-                <div className="grid grid-cols-3 gap-3">
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">Size Options</h3>
+                <div className="grid grid-cols-3 gap-3 mb-6">
                   {weightVariants.map((variant) => (
                     <button
                       key={variant.weight}
                       onClick={() => setSelectedWeight(variant.weight)}
-                      className={`p-3 rounded-lg border-2 transition-all duration-200 text-center ${
+                      className={`p-4 rounded-lg border-2 transition-all duration-200 text-center ${
                         selectedWeight === variant.weight
                           ? 'border-blue-500 bg-blue-50 shadow-lg'
                           : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
@@ -319,54 +336,36 @@ export default function ProductDetail() {
               </div>
             )}
 
-            {/* Quantity Selector */}
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Quantity</h3>
-              <div className="flex items-center space-x-4">
-                <div className="flex items-center border-2 border-gray-200 rounded-lg overflow-hidden">
-                  <button
-                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="p-3 hover:bg-gray-100 transition-colors disabled:opacity-50"
-                    disabled={quantity <= 1}
-                  >
-                    <Minus className="h-4 w-4" />
-                  </button>
-                  <span className="px-6 py-3 font-semibold text-xl bg-gray-50 min-w-[80px] text-center border-x-2 border-gray-200">
-                    {quantity}
-                  </span>
-                  <button
-                    onClick={() => setQuantity(quantity + 1)}
-                    className="p-3 hover:bg-gray-100 transition-colors"
-                  >
-                    <Plus className="h-4 w-4" />
-                  </button>
-                </div>
-              </div>
+            {/* Price Display */}
+            <div className="mb-6">
+              <span className="text-3xl font-bold text-green-600">
+                ₹{currentPrice.toFixed(2)}
+              </span>
             </div>
 
             {/* Add to Cart Section */}
             <div className="space-y-4">
-              <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+              <div className="flex items-center justify-center p-3 bg-gray-50 rounded-lg">
                 <span className="text-sm text-gray-600">
                   <Shield className="h-4 w-4 inline mr-1" />
                   Secure checkout • Free shipping over ₹2,000
                 </span>
               </div>
               
-              <div className="space-y-3">
+              <div className="flex gap-3">
                 <Button
                   size="lg"
-                  className="w-full h-14 text-lg font-semibold bg-blue-600 hover:bg-blue-700"
+                  variant="outline"
+                  className="flex-1 h-12 text-base font-semibold border-2 border-gray-300 text-gray-700 hover:bg-gray-50"
                   onClick={handleAddToCart}
                 >
-                  <ShoppingCart className="h-5 w-5 mr-3" />
+                  <ShoppingCart className="h-4 w-4 mr-2" />
                   Add to Cart
                 </Button>
                 
                 <Button
                   size="lg"
-                  variant="outline"
-                  className="w-full h-14 text-lg font-semibold border-2 border-orange-400 text-orange-600 hover:bg-orange-50"
+                  className="flex-1 h-12 text-base font-semibold bg-orange-500 hover:bg-orange-600 text-white"
                   onClick={handleAddToCart}
                 >
                   Buy Now
