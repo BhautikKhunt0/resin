@@ -49,14 +49,7 @@ export default function ProductDetail() {
   // Sort images by priority
   allImages.sort((a, b) => a.priority - b.priority);
   
-  // Debug logging
-  console.log('Product:', product?.name);
-  console.log('Product Images from API:', productImages.length);
-  console.log('All Images:', allImages.length);
-  console.log('Selected Index:', selectedImageIndex);
-  if (allImages.length > 0) {
-    console.log('Current Image:', allImages[selectedImageIndex]);
-  }
+
 
   const handleAddToCart = () => {
     if (!product) return;
@@ -141,12 +134,36 @@ export default function ProductDetail() {
                 <>
                   {(() => {
                     const currentImage = allImages[selectedImageIndex];
-                    const imageUrl = currentImage?.imageBlob ? `data:image/jpeg;base64,${currentImage.imageBlob}` : currentImage?.imageUrl;
+                    if (!currentImage) {
+                      return (
+                        <div className="w-full h-full flex items-center justify-center bg-gray-100">
+                          <Package className="h-24 w-24 text-gray-400" />
+                        </div>
+                      );
+                    }
+                    
+                    let imageUrl = '';
+                    if (currentImage.imageBlob) {
+                      // Handle base64 data from MongoDB
+                      if (currentImage.imageBlob.startsWith('data:')) {
+                        imageUrl = currentImage.imageBlob;
+                      } else {
+                        imageUrl = `data:image/jpeg;base64,${currentImage.imageBlob}`;
+                      }
+                    } else if (currentImage.imageUrl) {
+                      imageUrl = currentImage.imageUrl;
+                    }
+                    
+
+                    
                     return imageUrl ? (
                       <img
                         src={imageUrl}
                         alt={product.name}
                         className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none';
+                        }}
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center bg-gray-100">
@@ -189,7 +206,17 @@ export default function ProductDetail() {
             {allImages.length > 0 && (
               <div className="flex gap-2 overflow-x-auto pb-2">
                 {allImages.map((image, index) => {
-                  const imageUrl = image.imageBlob ? `data:image/jpeg;base64,${image.imageBlob}` : image.imageUrl;
+                  let imageUrl = '';
+                  if (image.imageBlob) {
+                    if (image.imageBlob.startsWith('data:')) {
+                      imageUrl = image.imageBlob;
+                    } else {
+                      imageUrl = `data:image/jpeg;base64,${image.imageBlob}`;
+                    }
+                  } else if (image.imageUrl) {
+                    imageUrl = image.imageUrl;
+                  }
+                  
                   return (
                     <button
                       key={image.id || index}
@@ -203,6 +230,9 @@ export default function ProductDetail() {
                           src={imageUrl}
                           alt={`${product.name} - Image ${index + 1}`}
                           className="w-full h-full object-cover"
+                          onError={(e) => {
+                            e.currentTarget.style.display = 'none';
+                          }}
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center bg-gray-100">
