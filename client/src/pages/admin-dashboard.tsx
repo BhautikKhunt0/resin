@@ -2835,46 +2835,39 @@ export default function AdminDashboard() {
 
       {/* Settings Tab */}
       {activeTab === "settings" && (
-        <div className="max-w-5xl">
-          <div className="mb-6">
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Settings</h1>
-            <p className="text-gray-600 dark:text-gray-400 mt-1">Manage your store settings and configuration</p>
+        <div className="space-y-8">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">Settings</h1>
+              <p className="text-gray-600 mt-2">Manage your store settings and configuration</p>
+            </div>
           </div>
 
-          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-6xl">
             {/* WhatsApp Configuration Card */}
-            <Card className="border border-gray-200 dark:border-gray-700 shadow-sm bg-white dark:bg-gray-800">
-              <CardHeader className="pb-3">
-                <div className="flex items-center space-x-3">
-                  <div className="w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
-                    <MessageCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
-                  </div>
-                  <div>
-                    <CardTitle className="text-base font-semibold text-gray-900 dark:text-white">
-                      WhatsApp Configuration
-                    </CardTitle>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                      Configure WhatsApp integration for order notifications
-                    </p>
-                  </div>
-                </div>
+            <Card className="border-0 shadow-lg">
+              <CardHeader className="bg-gradient-to-r from-green-50 to-green-100 border-b border-green-200">
+                <CardTitle className="flex items-center text-green-800">
+                  <MessageCircle className="h-5 w-5 mr-2" />
+                  WhatsApp Configuration
+                </CardTitle>
+                <p className="text-green-600 text-sm mt-1">Configure WhatsApp integration for order notifications</p>
               </CardHeader>
-              <CardContent className="space-y-4 pt-0">
+              <CardContent className="p-6 space-y-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                  <label className="block text-sm font-semibold text-gray-800 mb-2">
                     WhatsApp Number
                   </label>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                  <p className="text-sm text-gray-600 mb-4">
                     This number will receive order notifications from the checkout process
                   </p>
-                  
                   {isEditingWhatsapp ? (
-                    <div className="space-y-4">
+                    <div className="space-y-3">
                       <Input
                         value={whatsappNumber}
                         onChange={(e) => setWhatsappNumber(e.target.value)}
                         placeholder="+1234567890"
-                        className="text-base bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600"
+                        className="text-base"
                       />
                       <div className="flex space-x-3">
                         <Button
@@ -2884,7 +2877,7 @@ export default function AdminDashboard() {
                             }
                           }}
                           disabled={updateWhatsAppMutation.isPending}
-                          className="bg-green-600 hover:bg-green-700 text-white"
+                          className="bg-green-600 hover:bg-green-700"
                         >
                           {updateWhatsAppMutation.isPending ? "Saving..." : "Save Changes"}
                         </Button>
@@ -2894,20 +2887,17 @@ export default function AdminDashboard() {
                             setWhatsappNumber(whatsappSetting?.value || "");
                           }}
                           variant="outline"
-                          className="border-gray-300 dark:border-gray-600"
                         >
                           Cancel
                         </Button>
                       </div>
                     </div>
                   ) : (
-                    <div className="bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-lg p-4">
+                    <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
                       <div className="flex items-center justify-between">
                         <div>
-                          <div className="text-xs text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wide">
-                            Current Number
-                          </div>
-                          <div className="text-lg font-semibold text-gray-900 dark:text-white">
+                          <div className="text-sm text-gray-500 mb-1">Current Number</div>
+                          <div className="text-lg font-medium text-gray-900">
                             {whatsappSetting?.value || "Not configured"}
                           </div>
                         </div>
@@ -2917,8 +2907,7 @@ export default function AdminDashboard() {
                             setWhatsappNumber(whatsappSetting?.value || "");
                           }}
                           variant="outline"
-                          size="sm"
-                          className="border-green-300 dark:border-green-600 text-green-700 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20"
+                          className="border-green-300 text-green-700 hover:bg-green-50"
                         >
                           <Edit className="h-4 w-4 mr-2" />
                           Edit Number
@@ -2928,34 +2917,22 @@ export default function AdminDashboard() {
                   )}
                 </div>
                 
-                <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
-                  <div className="flex items-start space-x-2">
-                    <div className="w-4 h-4 text-blue-500 dark:text-blue-400 mt-0.5">
-                      <MessageCircle className="h-4 w-4" />
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <div className="flex">
+                    <div className="flex-shrink-0">
+                      <MessageCircle className="h-5 w-5 text-blue-500" />
                     </div>
-                    <div>
-                      <h3 className="text-xs font-semibold text-blue-800 dark:text-blue-300 mb-2">
+                    <div className="ml-3">
+                      <h3 className="text-sm font-semibold text-blue-800 mb-2">
                         How it works
                       </h3>
-                      <div className="text-xs text-blue-700 dark:text-blue-400">
+                      <div className="text-sm text-blue-700">
                         <p className="mb-2">When customers complete checkout, they'll be redirected to WhatsApp with their order details including:</p>
-                        <ul className="space-y-1">
-                          <li className="flex items-start">
-                            <span className="w-1 h-1 bg-blue-500 dark:bg-blue-400 rounded-full mt-1.5 mr-2 flex-shrink-0"></span>
-                            Customer name and contact information
-                          </li>
-                          <li className="flex items-start">
-                            <span className="w-1 h-1 bg-blue-500 dark:bg-blue-400 rounded-full mt-1.5 mr-2 flex-shrink-0"></span>
-                            Complete product list with quantities and sizes
-                          </li>
-                          <li className="flex items-start">
-                            <span className="w-1 h-1 bg-blue-500 dark:bg-blue-400 rounded-full mt-1.5 mr-2 flex-shrink-0"></span>
-                            Shipping address
-                          </li>
-                          <li className="flex items-start">
-                            <span className="w-1 h-1 bg-blue-500 dark:bg-blue-400 rounded-full mt-1.5 mr-2 flex-shrink-0"></span>
-                            Total order amount
-                          </li>
+                        <ul className="list-disc list-inside space-y-1">
+                          <li>Customer name and contact information</li>
+                          <li>Complete product list with quantities and sizes</li>
+                          <li>Shipping address</li>
+                          <li>Total order amount</li>
                         </ul>
                       </div>
                     </div>
@@ -2964,27 +2941,19 @@ export default function AdminDashboard() {
               </CardContent>
             </Card>
 
-            {/* Placeholder for future settings */}
-            <Card className="border border-gray-200 dark:border-gray-700 shadow-sm bg-white dark:bg-gray-800">
-              <CardHeader className="pb-3">
-                <div className="flex items-center space-x-3">
-                  <div className="w-8 h-8 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center">
-                    <Settings className="h-4 w-4 text-gray-500 dark:text-gray-400" />
-                  </div>
-                  <div>
-                    <CardTitle className="text-base font-semibold text-gray-900 dark:text-white">
-                      General Settings
-                    </CardTitle>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                      Configure general store preferences
-                    </p>
-                  </div>
-                </div>
+            {/* General Settings Card */}
+            <Card className="border-0 shadow-lg">
+              <CardHeader className="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200">
+                <CardTitle className="flex items-center text-gray-800">
+                  <Settings className="h-5 w-5 mr-2" />
+                  General Settings
+                </CardTitle>
+                <p className="text-gray-600 text-sm mt-1">Configure general store preferences</p>
               </CardHeader>
-              <CardContent className="pt-0">
-                <div className="text-center py-6">
-                  <Settings className="h-8 w-8 text-gray-300 dark:text-gray-600 mx-auto mb-3" />
-                  <p className="text-gray-500 dark:text-gray-400 text-xs">
+              <CardContent className="p-6">
+                <div className="text-center py-8">
+                  <Settings className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+                  <p className="text-gray-500 text-sm">
                     Additional settings will be available here
                   </p>
                 </div>
