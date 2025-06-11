@@ -2835,36 +2835,46 @@ export default function AdminDashboard() {
 
       {/* Settings Tab */}
       {activeTab === "settings" && (
-        <div className="max-w-4xl">
+        <div className="max-w-6xl mx-auto">
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900">Settings</h1>
-            <p className="text-gray-600 mt-2">Manage your store settings and configuration</p>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Settings</h1>
+            <p className="text-gray-600 dark:text-gray-400 mt-2">Manage your store settings and configuration</p>
           </div>
 
-          <div className="space-y-6">
-            <Card className="border-0 shadow-lg">
-              <CardHeader className="bg-gradient-to-r from-green-50 to-green-100 border-b border-green-200">
-                <CardTitle className="flex items-center text-green-800">
-                  <MessageCircle className="h-5 w-5 mr-2" />
-                  WhatsApp Configuration
-                </CardTitle>
-                <p className="text-green-600 text-sm mt-1">Configure WhatsApp integration for order notifications</p>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* WhatsApp Configuration Card */}
+            <Card className="border-0 shadow-sm hover:shadow-md transition-shadow bg-white dark:bg-gray-800">
+              <CardHeader className="pb-4">
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
+                    <MessageCircle className="h-5 w-5 text-green-600 dark:text-green-400" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">
+                      WhatsApp Configuration
+                    </CardTitle>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                      Configure WhatsApp integration for order notifications
+                    </p>
+                  </div>
+                </div>
               </CardHeader>
-              <CardContent className="p-6 space-y-6">
+              <CardContent className="space-y-6">
                 <div>
-                  <label className="block text-sm font-semibold text-gray-800 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
                     WhatsApp Number
                   </label>
-                  <p className="text-sm text-gray-600 mb-4">
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
                     This number will receive order notifications from the checkout process
                   </p>
+                  
                   {isEditingWhatsapp ? (
-                    <div className="space-y-3">
+                    <div className="space-y-4">
                       <Input
                         value={whatsappNumber}
                         onChange={(e) => setWhatsappNumber(e.target.value)}
                         placeholder="+1234567890"
-                        className="text-base"
+                        className="text-base bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600"
                       />
                       <div className="flex space-x-3">
                         <Button
@@ -2874,7 +2884,7 @@ export default function AdminDashboard() {
                             }
                           }}
                           disabled={updateWhatsAppMutation.isPending}
-                          className="bg-green-600 hover:bg-green-700"
+                          className="bg-green-600 hover:bg-green-700 text-white"
                         >
                           {updateWhatsAppMutation.isPending ? "Saving..." : "Save Changes"}
                         </Button>
@@ -2884,17 +2894,20 @@ export default function AdminDashboard() {
                             setWhatsappNumber(whatsappSetting?.value || "");
                           }}
                           variant="outline"
+                          className="border-gray-300 dark:border-gray-600"
                         >
                           Cancel
                         </Button>
                       </div>
                     </div>
                   ) : (
-                    <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                    <div className="bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-lg p-4">
                       <div className="flex items-center justify-between">
                         <div>
-                          <div className="text-sm text-gray-500 mb-1">Current Number</div>
-                          <div className="text-lg font-medium text-gray-900">
+                          <div className="text-xs text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wide">
+                            Current Number
+                          </div>
+                          <div className="text-lg font-semibold text-gray-900 dark:text-white">
                             {whatsappSetting?.value || "Not configured"}
                           </div>
                         </div>
@@ -2904,7 +2917,8 @@ export default function AdminDashboard() {
                             setWhatsappNumber(whatsappSetting?.value || "");
                           }}
                           variant="outline"
-                          className="border-green-300 text-green-700 hover:bg-green-50"
+                          size="sm"
+                          className="border-green-300 dark:border-green-600 text-green-700 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20"
                         >
                           <Edit className="h-4 w-4 mr-2" />
                           Edit Number
@@ -2914,26 +2928,65 @@ export default function AdminDashboard() {
                   )}
                 </div>
                 
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                  <div className="flex">
-                    <div className="flex-shrink-0">
-                      <MessageCircle className="h-5 w-5 text-blue-500" />
+                <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+                  <div className="flex items-start space-x-3">
+                    <div className="w-5 h-5 text-blue-500 dark:text-blue-400 mt-0.5">
+                      <MessageCircle className="h-5 w-5" />
                     </div>
-                    <div className="ml-3">
-                      <h3 className="text-sm font-semibold text-blue-800 mb-2">
+                    <div>
+                      <h3 className="text-sm font-semibold text-blue-800 dark:text-blue-300 mb-2">
                         How it works
                       </h3>
-                      <div className="text-sm text-blue-700">
-                        <p className="mb-2">When customers complete checkout, they'll be redirected to WhatsApp with their order details including:</p>
-                        <ul className="list-disc list-inside space-y-1">
-                          <li>Customer name and contact information</li>
-                          <li>Complete product list with quantities and sizes</li>
-                          <li>Shipping address</li>
-                          <li>Total order amount</li>
+                      <div className="text-sm text-blue-700 dark:text-blue-400">
+                        <p className="mb-3">When customers complete checkout, they'll be redirected to WhatsApp with their order details including:</p>
+                        <ul className="space-y-1.5">
+                          <li className="flex items-start">
+                            <span className="w-1.5 h-1.5 bg-blue-500 dark:bg-blue-400 rounded-full mt-2 mr-2 flex-shrink-0"></span>
+                            Customer name and contact information
+                          </li>
+                          <li className="flex items-start">
+                            <span className="w-1.5 h-1.5 bg-blue-500 dark:bg-blue-400 rounded-full mt-2 mr-2 flex-shrink-0"></span>
+                            Complete product list with quantities and sizes
+                          </li>
+                          <li className="flex items-start">
+                            <span className="w-1.5 h-1.5 bg-blue-500 dark:bg-blue-400 rounded-full mt-2 mr-2 flex-shrink-0"></span>
+                            Shipping address
+                          </li>
+                          <li className="flex items-start">
+                            <span className="w-1.5 h-1.5 bg-blue-500 dark:bg-blue-400 rounded-full mt-2 mr-2 flex-shrink-0"></span>
+                            Total order amount
+                          </li>
                         </ul>
                       </div>
                     </div>
                   </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Placeholder for future settings */}
+            <Card className="border-0 shadow-sm hover:shadow-md transition-shadow bg-white dark:bg-gray-800">
+              <CardHeader className="pb-4">
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center">
+                    <Settings className="h-5 w-5 text-gray-500 dark:text-gray-400" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">
+                      General Settings
+                    </CardTitle>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                      Configure general store preferences
+                    </p>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-8">
+                  <Settings className="h-12 w-12 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
+                  <p className="text-gray-500 dark:text-gray-400 text-sm">
+                    Additional settings will be available here
+                  </p>
                 </div>
               </CardContent>
             </Card>
