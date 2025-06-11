@@ -32,7 +32,7 @@ export default function ProductDetail() {
   });
 
   // Combine product main image with additional images
-  const allImages = [];
+  const allImages: ProductImage[] = [];
   
   // Always include the main product image as the first image if it exists
   if (product && (product.imageUrl || product.imageBlob)) {
