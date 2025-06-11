@@ -114,7 +114,7 @@ export default function Products() {
     });
 
     return filtered;
-  }, [products, searchQuery, selectedCategoryIds, selectedSubcategoryIds, priceRange, showFeaturedOnly, sortBy]);
+  }, [products, searchQuery, selectedCategoryIds, selectedSubcategoryIds, showFeaturedOnly, sortBy]);
 
   // Filter handlers
   const toggleCategory = (categoryId: number) => {
