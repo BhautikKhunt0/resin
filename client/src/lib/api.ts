@@ -205,7 +205,12 @@ export const api = {
       headers: {
         'Authorization': `Bearer ${token}`,
       },
-    }).then(res => res.json()),
+    }).then(res => {
+      if (!res.ok && res.status === 404) {
+        throw new Error('Setting not found');
+      }
+      return res.json();
+    }),
   createSetting: (token: string, data: any) =>
     fetch('/api/admin/settings', {
       method: 'POST',

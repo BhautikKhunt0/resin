@@ -420,7 +420,7 @@ export default function AdminDashboard() {
   // WhatsApp settings mutations
   const updateWhatsAppMutation = useMutation({
     mutationFn: (number: string) => {
-      if (whatsappSetting) {
+      if (whatsappSetting && whatsappSetting.key) {
         return api.updateSetting(token, "whatsapp_number", number);
       } else {
         return api.createSetting(token, {
@@ -435,7 +435,8 @@ export default function AdminDashboard() {
       setIsEditingWhatsapp(false);
       toast({ title: "WhatsApp number updated successfully" });
     },
-    onError: () => {
+    onError: (error) => {
+      console.error("WhatsApp update error:", error);
       toast({ title: "Failed to update WhatsApp number", variant: "destructive" });
     },
   });
