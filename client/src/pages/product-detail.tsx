@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useRoute, useLocation } from "wouter";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ArrowLeft, ShoppingCart, Package, Truck, Shield, ChevronLeft, ChevronRight, Minus, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -14,8 +14,13 @@ import type { Product, ProductImage, WeightVariant } from "@shared/schema";
 
 export default function ProductDetail() {
   const [, params] = useRoute("/products/:id");
-  const [, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
   const productId = params?.id ? parseInt(params.id) : null;
+
+  // Auto scroll to top when URL changes
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location]);
   const { addItem, buyNow } = useCart();
   const { toast } = useToast();
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);

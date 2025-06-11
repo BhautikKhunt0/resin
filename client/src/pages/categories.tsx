@@ -1,5 +1,6 @@
+import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Link, useParams } from "wouter";
+import { Link, useParams, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -9,7 +10,13 @@ import type { Category, Subcategory } from "@shared/schema";
 
 export default function Categories() {
   const { categoryId } = useParams<{ categoryId: string }>();
+  const [location] = useLocation();
   const catId = parseInt(categoryId || "0");
+
+  // Auto scroll to top when URL changes
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location]);
 
   const { data: category, isLoading: categoryLoading } = useQuery<Category>({
     queryKey: ["/api/categories", catId],

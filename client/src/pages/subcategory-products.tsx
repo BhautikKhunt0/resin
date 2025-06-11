@@ -1,5 +1,6 @@
+import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Link, useParams } from "wouter";
+import { Link, useParams, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ArrowLeft, Package } from "lucide-react";
@@ -9,7 +10,13 @@ import type { Subcategory, Product, Category } from "@shared/schema";
 
 export default function SubcategoryProducts() {
   const { subcategoryId } = useParams<{ subcategoryId: string }>();
+  const [location] = useLocation();
   const subId = parseInt(subcategoryId || "0");
+
+  // Auto scroll to top when URL changes
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location]);
 
   const { data: subcategory, isLoading: subcategoryLoading } = useQuery<Subcategory>({
     queryKey: ["/api/subcategories", subId],

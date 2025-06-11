@@ -33,6 +33,11 @@ export default function Products() {
   const [location] = useLocation();
   const searchParams = new URLSearchParams(location.split('?')[1] || '');
   const initialCategoryId = searchParams.get('categoryId');
+
+  // Auto scroll to top when URL changes
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location]);
   
   // Filter states
   const [searchQuery, setSearchQuery] = useState("");

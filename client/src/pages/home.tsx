@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -11,6 +11,12 @@ import ProductCard from "@/components/product-card";
 import type { Category, Product, Banner } from "@shared/schema";
 
 export default function Home() {
+  const [location] = useLocation();
+
+  // Auto scroll to top when URL changes
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location]);
   const { data: categories, isLoading: categoriesLoading } = useQuery<Category[]>({
     queryKey: ["/api/categories"],
     queryFn: api.getCategories,
