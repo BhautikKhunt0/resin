@@ -824,12 +824,8 @@ export default function AdminDashboard() {
         {/* Sidebar Header */}
         <div className="flex items-center justify-between h-16 px-4 border-b border-gray-200 bg-gradient-to-r from-pink-700 to-pink-800 flex-shrink-0">
           <div className="flex items-center space-x-3 min-w-0 flex-1">
-            <img 
-              src="/attached_assets/image_1749644860677.png" 
-              alt="The Resin Studio" 
-              className="h-8 w-auto object-contain flex-shrink-0"
-            />
             <div className="min-w-0 flex-1">
+              <h2 className="text-white text-lg font-bold leading-tight">The Resin Studio</h2>
               <p className="text-pink-100 text-xs leading-tight">Admin Panel</p>
             </div>
           </div>
