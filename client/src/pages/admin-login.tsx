@@ -143,7 +143,7 @@ export default function AdminLogin() {
 
                 <div className="mt-6 text-center">
                   <p className="text-sm text-gray-600">
-                    Demo credentials: admin@modernshop.com / password
+                    Demo credentials: admin@modernshop.com / admin123
                   </p>
                 </div>
               </CardContent>

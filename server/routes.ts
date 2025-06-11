@@ -174,23 +174,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Email and password required" });
       }
 
-      const admin = await storage.getAdminByEmail(email);
-      if (!admin) {
+      // Check against environment configuration
+      if (email !== config.admin.email) {
         return res.status(401).json({ message: "Invalid credentials" });
       }
 
-      const isValidPassword = await bcrypt.compare(password, admin.password);
+      const isValidPassword = await bcrypt.compare(password, config.admin.passwordHash);
       if (!isValidPassword) {
         return res.status(401).json({ message: "Invalid credentials" });
       }
 
       const token = jwt.sign(
-        { id: admin.id, email: admin.email },
+        { id: 1, email: config.admin.email },
         config.jwt.secret,
         { expiresIn: "24h" }
       );
 
-      res.json({ token, admin: { id: admin.id, email: admin.email } });
+      res.json({ token, admin: { id: 1, email: config.admin.email } });
     } catch (error) {
       res.status(500).json({ message: "Login failed" });
     }

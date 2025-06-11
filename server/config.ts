@@ -1,4 +1,5 @@
 import dotenv from 'dotenv';
+import bcrypt from 'bcryptjs';
 
 // Load environment variables from .env file
 dotenv.config();
@@ -20,6 +21,7 @@ export interface AppConfig {
   // Admin Configuration
   admin: {
     email: string;
+    password: string;
     passwordHash: string;
   };
   
@@ -42,6 +44,9 @@ function validateRequiredEnvVar(name: string, value: string | undefined): string
   return value;
 }
 
+// Initialize config object
+const adminPassword = validateRequiredEnvVar('ADMIN_PASSWORD', process.env.ADMIN_PASSWORD);
+
 export const config: AppConfig = {
   mongodb: {
     uri: validateRequiredEnvVar('MONGODB_URI', process.env.MONGODB_URI),
@@ -56,7 +61,8 @@ export const config: AppConfig = {
   
   admin: {
     email: validateRequiredEnvVar('ADMIN_EMAIL', process.env.ADMIN_EMAIL),
-    passwordHash: validateRequiredEnvVar('ADMIN_PASSWORD_HASH', process.env.ADMIN_PASSWORD_HASH),
+    password: adminPassword,
+    passwordHash: bcrypt.hashSync(adminPassword, 10), // Hash the password synchronously
   },
   
   jwt: {
@@ -73,5 +79,5 @@ export const config: AppConfig = {
 console.log('✓ Environment configuration loaded successfully');
 console.log(`✓ Database: ${config.mongodb.uri.includes('mongodb') ? 'MongoDB configured' : 'Invalid MongoDB URI'}`);
 console.log(`✓ Email: ${config.email.user}`);
-console.log(`✓ Admin: ${config.admin.email}`);
+console.log(`✓ Admin: ${config.admin.email} (password auto-hashed)`);
 console.log(`✓ Server: Port ${config.server.port}, Environment: ${config.server.nodeEnv}`);
