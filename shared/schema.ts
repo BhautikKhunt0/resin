@@ -24,7 +24,8 @@ export const products = pgTable("products", {
   name: text("name").notNull(),
   description: text("description").notNull(),
   price: decimal("price", { precision: 10, scale: 2 }).notNull(),
-  weight: text("weight"), // Weight category like "500g", "1kg", "2kg"
+  weight: text("weight"), // Default weight category like "500g", "1kg", "2kg"
+  weightVariants: jsonb("weight_variants"), // Array of {weight: string, price: number}
   imageUrl: text("image_url"),
   imageBlob: text("image_blob"), // Base64 encoded image data
   categoryId: integer("category_id").notNull(),
@@ -133,11 +134,17 @@ export type Banner = typeof banners.$inferSelect;
 export type InsertBanner = z.infer<typeof insertBannerSchema>;
 
 // Extended types for frontend
+export type WeightVariant = {
+  weight: string;
+  price: number;
+};
+
 export type CartItem = {
   productId: number;
   name: string;
   price: number;
   quantity: number;
+  weight?: string;
   imageUrl?: string;
 };
 
@@ -146,4 +153,5 @@ export type OrderItem = {
   name: string;
   price: number;
   quantity: number;
+  weight?: string;
 };

@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useRoute } from "wouter";
 import { useState } from "react";
-import { ArrowLeft, ShoppingCart, Package, Truck, Shield, ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowLeft, ShoppingCart, Package, Truck, Shield, ChevronLeft, ChevronRight, Minus, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -10,7 +10,7 @@ import { useCart } from "@/lib/cart-context";
 import { useToast } from "@/hooks/use-toast";
 import { api } from "@/lib/api";
 import { Link } from "wouter";
-import type { Product, ProductImage } from "@shared/schema";
+import type { Product, ProductImage, WeightVariant } from "@shared/schema";
 
 export default function ProductDetail() {
   const [, params] = useRoute("/products/:id");
@@ -18,6 +18,8 @@ export default function ProductDetail() {
   const { addItem } = useCart();
   const { toast } = useToast();
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [selectedWeight, setSelectedWeight] = useState<string>("");
+  const [quantity, setQuantity] = useState(1);
 
   const { data: product, isLoading, error } = useQuery<Product>({
     queryKey: ["/api/products", productId],
@@ -52,7 +54,24 @@ export default function ProductDetail() {
   // Sort images by priority (main image will be first due to priority -1)
   allImages.sort((a, b) => a.priority - b.priority);
   
-
+  // Get weight variants or create default variant
+  const weightVariants: WeightVariant[] = product?.weightVariants as WeightVariant[] || [];
+  if (weightVariants.length === 0 && product) {
+    // Create default variant if no weight variants exist
+    weightVariants.push({
+      weight: product.weight || "Standard",
+      price: parseFloat(product.price)
+    });
+  }
+  
+  // Set default selected weight if not already set
+  if (!selectedWeight && weightVariants.length > 0) {
+    setSelectedWeight(weightVariants[0].weight);
+  }
+  
+  // Get current price based on selected weight
+  const currentVariant = weightVariants.find(v => v.weight === selectedWeight) || weightVariants[0];
+  const currentPrice = currentVariant?.price || parseFloat(product?.price || "0");
 
   const handleAddToCart = () => {
     if (!product) return;
@@ -63,14 +82,15 @@ export default function ProductDetail() {
     addItem({
       productId: product.id,
       name: product.name,
-      price: parseFloat(product.price),
-      quantity: 1,
+      price: currentPrice,
+      quantity: quantity,
+      weight: selectedWeight,
       imageUrl: imageUrl || undefined,
     });
 
     toast({
       title: "Added to cart",
-      description: `${product.name} has been added to your cart.`,
+      description: `${quantity} x ${product.name} (${selectedWeight}) has been added to your cart.`,
     });
   };
 
