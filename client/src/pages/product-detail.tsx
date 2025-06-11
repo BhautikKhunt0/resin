@@ -290,25 +290,27 @@ export default function ProductDetail() {
               <p className="text-gray-600 leading-relaxed">{product.description}</p>
             </div>
 
-            {/* Weight Options */}
-            {weightVariants.length > 1 && (
+            {/* Size Options */}
+            {weightVariants.length > 0 && (
               <div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Size Options</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="grid grid-cols-3 gap-3">
                   {weightVariants.map((variant) => (
                     <button
                       key={variant.weight}
                       onClick={() => setSelectedWeight(variant.weight)}
-                      className={`p-4 rounded-lg border-2 transition-all duration-200 text-center ${
+                      className={`p-3 rounded-lg border-2 transition-all duration-200 text-center ${
                         selectedWeight === variant.weight
-                          ? 'border-primary bg-primary/5 shadow-md'
+                          ? 'border-blue-500 bg-blue-50 shadow-lg'
                           : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
                       }`}
                     >
-                      <div className="font-semibold text-gray-900 mb-1">
-                        {variant.weight}
+                      <div className="text-sm font-medium text-gray-700 mb-2">
+                        {variant.weight.split('(')[0].trim()}
                       </div>
-                      <div className="text-primary font-bold">
+                      <div className={`text-lg font-bold ${
+                        selectedWeight === variant.weight ? 'text-blue-600' : 'text-gray-900'
+                      }`}>
                         ₹{variant.price.toFixed(2)}
                       </div>
                     </button>
@@ -321,20 +323,20 @@ export default function ProductDetail() {
             <div>
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Quantity</h3>
               <div className="flex items-center space-x-4">
-                <div className="flex items-center border rounded-lg">
+                <div className="flex items-center border-2 border-gray-200 rounded-lg overflow-hidden">
                   <button
                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="p-2 hover:bg-gray-100 transition-colors"
+                    className="p-3 hover:bg-gray-100 transition-colors disabled:opacity-50"
                     disabled={quantity <= 1}
                   >
                     <Minus className="h-4 w-4" />
                   </button>
-                  <span className="px-4 py-2 font-semibold text-lg min-w-[60px] text-center">
+                  <span className="px-6 py-3 font-semibold text-xl bg-gray-50 min-w-[80px] text-center border-x-2 border-gray-200">
                     {quantity}
                   </span>
                   <button
                     onClick={() => setQuantity(quantity + 1)}
-                    className="p-2 hover:bg-gray-100 transition-colors"
+                    className="p-3 hover:bg-gray-100 transition-colors"
                   >
                     <Plus className="h-4 w-4" />
                   </button>
@@ -342,24 +344,35 @@ export default function ProductDetail() {
               </div>
             </div>
 
-            {/* Add to Cart */}
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex justify-between items-center mb-4">
-                  <span className="text-sm text-gray-600">
-                    Secure checkout • Free shipping over ₹2,000
-                  </span>
-                </div>
+            {/* Add to Cart Section */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                <span className="text-sm text-gray-600">
+                  <Shield className="h-4 w-4 inline mr-1" />
+                  Secure checkout • Free shipping over ₹2,000
+                </span>
+              </div>
+              
+              <div className="space-y-3">
                 <Button
                   size="lg"
-                  className="w-full"
+                  className="w-full h-14 text-lg font-semibold bg-blue-600 hover:bg-blue-700"
                   onClick={handleAddToCart}
                 >
-                  <ShoppingCart className="h-5 w-5 mr-2" />
+                  <ShoppingCart className="h-5 w-5 mr-3" />
                   Add to Cart
                 </Button>
-              </CardContent>
-            </Card>
+                
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="w-full h-14 text-lg font-semibold border-2 border-orange-400 text-orange-600 hover:bg-orange-50"
+                  onClick={handleAddToCart}
+                >
+                  Buy Now
+                </Button>
+              </div>
+            </div>
 
             {/* Features */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">

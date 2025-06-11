@@ -1007,7 +1007,7 @@ export default function AdminDashboard() {
                                 render={({ field }) => (
                                   <FormItem>
                                     <FormLabel className="text-sm font-medium text-gray-700">
-                                      Price <span className="text-red-500">*</span>
+                                      Base Price <span className="text-red-500">*</span>
                                     </FormLabel>
                                     <FormControl>
                                       <div className="relative">
@@ -1021,6 +1021,7 @@ export default function AdminDashboard() {
                                         />
                                       </div>
                                     </FormControl>
+                                    <p className="text-xs text-gray-500 mt-1">This will be used as fallback if no weight variants are added</p>
                                     <FormMessage />
                                   </FormItem>
                                 )}
@@ -1028,56 +1029,58 @@ export default function AdminDashboard() {
                             </div>
 
                             {/* Weight Variants Section */}
-                            <div>
+                            <div className="p-6 bg-blue-50 rounded-lg border border-blue-200">
                               <div className="flex items-center justify-between mb-4">
                                 <div>
-                                  <FormLabel className="text-sm font-medium text-gray-700">Weight Variants</FormLabel>
-                                  <p className="text-xs text-gray-500 mt-1">Add different weight options with custom pricing</p>
+                                  <FormLabel className="text-lg font-semibold text-gray-900">Size/Weight Variants</FormLabel>
+                                  <p className="text-sm text-gray-600 mt-1">Configure different size options with their respective prices</p>
                                 </div>
                                 <Button
                                   type="button"
-                                  variant="outline"
+                                  variant="default"
                                   size="sm"
                                   onClick={() => {
                                     const currentVariants = productForm.getValues('weightVariants') || [];
                                     productForm.setValue('weightVariants', [...currentVariants, { weight: '', price: 0 }]);
                                   }}
-                                  className="h-8"
+                                  className="h-9 bg-blue-600 hover:bg-blue-700"
                                 >
-                                  <Plus className="h-3 w-3 mr-1" />
-                                  Add Variant
+                                  <Plus className="h-4 w-4 mr-2" />
+                                  Add Size Variant
                                 </Button>
                               </div>
                               
-                              <div className="space-y-3">
+                              <div className="space-y-4">
                                 {(productForm.watch('weightVariants') || []).map((variant, index) => (
-                                  <div key={index} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                                  <div key={index} className="flex items-center gap-4 p-4 bg-white rounded-lg border border-gray-200 shadow-sm">
                                     <div className="flex-1">
+                                      <label className="text-xs font-medium text-gray-600 mb-1 block">Size/Weight</label>
                                       <Input
-                                        placeholder="e.g., 50g, 100g, 200g"
+                                        placeholder="e.g., Small (50g), Medium (100g), Large (200g)"
                                         value={variant.weight}
                                         onChange={(e) => {
                                           const variants = productForm.getValues('weightVariants') || [];
                                           variants[index] = { ...variants[index], weight: e.target.value };
                                           productForm.setValue('weightVariants', variants);
                                         }}
-                                        className="h-9"
+                                        className="h-10 border-gray-300 focus:border-blue-500"
                                       />
                                     </div>
                                     <div className="flex-1">
+                                      <label className="text-xs font-medium text-gray-600 mb-1 block">Price</label>
                                       <div className="relative">
-                                        <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">₹</span>
+                                        <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium">₹</span>
                                         <Input
                                           type="number"
                                           step="0.01"
-                                          placeholder="Price"
+                                          placeholder="0.00"
                                           value={variant.price || ''}
                                           onChange={(e) => {
                                             const variants = productForm.getValues('weightVariants') || [];
                                             variants[index] = { ...variants[index], price: parseFloat(e.target.value) || 0 };
                                             productForm.setValue('weightVariants', variants);
                                           }}
-                                          className="h-9 pl-8"
+                                          className="h-10 pl-8 border-gray-300 focus:border-blue-500"
                                         />
                                       </div>
                                     </div>
@@ -1090,16 +1093,19 @@ export default function AdminDashboard() {
                                         const newVariants = variants.filter((_, i) => i !== index);
                                         productForm.setValue('weightVariants', newVariants);
                                       }}
-                                      className="h-8 w-8 p-0 text-red-500 hover:text-red-700 hover:bg-red-50"
+                                      className="h-9 w-9 p-0 text-red-500 hover:text-red-700 hover:bg-red-50 self-end"
+                                      title="Remove variant"
                                     >
-                                      <Trash2 className="h-3 w-3" />
+                                      <Trash2 className="h-4 w-4" />
                                     </Button>
                                   </div>
                                 ))}
                                 
                                 {(!productForm.watch('weightVariants') || productForm.watch('weightVariants')?.length === 0) && (
-                                  <div className="text-center py-8 text-gray-500 text-sm border-2 border-dashed border-gray-200 rounded-lg">
-                                    No weight variants added. The default price will be used for all orders.
+                                  <div className="text-center py-12 text-gray-500 border-2 border-dashed border-gray-300 rounded-lg bg-white">
+                                    <Package className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+                                    <p className="text-lg font-medium text-gray-600 mb-2">No size variants configured</p>
+                                    <p className="text-sm text-gray-500">Add size variants to enable different pricing options for customers</p>
                                   </div>
                                 )}
                               </div>
