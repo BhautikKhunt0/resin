@@ -2965,7 +2965,7 @@ export default function AdminDashboard() {
 
       {/* Content Management Tab */}
       {activeTab === "content" && (
-        <div className="max-w-4xl">
+        <div className="flex-1 p-6">
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-gray-900">Content Management</h1>
             <p className="text-gray-600 mt-2">Manage website content and legal pages</p>
