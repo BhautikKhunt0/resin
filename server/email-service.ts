@@ -4,8 +4,8 @@ import { Order, OrderItem } from '@shared/schema';
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
-    user: 'bhautikkhunt4117@gmail.com',
-    pass: 'itde ukag ubdv yskn'
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS
   }
 });
 
@@ -77,7 +77,7 @@ export async function sendOrderConfirmationEmail(order: Order) {
     `;
 
     const mailOptions = {
-      from: 'bhautikkhunt4117@gmail.com',
+      from: process.env.EMAIL_FROM,
       to: order.customerEmail,
       subject: `Order Confirmation - Order #${order.id}`,
       html: htmlContent
@@ -183,7 +183,7 @@ export async function sendOrderStatusUpdateEmail(order: Order, previousStatus: s
     `;
 
     const mailOptions = {
-      from: 'bhautikkhunt4117@gmail.com',
+      from: process.env.EMAIL_FROM,
       to: order.customerEmail,
       subject: `Order Status Update - Order #${order.id} - ${order.status}`,
       html: htmlContent
