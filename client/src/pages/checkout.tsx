@@ -55,6 +55,35 @@ export default function Checkout() {
     },
   });
 
+  // Parse weight from product size string
+  const parseWeight = (weightStr: string | undefined): number => {
+    if (!weightStr) return 1; // Default to 1kg if no weight specified
+    
+    const cleanStr = weightStr.toLowerCase().trim();
+    const numericPart = parseFloat(cleanStr.replace(/[^\d.]/g, ''));
+    
+    if (isNaN(numericPart)) return 1; // Default to 1kg if parsing fails
+    
+    // Check if it's in grams (g, gm, gram, grams but not kg, kilogram)
+    if ((cleanStr.includes('g') || cleanStr.includes('gram')) && 
+        !cleanStr.includes('kg') && !cleanStr.includes('kilogram')) {
+      return numericPart / 1000; // Convert grams to kg
+    }
+    
+    // Otherwise assume it's kg (kg, kilogram, kilograms, or no unit)
+    return numericPart;
+  };
+
+  // Calculate total weight of all items
+  const calculateTotalWeight = () => {
+    let totalWeight = 0;
+    state.items.forEach(item => {
+      const itemWeight = parseWeight(item.weight);
+      totalWeight += itemWeight * item.quantity;
+    });
+    return totalWeight;
+  };
+
   // Calculate shipping based on state and weight
   const calculateShipping = () => {
     const totalPrice = getTotalPrice();
@@ -65,12 +94,7 @@ export default function Checkout() {
       return 0;
     }
 
-    // Calculate total weight from cart items
-    let totalWeight = 0;
-    state.items.forEach(item => {
-      const itemWeight = parseFloat(item.weight?.replace(/[^\d.]/g, '') || '1'); // Extract numeric part, default to 1kg
-      totalWeight += itemWeight * item.quantity;
-    });
+    const totalWeight = calculateTotalWeight();
 
     // Base shipping rates per kg
     let shippingPerKg = selectedState === 'Gujarat' ? 50 : 80;
@@ -83,6 +107,7 @@ export default function Checkout() {
     return Math.ceil(totalWeight) * shippingPerKg;
   };
 
+  const totalWeight = calculateTotalWeight();
   const shipping = calculateShipping();
   const subtotal = getTotalPrice();
   const total = subtotal + shipping;
@@ -217,6 +242,12 @@ export default function Checkout() {
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">Subtotal</span>
                     <span className="font-medium">₹{subtotal.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">Total Weight</span>
+                    <span className="font-medium">
+                      {totalWeight < 1 ? `${(totalWeight * 1000).toFixed(0)}g` : `${totalWeight.toFixed(2)}kg`}
+                    </span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">Shipping</span>
@@ -386,7 +417,8 @@ export default function Checkout() {
                       <ul className="text-sm text-blue-800 space-y-1">
                         <li>• Free shipping on orders above ₹1,999</li>
                         <li>• Gujarat: ₹50/kg, Outside Gujarat: ₹80/kg</li>
-                        <li>• Shipping cost doubles for orders above 1kg</li>
+                        <li>• Shipping rates double for total weight above 1kg</li>
+                        <li>• Weight calculated from product sizes (g/gm = grams, kg = kilograms)</li>
                       </ul>
                     </div>
 
