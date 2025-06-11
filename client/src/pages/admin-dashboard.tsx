@@ -2292,6 +2292,256 @@ export default function AdminDashboard() {
               </Card>
             </div>
           )}
+
+          {/* Settings Tab */}
+          {activeTab === "settings" && (
+            <div className="space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900">Settings</h2>
+                  <p className="text-gray-600 mt-1">Manage your store settings and configuration</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* WhatsApp Configuration Card */}
+                <Card className="border-0 shadow-lg">
+                  <CardHeader className="bg-gradient-to-r from-green-50 to-green-100 border-b border-green-200">
+                    <CardTitle className="flex items-center text-green-800">
+                      <MessageCircle className="h-5 w-5 mr-2" />
+                      WhatsApp Configuration
+                    </CardTitle>
+                    <p className="text-green-600 text-sm mt-1">Configure WhatsApp integration for order notifications</p>
+                  </CardHeader>
+                  <CardContent className="p-6 space-y-6">
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-800 mb-2">
+                        WhatsApp Number
+                      </label>
+                      <p className="text-sm text-gray-600 mb-4">
+                        This number will receive order notifications from the checkout process
+                      </p>
+                      {isEditingWhatsapp ? (
+                        <div className="space-y-3">
+                          <Input
+                            value={whatsappNumber}
+                            onChange={(e) => setWhatsappNumber(e.target.value)}
+                            placeholder="+1234567890"
+                            className="text-base"
+                          />
+                          <div className="flex space-x-3">
+                            <Button
+                              onClick={() => {
+                                if (whatsappNumber.trim()) {
+                                  updateWhatsAppMutation.mutate(whatsappNumber.trim());
+                                }
+                              }}
+                              disabled={updateWhatsAppMutation.isPending}
+                              className="bg-green-600 hover:bg-green-700"
+                            >
+                              {updateWhatsAppMutation.isPending ? "Saving..." : "Save Changes"}
+                            </Button>
+                            <Button
+                              onClick={() => {
+                                setIsEditingWhatsapp(false);
+                                setWhatsappNumber(whatsappSetting?.value || "");
+                              }}
+                              variant="outline"
+                            >
+                              Cancel
+                            </Button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <div className="text-sm text-gray-500 mb-1">Current Number</div>
+                              <div className="text-lg font-medium text-gray-900">
+                                {whatsappSetting?.value || "Not configured"}
+                              </div>
+                            </div>
+                            <Button
+                              onClick={() => {
+                                setIsEditingWhatsapp(true);
+                                setWhatsappNumber(whatsappSetting?.value || "");
+                              }}
+                              variant="outline"
+                              className="border-green-300 text-green-700 hover:bg-green-50"
+                            >
+                              <Edit className="h-4 w-4 mr-2" />
+                              Edit Number
+                            </Button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                      <div className="flex">
+                        <div className="flex-shrink-0">
+                          <MessageCircle className="h-5 w-5 text-blue-500" />
+                        </div>
+                        <div className="ml-3">
+                          <h3 className="text-sm font-semibold text-blue-800 mb-2">
+                            How it works
+                          </h3>
+                          <div className="text-sm text-blue-700">
+                            <p className="mb-2">When customers complete checkout, they'll be redirected to WhatsApp with their order details including:</p>
+                            <ul className="list-disc list-inside space-y-1">
+                              <li>Customer name and contact information</li>
+                              <li>Complete product list with quantities and sizes</li>
+                              <li>Shipping address</li>
+                              <li>Total order amount</li>
+                            </ul>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* General Settings Card */}
+                <Card className="border-0 shadow-lg">
+                  <CardHeader className="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200">
+                    <CardTitle className="flex items-center text-gray-800">
+                      <Settings className="h-5 w-5 mr-2" />
+                      General Settings
+                    </CardTitle>
+                    <p className="text-gray-600 text-sm mt-1">Configure general store preferences</p>
+                  </CardHeader>
+                  <CardContent className="p-6">
+                    <div className="text-center py-8">
+                      <Settings className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+                      <p className="text-gray-500 text-sm">
+                        Additional settings will be available here
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          )}
+
+          {/* Content Management Tab */}
+          {activeTab === "content" && (
+            <div className="space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900">Content Management</h2>
+                  <p className="text-gray-600 mt-1">Manage website content and legal pages</p>
+                </div>
+              </div>
+
+              <div className="space-y-6">
+                <Card className="border-0 shadow-lg">
+                  <CardHeader className="bg-gradient-to-r from-blue-50 to-blue-100 border-b border-blue-200">
+                    <CardTitle className="flex items-center text-blue-800">
+                      <FileText className="h-5 w-5 mr-2" />
+                      Terms of Service
+                    </CardTitle>
+                    <p className="text-blue-600 text-sm mt-1">Manage your website's Terms of Service content</p>
+                  </CardHeader>
+                  <CardContent className="p-6 space-y-6">
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-800 mb-2">
+                        Terms of Service Content
+                      </label>
+                      <p className="text-sm text-gray-600 mb-4">
+                        This content will be displayed on the Terms of Service page
+                      </p>
+                      {isEditingTerms ? (
+                        <div className="space-y-4">
+                          <div className="w-full max-w-full">
+                            <Textarea
+                              value={termsOfService}
+                              onChange={(e) => setTermsOfService(e.target.value)}
+                              placeholder="Enter your Terms of Service content..."
+                              className="w-full h-80 resize-none font-mono text-sm border-2 border-blue-200 focus:border-blue-400 overflow-y-auto"
+                              rows={15}
+                            />
+                          </div>
+                          <div className="flex space-x-3">
+                            <Button
+                              onClick={() => {
+                                if (termsOfService.trim()) {
+                                  updateTermsMutation.mutate(termsOfService.trim());
+                                }
+                              }}
+                              disabled={updateTermsMutation.isPending}
+                              className="bg-blue-600 hover:bg-blue-700"
+                            >
+                              {updateTermsMutation.isPending ? "Saving..." : "Save Changes"}
+                            </Button>
+                            <Button
+                              onClick={() => {
+                                setIsEditingTerms(false);
+                                setTermsOfService(termsSetting?.value || "");
+                              }}
+                              variant="outline"
+                            >
+                              Cancel
+                            </Button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="space-y-4">
+                          <div className="border border-gray-200 rounded-lg bg-gray-50 p-4 max-h-80 overflow-y-auto">
+                            <div className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">
+                              {termsSetting?.value || "No Terms of Service content configured"}
+                            </div>
+                          </div>
+                          <div className="flex items-center space-x-3">
+                            <Button
+                              onClick={() => {
+                                setIsEditingTerms(true);
+                                setTermsOfService(termsSetting?.value || "");
+                              }}
+                              variant="outline"
+                              className="border-blue-300 text-blue-700 hover:bg-blue-50"
+                            >
+                              <Edit className="h-4 w-4 mr-2" />
+                              Edit Content
+                            </Button>
+                            <Button
+                              onClick={() => window.open('/terms-of-service', '_blank')}
+                              variant="outline"
+                              className="border-gray-300 text-gray-700 hover:bg-gray-50"
+                            >
+                              <Eye className="h-4 w-4 mr-2" />
+                              Preview Page
+                            </Button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                      <div className="flex">
+                        <div className="flex-shrink-0">
+                          <FileText className="h-5 w-5 text-blue-500" />
+                        </div>
+                        <div className="ml-3">
+                          <h3 className="text-sm font-semibold text-blue-800 mb-2">
+                            Formatting Tips
+                          </h3>
+                          <div className="text-sm text-blue-700">
+                            <p className="mb-2">You can use simple formatting in your content:</p>
+                            <ul className="list-disc list-inside space-y-1">
+                              <li><strong># Title</strong> for main headings</li>
+                              <li><strong>## Subtitle</strong> for section headings</li>
+                              <li><strong>**bold text**</strong> for emphasis</li>
+                              <li><strong>*italic text*</strong> for emphasis</li>
+                            </ul>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          )}
         </main>
       </div>
 
@@ -2833,255 +3083,7 @@ export default function AdminDashboard() {
         </DialogContent>
       </Dialog>
 
-      {/* Settings Tab */}
-      {activeTab === "settings" && (
-        <div className="space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900">Settings</h2>
-              <p className="text-gray-600 mt-1">Manage your store settings and configuration</p>
-            </div>
-          </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* WhatsApp Configuration Card */}
-            <Card className="border-0 shadow-lg">
-              <CardHeader className="bg-gradient-to-r from-green-50 to-green-100 border-b border-green-200">
-                <CardTitle className="flex items-center text-green-800">
-                  <MessageCircle className="h-5 w-5 mr-2" />
-                  WhatsApp Configuration
-                </CardTitle>
-                <p className="text-green-600 text-sm mt-1">Configure WhatsApp integration for order notifications</p>
-              </CardHeader>
-              <CardContent className="p-6 space-y-6">
-                <div>
-                  <label className="block text-sm font-semibold text-gray-800 mb-2">
-                    WhatsApp Number
-                  </label>
-                  <p className="text-sm text-gray-600 mb-4">
-                    This number will receive order notifications from the checkout process
-                  </p>
-                  {isEditingWhatsapp ? (
-                    <div className="space-y-3">
-                      <Input
-                        value={whatsappNumber}
-                        onChange={(e) => setWhatsappNumber(e.target.value)}
-                        placeholder="+1234567890"
-                        className="text-base"
-                      />
-                      <div className="flex space-x-3">
-                        <Button
-                          onClick={() => {
-                            if (whatsappNumber.trim()) {
-                              updateWhatsAppMutation.mutate(whatsappNumber.trim());
-                            }
-                          }}
-                          disabled={updateWhatsAppMutation.isPending}
-                          className="bg-green-600 hover:bg-green-700"
-                        >
-                          {updateWhatsAppMutation.isPending ? "Saving..." : "Save Changes"}
-                        </Button>
-                        <Button
-                          onClick={() => {
-                            setIsEditingWhatsapp(false);
-                            setWhatsappNumber(whatsappSetting?.value || "");
-                          }}
-                          variant="outline"
-                        >
-                          Cancel
-                        </Button>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <div className="text-sm text-gray-500 mb-1">Current Number</div>
-                          <div className="text-lg font-medium text-gray-900">
-                            {whatsappSetting?.value || "Not configured"}
-                          </div>
-                        </div>
-                        <Button
-                          onClick={() => {
-                            setIsEditingWhatsapp(true);
-                            setWhatsappNumber(whatsappSetting?.value || "");
-                          }}
-                          variant="outline"
-                          className="border-green-300 text-green-700 hover:bg-green-50"
-                        >
-                          <Edit className="h-4 w-4 mr-2" />
-                          Edit Number
-                        </Button>
-                      </div>
-                    </div>
-                  )}
-                </div>
-                
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                  <div className="flex">
-                    <div className="flex-shrink-0">
-                      <MessageCircle className="h-5 w-5 text-blue-500" />
-                    </div>
-                    <div className="ml-3">
-                      <h3 className="text-sm font-semibold text-blue-800 mb-2">
-                        How it works
-                      </h3>
-                      <div className="text-sm text-blue-700">
-                        <p className="mb-2">When customers complete checkout, they'll be redirected to WhatsApp with their order details including:</p>
-                        <ul className="list-disc list-inside space-y-1">
-                          <li>Customer name and contact information</li>
-                          <li>Complete product list with quantities and sizes</li>
-                          <li>Shipping address</li>
-                          <li>Total order amount</li>
-                        </ul>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* General Settings Card */}
-            <Card className="border-0 shadow-lg">
-              <CardHeader className="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200">
-                <CardTitle className="flex items-center text-gray-800">
-                  <Settings className="h-5 w-5 mr-2" />
-                  General Settings
-                </CardTitle>
-                <p className="text-gray-600 text-sm mt-1">Configure general store preferences</p>
-              </CardHeader>
-              <CardContent className="p-6">
-                <div className="text-center py-8">
-                  <Settings className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-                  <p className="text-gray-500 text-sm">
-                    Additional settings will be available here
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      )}
-
-      {/* Content Management Tab */}
-      {activeTab === "content" && (
-        <div className="space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900">Content Management</h2>
-              <p className="text-gray-600 mt-1">Manage website content and legal pages</p>
-            </div>
-          </div>
-
-          <div className="space-y-6">
-            <Card className="border-0 shadow-lg">
-              <CardHeader className="bg-gradient-to-r from-blue-50 to-blue-100 border-b border-blue-200">
-                <CardTitle className="flex items-center text-blue-800">
-                  <FileText className="h-5 w-5 mr-2" />
-                  Terms of Service
-                </CardTitle>
-                <p className="text-blue-600 text-sm mt-1">Manage your website's Terms of Service content</p>
-              </CardHeader>
-              <CardContent className="p-6 space-y-6">
-                <div>
-                  <label className="block text-sm font-semibold text-gray-800 mb-2">
-                    Terms of Service Content
-                  </label>
-                  <p className="text-sm text-gray-600 mb-4">
-                    This content will be displayed on the Terms of Service page
-                  </p>
-                  {isEditingTerms ? (
-                    <div className="space-y-4">
-                      <div className="w-full max-w-full">
-                        <Textarea
-                          value={termsOfService}
-                          onChange={(e) => setTermsOfService(e.target.value)}
-                          placeholder="Enter your Terms of Service content..."
-                          className="w-full h-80 resize-none font-mono text-sm border-2 border-blue-200 focus:border-blue-400 overflow-y-auto"
-                          rows={15}
-                        />
-                      </div>
-                      <div className="flex space-x-3">
-                        <Button
-                          onClick={() => {
-                            if (termsOfService.trim()) {
-                              updateTermsMutation.mutate(termsOfService.trim());
-                            }
-                          }}
-                          disabled={updateTermsMutation.isPending}
-                          className="bg-blue-600 hover:bg-blue-700"
-                        >
-                          {updateTermsMutation.isPending ? "Saving..." : "Save Changes"}
-                        </Button>
-                        <Button
-                          onClick={() => {
-                            setIsEditingTerms(false);
-                            setTermsOfService(termsSetting?.value || "");
-                          }}
-                          variant="outline"
-                        >
-                          Cancel
-                        </Button>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="space-y-4">
-                      <div className="border border-gray-200 rounded-lg bg-gray-50 p-4 max-h-80 overflow-y-auto">
-                        <div className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">
-                          {termsSetting?.value || "No Terms of Service content configured"}
-                        </div>
-                      </div>
-                      <div className="flex items-center space-x-3">
-                        <Button
-                          onClick={() => {
-                            setIsEditingTerms(true);
-                            setTermsOfService(termsSetting?.value || "");
-                          }}
-                          variant="outline"
-                          className="border-blue-300 text-blue-700 hover:bg-blue-50"
-                        >
-                          <Edit className="h-4 w-4 mr-2" />
-                          Edit Content
-                        </Button>
-                        <Button
-                          onClick={() => window.open('/terms-of-service', '_blank')}
-                          variant="outline"
-                          className="border-gray-300 text-gray-700 hover:bg-gray-50"
-                        >
-                          <Eye className="h-4 w-4 mr-2" />
-                          Preview Page
-                        </Button>
-                      </div>
-                    </div>
-                  )}
-                </div>
-                
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                  <div className="flex">
-                    <div className="flex-shrink-0">
-                      <FileText className="h-5 w-5 text-blue-500" />
-                    </div>
-                    <div className="ml-3">
-                      <h3 className="text-sm font-semibold text-blue-800 mb-2">
-                        Formatting Tips
-                      </h3>
-                      <div className="text-sm text-blue-700">
-                        <p className="mb-2">You can use simple formatting in your content:</p>
-                        <ul className="list-disc list-inside space-y-1">
-                          <li><strong># Title</strong> for main headings</li>
-                          <li><strong>## Subtitle</strong> for section headings</li>
-                          <li><strong>**bold text**</strong> for emphasis</li>
-                          <li><strong>*italic text*</strong> for emphasis</li>
-                        </ul>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      )}
 
       {/* Order Details Dialog */}
       <Dialog open={orderDetailsDialogOpen} onOpenChange={setOrderDetailsDialogOpen}>
