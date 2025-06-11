@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useQuery } from "@tanstack/react-query";
 import type { Category, Subcategory } from "@shared/schema";
-import logoImage from "@assets/image_1749645267461.png";
+
 
 export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -112,7 +112,7 @@ export default function Header() {
     >
       <Button 
         variant="ghost" 
-        className="text-sm font-medium text-pink-100 hover:text-white h-auto p-0 bg-transparent border-0 shadow-none flex items-center gap-1"
+        className="text-sm font-medium text-pink-100 hover:text-white hover:bg-transparent h-auto p-0 bg-transparent border-0 shadow-none flex items-center gap-1"
       >
         <Grid3X3 className="h-4 w-4" />
         Collections
@@ -249,11 +249,7 @@ export default function Header() {
           {/* Logo - Center on mobile, left on desktop */}
           <Link href="/">
             <div className="flex items-center space-x-3 cursor-pointer">
-              <img 
-                src={logoImage} 
-                alt="The Resin Studio" 
-                className="h-10 w-auto object-contain"
-              />
+              <h1 className="text-white text-xl font-bold">The Resin Studio</h1>
             </div>
           </Link>
 
