@@ -2963,123 +2963,125 @@ export default function AdminDashboard() {
         </div>
       )}
 
-      {/* Content Management Tab */}
-      {activeTab === "content" && (
-        <div className="space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900">Content Management</h2>
-              <p className="text-gray-600 mt-1">Manage website content and legal pages</p>
-            </div>
-          </div>
-
-          <div className="space-y-6">
-            <Card className="border-0 shadow-lg">
-              <CardHeader className="bg-gradient-to-r from-blue-50 to-blue-100 border-b border-blue-200">
-                <CardTitle className="flex items-center text-blue-800">
-                  <FileText className="h-5 w-5 mr-2" />
-                  Terms of Service
-                </CardTitle>
-                <p className="text-blue-600 text-sm mt-1">Manage your website's Terms of Service content</p>
-              </CardHeader>
-              <CardContent className="p-6 space-y-6">
+          {/* Content Management Tab */}
+          {activeTab === "content" && (
+            <div className="space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
-                  <label className="block text-sm font-semibold text-gray-800 mb-2">
-                    Terms of Service Content
-                  </label>
-                  <p className="text-sm text-gray-600 mb-4">
-                    This content will be displayed on the Terms of Service page
-                  </p>
-                  {isEditingTerms ? (
-                    <div className="space-y-4">
-                      <Textarea
-                        value={termsOfService}
-                        onChange={(e) => setTermsOfService(e.target.value)}
-                        placeholder="Enter your Terms of Service content..."
-                        className="min-h-[400px] font-mono text-sm border-2 border-blue-200 focus:border-blue-400"
-                        rows={20}
-                      />
-                      <div className="flex space-x-3">
-                        <Button
-                          onClick={() => {
-                            if (termsOfService.trim()) {
-                              updateTermsMutation.mutate(termsOfService.trim());
-                            }
-                          }}
-                          disabled={updateTermsMutation.isPending}
-                          className="bg-blue-600 hover:bg-blue-700"
-                        >
-                          {updateTermsMutation.isPending ? "Saving..." : "Save Changes"}
-                        </Button>
-                        <Button
-                          onClick={() => {
-                            setIsEditingTerms(false);
-                            setTermsOfService(termsSetting?.value || "");
-                          }}
-                          variant="outline"
-                        >
-                          Cancel
-                        </Button>
-                      </div>
+                  <h2 className="text-2xl font-bold text-gray-900">Content Management</h2>
+                  <p className="text-gray-600 mt-1">Manage website content and legal pages</p>
+                </div>
+              </div>
+
+              <div className="space-y-6">
+                <Card className="border-0 shadow-lg">
+                  <CardHeader className="bg-gradient-to-r from-blue-50 to-blue-100 border-b border-blue-200">
+                    <CardTitle className="flex items-center text-blue-800">
+                      <FileText className="h-5 w-5 mr-2" />
+                      Terms of Service
+                    </CardTitle>
+                    <p className="text-blue-600 text-sm mt-1">Manage your website's Terms of Service content</p>
+                  </CardHeader>
+                  <CardContent className="p-6 space-y-6">
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-800 mb-2">
+                        Terms of Service Content
+                      </label>
+                      <p className="text-sm text-gray-600 mb-4">
+                        This content will be displayed on the Terms of Service page
+                      </p>
+                      {isEditingTerms ? (
+                        <div className="space-y-4">
+                          <Textarea
+                            value={termsOfService}
+                            onChange={(e) => setTermsOfService(e.target.value)}
+                            placeholder="Enter your Terms of Service content..."
+                            className="min-h-[400px] font-mono text-sm border-2 border-blue-200 focus:border-blue-400"
+                            rows={20}
+                          />
+                          <div className="flex space-x-3">
+                            <Button
+                              onClick={() => {
+                                if (termsOfService.trim()) {
+                                  updateTermsMutation.mutate(termsOfService.trim());
+                                }
+                              }}
+                              disabled={updateTermsMutation.isPending}
+                              className="bg-blue-600 hover:bg-blue-700"
+                            >
+                              {updateTermsMutation.isPending ? "Saving..." : "Save Changes"}
+                            </Button>
+                            <Button
+                              onClick={() => {
+                                setIsEditingTerms(false);
+                                setTermsOfService(termsSetting?.value || "");
+                              }}
+                              variant="outline"
+                            >
+                              Cancel
+                            </Button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="space-y-4">
+                          <div className="border border-gray-200 rounded-lg bg-gray-50 p-4 max-h-80 overflow-y-auto">
+                            <div className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">
+                              {termsSetting?.value || "No Terms of Service content configured"}
+                            </div>
+                          </div>
+                          <div className="flex items-center space-x-3">
+                            <Button
+                              onClick={() => {
+                                setIsEditingTerms(true);
+                                setTermsOfService(termsSetting?.value || "");
+                              }}
+                              variant="outline"
+                              className="border-blue-300 text-blue-700 hover:bg-blue-50"
+                            >
+                              <Edit className="h-4 w-4 mr-2" />
+                              Edit Content
+                            </Button>
+                            <Button
+                              onClick={() => window.open('/terms-of-service', '_blank')}
+                              variant="outline"
+                              className="border-gray-300 text-gray-700 hover:bg-gray-50"
+                            >
+                              <Eye className="h-4 w-4 mr-2" />
+                              Preview Page
+                            </Button>
+                          </div>
+                        </div>
+                      )}
                     </div>
-                  ) : (
-                    <div className="space-y-4">
-                      <div className="border border-gray-200 rounded-lg bg-gray-50 p-4 max-h-80 overflow-y-auto">
-                        <div className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">
-                          {termsSetting?.value || "No Terms of Service content configured"}
+                    
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                      <div className="flex">
+                        <div className="flex-shrink-0">
+                          <FileText className="h-5 w-5 text-blue-500" />
+                        </div>
+                        <div className="ml-3">
+                          <h3 className="text-sm font-semibold text-blue-800 mb-2">
+                            Formatting Tips
+                          </h3>
+                          <div className="text-sm text-blue-700">
+                            <p className="mb-2">You can use simple formatting in your content:</p>
+                            <ul className="list-disc list-inside space-y-1">
+                              <li><strong># Title</strong> for main headings</li>
+                              <li><strong>## Subtitle</strong> for section headings</li>
+                              <li><strong>**bold text**</strong> for emphasis</li>
+                              <li><strong>*italic text*</strong> for emphasis</li>
+                            </ul>
+                          </div>
                         </div>
                       </div>
-                      <div className="flex items-center space-x-3">
-                        <Button
-                          onClick={() => {
-                            setIsEditingTerms(true);
-                            setTermsOfService(termsSetting?.value || "");
-                          }}
-                          variant="outline"
-                          className="border-blue-300 text-blue-700 hover:bg-blue-50"
-                        >
-                          <Edit className="h-4 w-4 mr-2" />
-                          Edit Content
-                        </Button>
-                        <Button
-                          onClick={() => window.open('/terms-of-service', '_blank')}
-                          variant="outline"
-                          className="border-gray-300 text-gray-700 hover:bg-gray-50"
-                        >
-                          <Eye className="h-4 w-4 mr-2" />
-                          Preview Page
-                        </Button>
-                      </div>
                     </div>
-                  )}
-                </div>
-                
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                  <div className="flex">
-                    <div className="flex-shrink-0">
-                      <FileText className="h-5 w-5 text-blue-500" />
-                    </div>
-                    <div className="ml-3">
-                      <h3 className="text-sm font-semibold text-blue-800 mb-2">
-                        Formatting Tips
-                      </h3>
-                      <div className="text-sm text-blue-700">
-                        <p className="mb-2">You can use simple formatting in your content:</p>
-                        <ul className="list-disc list-inside space-y-1">
-                          <li><strong># Title</strong> for main headings</li>
-                          <li><strong>## Subtitle</strong> for section headings</li>
-                          <li><strong>**bold text**</strong> for emphasis</li>
-                          <li><strong>*italic text*</strong> for emphasis</li>
-                        </ul>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      )}
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          )}
+        </main>
+
     </div>
   );
 }
