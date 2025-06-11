@@ -970,7 +970,7 @@ export default function AdminDashboard() {
                         variant="outline" 
                         size="sm"
                         onClick={() => setActiveTab("orders")}
-                        className="text-blue-600 border-blue-200 hover:bg-blue-50"
+                        className="text-pink-600 border-pink-200 hover:bg-pink-50"
                       >
                         View All
                       </Button>

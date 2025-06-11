@@ -247,8 +247,8 @@ export default function Header() {
 
           {/* Logo - Center on mobile, left on desktop */}
           <Link href="/">
-            <h1 className="text-xl md:text-2xl font-bold text-primary cursor-pointer">
-              ModernShop
+            <h1 className="text-xl md:text-2xl font-bold text-pink-700 cursor-pointer">
+              The Resin Studio
             </h1>
           </Link>
 
