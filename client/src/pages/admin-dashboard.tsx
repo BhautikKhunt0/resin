@@ -822,19 +822,19 @@ export default function AdminDashboard() {
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
       `}>
         {/* Sidebar Header */}
-        <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200 bg-gradient-to-r from-blue-600 to-blue-700 flex-shrink-0">
+        <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200 bg-gradient-to-r from-pink-700 to-pink-800 flex-shrink-0">
           <div className="flex items-center space-x-3">
             <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center">
-              <Package className="h-5 w-5 text-blue-600" />
+              <Package className="h-5 w-5 text-pink-700" />
             </div>
             <div>
-              <h1 className="text-lg font-bold text-white">Admin Panel</h1>
-              <p className="text-blue-100 text-xs">E-commerce Management</p>
+              <h1 className="text-lg font-bold text-white">The Resin Studio</h1>
+              <p className="text-pink-100 text-xs">Admin Panel</p>
             </div>
           </div>
           <button
             onClick={() => setSidebarOpen(false)}
-            className="lg:hidden p-1.5 rounded-md text-blue-100 hover:text-white hover:bg-blue-500"
+            className="lg:hidden p-1.5 rounded-md text-pink-100 hover:text-white hover:bg-pink-600"
           >
             <X className="h-4 w-4" />
           </button>
@@ -855,7 +855,7 @@ export default function AdminDashboard() {
                     className={`
                       w-full flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200
                       ${activeTab === item.id
-                        ? 'bg-blue-50 text-blue-700 shadow-sm'
+                        ? 'bg-pink-50 text-pink-700 shadow-sm'
                         : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                       }
                     `}
@@ -872,7 +872,7 @@ export default function AdminDashboard() {
         {/* User Profile Section */}
         <div className="flex-shrink-0 p-4 border-t border-gray-200 bg-gray-50">
           <div className="flex items-center space-x-3 mb-3">
-            <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
+            <div className="w-8 h-8 bg-gradient-to-r from-pink-600 to-pink-700 rounded-full flex items-center justify-center flex-shrink-0">
               <Users className="h-4 w-4 text-white" />
             </div>
             <div className="flex-1 min-w-0">
@@ -898,7 +898,7 @@ export default function AdminDashboard() {
         <div className="flex-shrink-0 h-16 flex items-center gap-x-4 border-b border-gray-200 bg-white px-4 shadow-sm sm:gap-x-6 sm:px-6">
           <button
             type="button"
-            className="lg:hidden p-2 text-gray-700 hover:bg-gray-100 rounded-md"
+            className="lg:hidden p-2 text-pink-700 hover:bg-pink-100 rounded-md"
             onClick={() => setSidebarOpen(true)}
           >
             <Menu className="h-5 w-5" />
@@ -920,42 +920,42 @@ export default function AdminDashboard() {
               
               {/* Stats */}
               <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                <Card className="border-0 shadow-lg bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
+                <Card className="border-0 shadow-lg bg-gradient-to-br from-pink-50 to-pink-100 border-pink-200">
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium text-blue-700">Total Products</CardTitle>
-                    <div className="p-2 bg-blue-500 rounded-lg">
+                    <CardTitle className="text-sm font-medium text-pink-700">Total Products</CardTitle>
+                    <div className="p-2 bg-pink-600 rounded-lg">
                       <Package className="h-5 w-5 text-white" />
                     </div>
                   </CardHeader>
                   <CardContent>
-                    <div className="text-3xl font-bold text-blue-900">{totalProducts}</div>
-                    <p className="text-xs text-blue-600 mt-1">Active products in store</p>
+                    <div className="text-3xl font-bold text-pink-900">{totalProducts}</div>
+                    <p className="text-xs text-pink-600 mt-1">Active products in store</p>
                   </CardContent>
                 </Card>
                 
-                <Card className="border-0 shadow-lg bg-gradient-to-br from-green-50 to-green-100 border-green-200">
+                <Card className="border-0 shadow-lg bg-gradient-to-br from-pink-50 to-pink-100 border-pink-200">
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium text-green-700">Total Orders</CardTitle>
-                    <div className="p-2 bg-green-500 rounded-lg">
+                    <CardTitle className="text-sm font-medium text-pink-700">Total Orders</CardTitle>
+                    <div className="p-2 bg-pink-600 rounded-lg">
                       <ShoppingBag className="h-5 w-5 text-white" />
                     </div>
                   </CardHeader>
                   <CardContent>
-                    <div className="text-3xl font-bold text-green-900">{totalOrders}</div>
-                    <p className="text-xs text-green-600 mt-1">Orders received</p>
+                    <div className="text-3xl font-bold text-pink-900">{totalOrders}</div>
+                    <p className="text-xs text-pink-600 mt-1">Orders received</p>
                   </CardContent>
                 </Card>
                 
-                <Card className="border-0 shadow-lg bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200">
+                <Card className="border-0 shadow-lg bg-gradient-to-br from-pink-50 to-pink-100 border-pink-200">
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium text-purple-700">Total Revenue</CardTitle>
-                    <div className="p-2 bg-purple-500 rounded-lg">
+                    <CardTitle className="text-sm font-medium text-pink-700">Total Revenue</CardTitle>
+                    <div className="p-2 bg-pink-600 rounded-lg">
                       <DollarSign className="h-5 w-5 text-white" />
                     </div>
                   </CardHeader>
                   <CardContent>
-                    <div className="text-3xl font-bold text-purple-900">₹{totalRevenue.toFixed(2)}</div>
-                    <p className="text-xs text-purple-600 mt-1">Total sales revenue</p>
+                    <div className="text-3xl font-bold text-pink-900">₹{totalRevenue.toFixed(2)}</div>
+                    <p className="text-xs text-pink-600 mt-1">Total sales revenue</p>
                   </CardContent>
                 </Card>
               </div>
