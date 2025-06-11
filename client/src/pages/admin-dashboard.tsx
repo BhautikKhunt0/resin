@@ -2431,86 +2431,171 @@ export default function AdminDashboard() {
                       ))}
                     </div>
                   ) : banners && banners.length > 0 ? (
-                    <div className="overflow-hidden">
-                      <Table>
-                        <TableHeader className="bg-gray-50">
-                          <TableRow className="border-none">
-                            <TableHead className="py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">Banner</TableHead>
-                            <TableHead className="py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">Title</TableHead>
-                            <TableHead className="py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</TableHead>
-                            <TableHead className="py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">Created</TableHead>
-                            <TableHead className="py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider text-right">Actions</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {banners.map((banner, index) => (
-                            <TableRow key={banner.id} className={`border-gray-100 hover:bg-gray-50 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-gray-25'}`}>
-                              <TableCell className="py-4 px-6">
-                                <div className="w-20 h-12 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg flex items-center justify-center overflow-hidden">
-                                  {banner.imageUrl || banner.imageBlob ? (
-                                    <img 
-                                      src={banner.imageUrl || `data:image/jpeg;base64,${banner.imageBlob}`} 
-                                      alt={banner.title}
-                                      className="w-full h-full object-cover rounded-lg"
-                                    />
-                                  ) : (
-                                    <ImageIcon className="h-6 w-6 text-gray-400" />
-                                  )}
-                                </div>
-                              </TableCell>
-                              <TableCell className="py-4 px-6">
-                                <div>
-                                  <div className="font-semibold text-gray-900 text-sm">{banner.title}</div>
-                                  <div className="text-gray-500 text-xs mt-1 line-clamp-1">{banner.description}</div>
-                                </div>
-                              </TableCell>
-                              <TableCell className="py-4 px-6">
-                                <Badge 
-                                  variant={banner.isActive ? "default" : "secondary"}
-                                  className={banner.isActive ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-600"}
-                                >
-                                  {banner.isActive ? "Active" : "Inactive"}
-                                </Badge>
-                              </TableCell>
-                              <TableCell className="py-4 px-6">
-                                <div className="text-sm text-gray-500">
-                                  {new Date(banner.createdAt).toLocaleDateString()}
-                                </div>
-                              </TableCell>
-                              <TableCell className="py-4 px-6 text-right">
-                                <div className="flex justify-end space-x-2">
-                                  <Button 
-                                    variant="ghost" 
-                                    size="sm" 
-                                    className="h-8 w-8 p-0 text-gray-400 hover:text-blue-600 hover:bg-blue-50"
-                                    onClick={() => {
-                                      setEditingBanner(banner);
-                                      bannerForm.reset({
-                                        title: banner.title,
-                                        description: banner.description || "",
-                                        imageUrl: banner.imageUrl || "",
-                                        imageBlob: banner.imageBlob || "",
-                                        isActive: banner.isActive === 1,
-                                      });
-                                      setBannerDialogOpen(true);
-                                    }}
-                                  >
-                                    <Edit className="h-4 w-4" />
-                                  </Button>
-                                  <Button 
-                                    variant="ghost" 
-                                    size="sm" 
-                                    className="h-8 w-8 p-0 text-gray-400 hover:text-red-600 hover:bg-red-50"
-                                    onClick={() => deleteBannerMutation.mutate(banner.id)}
-                                  >
-                                    <Trash2 className="h-4 w-4" />
-                                  </Button>
-                                </div>
-                              </TableCell>
+                    <div>
+                      {/* Desktop Table View - Hidden on Mobile */}
+                      <div className="hidden lg:block overflow-hidden">
+                        <Table>
+                          <TableHeader className="bg-gray-50">
+                            <TableRow className="border-none">
+                              <TableHead className="py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">Banner</TableHead>
+                              <TableHead className="py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">Title</TableHead>
+                              <TableHead className="py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</TableHead>
+                              <TableHead className="py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">Created</TableHead>
+                              <TableHead className="py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider text-right">Actions</TableHead>
                             </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
+                          </TableHeader>
+                          <TableBody>
+                            {banners.map((banner, index) => (
+                              <TableRow key={banner.id} className={`border-gray-100 hover:bg-gray-50 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-gray-25'}`}>
+                                <TableCell className="py-4 px-6">
+                                  <div className="w-20 h-12 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg flex items-center justify-center overflow-hidden">
+                                    {banner.imageUrl || banner.imageBlob ? (
+                                      <img 
+                                        src={banner.imageUrl || `data:image/jpeg;base64,${banner.imageBlob}`} 
+                                        alt={banner.title}
+                                        className="w-full h-full object-cover rounded-lg"
+                                      />
+                                    ) : (
+                                      <ImageIcon className="h-6 w-6 text-gray-400" />
+                                    )}
+                                  </div>
+                                </TableCell>
+                                <TableCell className="py-4 px-6">
+                                  <div>
+                                    <div className="font-semibold text-gray-900 text-sm">{banner.title}</div>
+                                    <div className="text-gray-500 text-xs mt-1 line-clamp-1">{banner.description}</div>
+                                  </div>
+                                </TableCell>
+                                <TableCell className="py-4 px-6">
+                                  <Badge 
+                                    variant={banner.isActive ? "default" : "secondary"}
+                                    className={banner.isActive ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-600"}
+                                  >
+                                    {banner.isActive ? "Active" : "Inactive"}
+                                  </Badge>
+                                </TableCell>
+                                <TableCell className="py-4 px-6">
+                                  <div className="text-sm text-gray-500">
+                                    {new Date(banner.createdAt).toLocaleDateString()}
+                                  </div>
+                                </TableCell>
+                                <TableCell className="py-4 px-6 text-right">
+                                  <div className="flex justify-end space-x-2">
+                                    <Button 
+                                      variant="ghost" 
+                                      size="sm" 
+                                      className="h-8 w-8 p-0 text-gray-400 hover:text-blue-600 hover:bg-blue-50"
+                                      onClick={() => {
+                                        setEditingBanner(banner);
+                                        bannerForm.reset({
+                                          title: banner.title,
+                                          description: banner.description || "",
+                                          imageUrl: banner.imageUrl || "",
+                                          imageBlob: banner.imageBlob || "",
+                                          isActive: banner.isActive === 1,
+                                        });
+                                        setBannerDialogOpen(true);
+                                      }}
+                                    >
+                                      <Edit className="h-4 w-4" />
+                                    </Button>
+                                    <Button 
+                                      variant="ghost" 
+                                      size="sm" 
+                                      className="h-8 w-8 p-0 text-gray-400 hover:text-red-600 hover:bg-red-50"
+                                      onClick={() => deleteBannerMutation.mutate(banner.id)}
+                                    >
+                                      <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                  </div>
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </div>
+
+                      {/* Mobile Card View - Visible on Mobile */}
+                      <div className="lg:hidden space-y-4 p-4">
+                        {banners.map((banner) => {
+                          const imageUrl = banner.imageUrl || (banner.imageBlob ? `data:image/jpeg;base64,${banner.imageBlob}` : null);
+                          return (
+                            <Card key={banner.id} className="border border-gray-200 hover:shadow-md transition-shadow">
+                              <CardContent className="p-4">
+                                <div className="flex space-x-4">
+                                  {/* Banner Image */}
+                                  <div className="flex-shrink-0">
+                                    <div className="w-24 h-16 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg flex items-center justify-center overflow-hidden">
+                                      {imageUrl ? (
+                                        <img 
+                                          src={imageUrl} 
+                                          alt={banner.title}
+                                          className="w-full h-full object-cover rounded-lg"
+                                        />
+                                      ) : (
+                                        <ImageIcon className="h-6 w-6 text-gray-400" />
+                                      )}
+                                    </div>
+                                  </div>
+
+                                  {/* Banner Details */}
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-start justify-between">
+                                      <div className="flex-1 min-w-0">
+                                        <h3 className="font-semibold text-gray-900 text-sm truncate">{banner.title}</h3>
+                                        <p className="text-gray-500 text-xs mt-1 line-clamp-2">{banner.description}</p>
+                                        
+                                        <div className="flex items-center space-x-2 mt-2">
+                                          <Badge 
+                                            variant={banner.isActive ? "default" : "secondary"}
+                                            className={`text-xs ${banner.isActive ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-600"}`}
+                                          >
+                                            {banner.isActive ? "Active" : "Inactive"}
+                                          </Badge>
+                                          <span className="text-xs text-gray-500">
+                                            {new Date(banner.createdAt).toLocaleDateString()}
+                                          </span>
+                                        </div>
+                                      </div>
+                                    </div>
+                                    
+                                    <div className="flex space-x-2 mt-3">
+                                      <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => {
+                                          setEditingBanner(banner);
+                                          bannerForm.reset({
+                                            title: banner.title,
+                                            description: banner.description || "",
+                                            imageUrl: banner.imageUrl || "",
+                                            imageBlob: banner.imageBlob || "",
+                                            isActive: banner.isActive === 1,
+                                          });
+                                          setBannerDialogOpen(true);
+                                        }}
+                                        className="h-8 px-3 text-blue-600 border-blue-200 hover:bg-blue-50"
+                                      >
+                                        <Edit className="h-3 w-3 mr-1" />
+                                        Edit
+                                      </Button>
+                                      <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => deleteBannerMutation.mutate(banner.id)}
+                                        className="h-8 px-3 text-red-600 border-red-200 hover:bg-red-50"
+                                      >
+                                        <Trash2 className="h-3 w-3 mr-1" />
+                                        Delete
+                                      </Button>
+                                    </div>
+                                  </div>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          );
+                        })}
+                      </div>
                     </div>
                   ) : (
                     <div className="text-center py-12">
