@@ -493,9 +493,9 @@ export default function Products() {
 
             {/* Products Grid/List */}
             {productsLoading ? (
-              <div className={`grid gap-6 ${
+              <div className={`grid gap-4 md:gap-6 ${
                 viewMode === "grid" 
-                  ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3" 
+                  ? "grid-cols-2 sm:grid-cols-2 lg:grid-cols-3" 
                   : "grid-cols-1"
               }`}>
                 {[...Array(6)].map((_, i) => (
@@ -533,9 +533,9 @@ export default function Products() {
                 </div>
               </Card>
             ) : (
-              <div className={`grid gap-6 ${
+              <div className={`grid gap-4 md:gap-6 ${
                 viewMode === "grid" 
-                  ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3" 
+                  ? "grid-cols-2 sm:grid-cols-2 lg:grid-cols-3" 
                   : "grid-cols-1"
               }`}>
                 {filteredAndSortedProducts.map((product) => (
