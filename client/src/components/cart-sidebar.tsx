@@ -84,7 +84,7 @@ export default function CartSidebar() {
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => removeItem(item.productId)}
+                      onClick={() => removeItem(item.productId, item.weight)}
                       className="text-red-500 hover:text-red-700"
                     >
                       <Trash2 className="h-4 w-4" />
