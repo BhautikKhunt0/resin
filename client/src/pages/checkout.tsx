@@ -3,11 +3,12 @@ import { useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { ArrowLeft, CreditCard, Package, Truck } from "lucide-react";
+import { ArrowLeft, X, MapPin, User, Mail, Phone, Home, Package, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useCart } from "@/lib/cart-context";
 import { useToast } from "@/hooks/use-toast";
@@ -18,11 +19,22 @@ import type { InsertOrder } from "@shared/schema";
 const checkoutSchema = z.object({
   customerName: z.string().min(2, "Name must be at least 2 characters"),
   customerEmail: z.string().email("Invalid email address"),
-  customerPhone: z.string().min(10, "Phone number must be at least 10 characters"),
-  shippingAddress: z.string().min(10, "Address must be at least 10 characters"),
+  customerPhone: z.string().min(10, "WhatsApp number must be at least 10 characters"),
+  shippingAddress: z.string().min(10, "Complete address must be at least 10 characters"),
+  city: z.string().min(2, "City is required"),
+  state: z.string().min(2, "State is required"),
+  pincode: z.string().min(6, "Pincode must be 6 digits").max(6, "Pincode must be 6 digits"),
 });
 
 type CheckoutFormData = z.infer<typeof checkoutSchema>;
+
+const indianStates = [
+  "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh", "Goa", "Gujarat", 
+  "Haryana", "Himachal Pradesh", "Jammu and Kashmir", "Jharkhand", "Karnataka", "Kerala", 
+  "Madhya Pradesh", "Maharashtra", "Manipur", "Meghalaya", "Mizoram", "Nagaland", "Odisha", 
+  "Punjab", "Rajasthan", "Sikkim", "Tamil Nadu", "Telangana", "Tripura", "Uttar Pradesh", 
+  "Uttarakhand", "West Bengal"
+];
 
 export default function Checkout() {
   const { state, clearCart, getTotalPrice } = useCart();
@@ -37,8 +49,43 @@ export default function Checkout() {
       customerEmail: "",
       customerPhone: "",
       shippingAddress: "",
+      city: "",
+      state: "",
+      pincode: "",
     },
   });
+
+  // Calculate shipping based on state and weight
+  const calculateShipping = () => {
+    const totalPrice = getTotalPrice();
+    const selectedState = form.watch('state');
+    
+    // Free shipping if total > ₹1999
+    if (totalPrice > 1999) {
+      return 0;
+    }
+
+    // Calculate total weight from cart items
+    let totalWeight = 0;
+    state.items.forEach(item => {
+      const itemWeight = parseFloat(item.weight?.replace(/[^\d.]/g, '') || '1'); // Extract numeric part, default to 1kg
+      totalWeight += itemWeight * item.quantity;
+    });
+
+    // Base shipping rates per kg
+    let shippingPerKg = selectedState === 'Gujarat' ? 50 : 80;
+    
+    // Double the rate if weight > 1kg
+    if (totalWeight > 1) {
+      shippingPerKg *= 2;
+    }
+
+    return Math.ceil(totalWeight) * shippingPerKg;
+  };
+
+  const shipping = calculateShipping();
+  const subtotal = getTotalPrice();
+  const total = subtotal + shipping;
 
   const createOrderMutation = useMutation({
     mutationFn: async (orderData: InsertOrder) => {
@@ -82,21 +129,21 @@ export default function Checkout() {
       weight: item.weight,
     }));
 
+    const fullAddress = `${data.shippingAddress}, ${data.city}, ${data.state} ${data.pincode}`;
+
     const orderData: InsertOrder = {
-      ...data,
+      customerName: data.customerName,
+      customerEmail: data.customerEmail,
+      customerPhone: data.customerPhone,
+      shippingAddress: fullAddress,
       orderItems,
-      totalAmount: getTotalPrice().toFixed(2),
+      totalAmount: total.toFixed(2),
       status: "Processing",
     };
 
     createOrderMutation.mutate(orderData);
     setIsProcessing(false);
   };
-
-  const totalPrice = getTotalPrice();
-  const shipping = totalPrice > 50 ? 0 : 9.99;
-  const tax = totalPrice * 0.08; // 8% tax
-  const finalTotal = totalPrice + shipping + tax;
 
   if (state.items.length === 0) {
     return (
@@ -115,174 +162,254 @@ export default function Checkout() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Back Button */}
-        <Link href="/products">
-          <Button variant="ghost" className="mb-8">
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Continue Shopping
-          </Button>
-        </Link>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-8">
+          <Link href="/products">
+            <Button variant="ghost" className="flex items-center text-gray-600 hover:text-gray-900">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Continue Shopping
+            </Button>
+          </Link>
+        </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Cart Summary */}
+          <div className="lg:order-2">
+            <Card className="sticky top-4">
+              <CardHeader className="pb-4">
+                <div className="flex items-center space-x-2">
+                  <ShoppingCart className="h-5 w-5 text-gray-600" />
+                  <CardTitle className="text-lg">Cart Summary</CardTitle>
+                </div>
+                <p className="text-sm text-gray-500">{state.items.length} items</p>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {/* Cart Items */}
+                <div className="space-y-3 max-h-64 overflow-y-auto">
+                  {state.items.map((item, index) => (
+                    <div key={`${item.productId}-${item.weight}`} className="flex items-center space-x-3 py-2">
+                      <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
+                        {item.imageUrl ? (
+                          <img
+                            src={item.imageUrl}
+                            alt={item.name}
+                            className="w-full h-full object-cover rounded-lg"
+                          />
+                        ) : (
+                          <Package className="h-6 w-6 text-gray-400" />
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-900 truncate">{item.name}</p>
+                        <p className="text-xs text-gray-500">
+                          Size: {item.weight || 'Standard'} • Qty: {item.quantity}
+                        </p>
+                      </div>
+                      <div className="text-sm font-medium text-gray-900">
+                        ₹{(item.price * item.quantity).toFixed(2)}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="border-t pt-4 space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">Subtotal</span>
+                    <span className="font-medium">₹{subtotal.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">Shipping</span>
+                    <span className={`font-medium ${shipping === 0 ? 'text-green-600' : ''}`}>
+                      {shipping === 0 ? 'FREE' : `₹${shipping.toFixed(2)}`}
+                    </span>
+                  </div>
+                  <div className="border-t pt-2 flex justify-between text-lg font-semibold">
+                    <span>Total</span>
+                    <span>₹{total.toFixed(2)}</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
           {/* Checkout Form */}
-          <div>
+          <div className="lg:order-1">
             <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <CreditCard className="h-5 w-5 mr-2" />
-                  Checkout Information
+              <CardHeader className="pb-6">
+                <CardTitle className="text-xl flex items-center">
+                  <User className="h-5 w-5 mr-2 text-blue-600" />
+                  Checkout Details
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <Form {...form}>
                   <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                    <FormField
-                      control={form.control}
-                      name="customerName"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Full Name</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Enter your full name" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                    {/* Customer Information */}
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                        <User className="h-4 w-4 mr-2" />
+                        Customer Information
+                      </h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <FormField
+                          control={form.control}
+                          name="customerName"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Full Name *</FormLabel>
+                              <FormControl>
+                                <Input placeholder="Enter your full name" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name="customerEmail"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Email Address *</FormLabel>
+                              <FormControl>
+                                <Input placeholder="your@email.com" type="email" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                      <div className="mt-4">
+                        <FormField
+                          control={form.control}
+                          name="customerPhone"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>WhatsApp Number *</FormLabel>
+                              <FormControl>
+                                <Input 
+                                  placeholder="+91 98765 43210" 
+                                  {...field}
+                                />
+                              </FormControl>
+                              <p className="text-xs text-gray-500 mt-1">Include country code (e.g., +91 for India)</p>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                    </div>
 
-                    <FormField
-                      control={form.control}
-                      name="customerEmail"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Email Address</FormLabel>
-                          <FormControl>
-                            <Input type="email" placeholder="Enter your email" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                    {/* Shipping Address */}
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                        <MapPin className="h-4 w-4 mr-2" />
+                        Shipping Address
+                      </h3>
+                      <div className="space-y-4">
+                        <FormField
+                          control={form.control}
+                          name="shippingAddress"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Complete Address *</FormLabel>
+                              <FormControl>
+                                <Textarea 
+                                  placeholder="House/Flat number, Street name, Area, Landmark"
+                                  className="resize-none"
+                                  rows={3}
+                                  {...field}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <FormField
+                            control={form.control}
+                            name="city"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>City *</FormLabel>
+                                <FormControl>
+                                  <Input placeholder="City" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name="state"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>State *</FormLabel>
+                                <Select onValueChange={field.onChange} value={field.value}>
+                                  <FormControl>
+                                    <SelectTrigger>
+                                      <SelectValue placeholder="Select state" />
+                                    </SelectTrigger>
+                                  </FormControl>
+                                  <SelectContent>
+                                    {indianStates.map(state => (
+                                      <SelectItem key={state} value={state}>
+                                        {state}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name="pincode"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Pincode *</FormLabel>
+                                <FormControl>
+                                  <Input placeholder="123456" maxLength={6} {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                      </div>
+                    </div>
 
-                    <FormField
-                      control={form.control}
-                      name="customerPhone"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Phone Number</FormLabel>
-                          <FormControl>
-                            <Input type="tel" placeholder="Enter your phone number" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                    {/* Shipping Info */}
+                    <div className="bg-blue-50 p-4 rounded-lg">
+                      <h4 className="font-medium text-blue-900 mb-2">Shipping Information</h4>
+                      <ul className="text-sm text-blue-800 space-y-1">
+                        <li>• Free shipping on orders above ₹1,999</li>
+                        <li>• Gujarat: ₹50/kg, Outside Gujarat: ₹80/kg</li>
+                        <li>• Shipping cost doubles for orders above 1kg</li>
+                      </ul>
+                    </div>
 
-                    <FormField
-                      control={form.control}
-                      name="shippingAddress"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Shipping Address</FormLabel>
-                          <FormControl>
-                            <Textarea
-                              placeholder="Enter your complete shipping address"
-                              className="min-h-[100px]"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <Button
-                      type="submit"
-                      size="lg"
-                      className="w-full"
-                      disabled={isProcessing || createOrderMutation.isPending}
-                    >
-                      {isProcessing || createOrderMutation.isPending ? "Processing..." : "Place Order"}
-                    </Button>
+                    {/* Action Buttons */}
+                    <div className="flex space-x-4 pt-4">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="flex-1"
+                        onClick={() => setLocation("/products")}
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        type="submit"
+                        className="flex-1 bg-blue-600 hover:bg-blue-700"
+                        disabled={isProcessing || createOrderMutation.isPending}
+                      >
+                        {isProcessing ? "Processing..." : "Continue to Review"}
+                      </Button>
+                    </div>
                   </form>
                 </Form>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Order Summary */}
-          <div>
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Truck className="h-5 w-5 mr-2" />
-                  Order Summary
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {/* Order Items */}
-                  <div className="space-y-3">
-                    {state.items.map((item) => (
-                      <div key={item.productId} className="flex items-center space-x-3">
-                        {item.imageUrl && (
-                          <img
-                            src={item.imageUrl}
-                            alt={item.name}
-                            className="w-12 h-12 object-cover rounded"
-                          />
-                        )}
-                        <div className="flex-1">
-                          <h4 className="font-medium text-sm">{item.name}</h4>
-                          {item.weight && (
-                            <p className="text-blue-600 text-xs font-medium mb-1">Size: {item.weight}</p>
-                          )}
-                          <p className="text-gray-600 text-sm">
-                            Qty: {item.quantity} × ₹{item.price.toFixed(2)}
-                          </p>
-                        </div>
-                        <span className="font-medium">
-                          ₹{(item.price * item.quantity).toFixed(2)}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-
-                  <hr />
-
-                  {/* Price Breakdown */}
-                  <div className="space-y-2">
-                    <div className="flex justify-between">
-                      <span>Subtotal</span>
-                      <span>₹{totalPrice.toFixed(2)}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Shipping</span>
-                      <span>{shipping === 0 ? "Free" : `₹${shipping.toFixed(2)}`}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Tax</span>
-                      <span>₹{tax.toFixed(2)}</span>
-                    </div>
-                    <hr />
-                    <div className="flex justify-between text-lg font-semibold">
-                      <span>Total</span>
-                      <span className="text-primary">₹{finalTotal.toFixed(2)}</span>
-                    </div>
-                  </div>
-
-                  {/* Shipping Info */}
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <p className="text-sm text-gray-600">
-                      <Truck className="h-4 w-4 inline mr-2" />
-                      {shipping === 0 
-                        ? "🎉 You qualify for free shipping!" 
-                        : `Add ₹${(50 - totalPrice).toFixed(2)} more for free shipping`
-                      }
-                    </p>
-                  </div>
-                </div>
               </CardContent>
             </Card>
           </div>
