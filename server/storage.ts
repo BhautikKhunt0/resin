@@ -6,6 +6,7 @@ import {
   orders, 
   admins,
   banners,
+  settings,
   type Category,
   type Subcategory,
   type Product,
@@ -13,13 +14,15 @@ import {
   type Order,
   type Admin,
   type Banner,
+  type Setting,
   type InsertCategory,
   type InsertSubcategory,
   type InsertProduct,
   type InsertProductImage,
   type InsertOrder,
   type InsertAdmin,
-  type InsertBanner
+  type InsertBanner,
+  type InsertSetting
 } from "@shared/schema";
 
 export interface IStorage {
@@ -73,6 +76,13 @@ export interface IStorage {
   createBanner(banner: InsertBanner): Promise<Banner>;
   updateBanner(id: number, banner: Partial<InsertBanner>): Promise<Banner | undefined>;
   deleteBanner(id: number): Promise<boolean>;
+
+  // Settings
+  getSettings(): Promise<Setting[]>;
+  getSettingByKey(key: string): Promise<Setting | undefined>;
+  createSetting(setting: InsertSetting): Promise<Setting>;
+  updateSetting(key: string, value: string): Promise<Setting | undefined>;
+  deleteSetting(key: string): Promise<boolean>;
 }
 
 export class MemStorage implements IStorage {
@@ -83,6 +93,7 @@ export class MemStorage implements IStorage {
   private orders: Map<number, Order>;
   private admins: Map<number, Admin>;
   private banners: Map<number, Banner>;
+  private settings: Map<string, Setting>;
   private currentCategoryId: number;
   private currentSubcategoryId: number;
   private currentProductId: number;
@@ -90,6 +101,7 @@ export class MemStorage implements IStorage {
   private currentOrderId: number;
   private currentAdminId: number;
   private currentBannerId: number;
+  private currentSettingId: number;
 
   constructor() {
     this.categories = new Map();
@@ -99,6 +111,7 @@ export class MemStorage implements IStorage {
     this.orders = new Map();
     this.admins = new Map();
     this.banners = new Map();
+    this.settings = new Map();
     this.currentCategoryId = 1;
     this.currentSubcategoryId = 1;
     this.currentProductId = 1;
@@ -106,6 +119,7 @@ export class MemStorage implements IStorage {
     this.currentOrderId = 1;
     this.currentAdminId = 1;
     this.currentBannerId = 1;
+    this.currentSettingId = 1;
 
     this.seedData();
   }

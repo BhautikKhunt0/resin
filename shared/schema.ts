@@ -71,6 +71,14 @@ export const banners = pgTable("banners", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+export const settings = pgTable("settings", {
+  id: serial("id").primaryKey(),
+  key: text("key").notNull().unique(),
+  value: text("value").notNull(),
+  description: text("description"),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
 // Insert schemas
 export const insertCategorySchema = createInsertSchema(categories).omit({
   id: true,
@@ -115,6 +123,11 @@ export const insertProductImageSchema = createInsertSchema(productImages).omit({
   productId: z.number().int().min(1).max(Number.MAX_SAFE_INTEGER),
 });
 
+export const insertSettingSchema = createInsertSchema(settings).omit({
+  id: true,
+  updatedAt: true,
+});
+
 // Types
 export type Category = typeof categories.$inferSelect;
 export type InsertCategory = z.infer<typeof insertCategorySchema>;
@@ -136,6 +149,9 @@ export type InsertAdmin = z.infer<typeof insertAdminSchema>;
 
 export type Banner = typeof banners.$inferSelect;
 export type InsertBanner = z.infer<typeof insertBannerSchema>;
+
+export type Setting = typeof settings.$inferSelect;
+export type InsertSetting = z.infer<typeof insertSettingSchema>;
 
 // Extended types for frontend
 export type WeightVariant = {
