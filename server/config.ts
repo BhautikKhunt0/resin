@@ -79,5 +79,5 @@ export const config: AppConfig = {
 console.log('✓ Environment configuration loaded successfully');
 console.log(`✓ Database: ${config.mongodb.uri.includes('mongodb') ? 'MongoDB configured' : 'Invalid MongoDB URI'}`);
 console.log(`✓ Email: ${config.email.user}`);
-console.log(`✓ Admin: ${config.admin.email} (password auto-hashed)`);
+console.log(`✓ Admin: ${config.admin.email} (password auto-hashed from .env)`);
 console.log(`✓ Server: Port ${config.server.port}, Environment: ${config.server.nodeEnv}`);
