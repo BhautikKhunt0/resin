@@ -525,6 +525,43 @@ export class MemStorage implements IStorage {
   async deleteBanner(id: number): Promise<boolean> {
     return this.banners.delete(id);
   }
+
+  // Settings methods
+  async getSettings(): Promise<Setting[]> {
+    return Array.from(this.settings.values());
+  }
+
+  async getSettingByKey(key: string): Promise<Setting | undefined> {
+    return this.settings.get(key);
+  }
+
+  async createSetting(setting: InsertSetting): Promise<Setting> {
+    const newSetting: Setting = {
+      ...setting,
+      id: this.currentSettingId++,
+      description: setting.description || null,
+      updatedAt: new Date(),
+    };
+    this.settings.set(setting.key, newSetting);
+    return newSetting;
+  }
+
+  async updateSetting(key: string, value: string): Promise<Setting | undefined> {
+    const existingSetting = this.settings.get(key);
+    if (!existingSetting) return undefined;
+
+    const updatedSetting: Setting = {
+      ...existingSetting,
+      value,
+      updatedAt: new Date(),
+    };
+    this.settings.set(key, updatedSetting);
+    return updatedSetting;
+  }
+
+  async deleteSetting(key: string): Promise<boolean> {
+    return this.settings.delete(key);
+  }
 }
 
 import { MongoDBStorage } from "./mongodb-storage";

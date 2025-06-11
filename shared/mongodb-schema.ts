@@ -162,3 +162,21 @@ const bannerSchema = new Schema<IBanner>({
 }, { timestamps: false });
 
 export const BannerModel = model<IBanner>('Banner', bannerSchema);
+
+// Settings Schema
+export interface ISetting extends Document {
+  _id: string;
+  key: string;
+  value: string;
+  description?: string;
+  updatedAt: Date;
+}
+
+const settingSchema = new Schema<ISetting>({
+  key: { type: String, required: true, unique: true },
+  value: { type: String, required: true },
+  description: { type: String },
+  updatedAt: { type: Date, default: Date.now }
+}, { timestamps: false });
+
+export const SettingModel = model<ISetting>('Setting', settingSchema);

@@ -6,13 +6,15 @@ import {
   type Order,
   type Admin,
   type Banner,
+  type Setting,
   type InsertCategory,
   type InsertSubcategory,
   type InsertProduct,
   type InsertProductImage,
   type InsertOrder,
   type InsertAdmin,
-  type InsertBanner
+  type InsertBanner,
+  type InsertSetting
 } from "@shared/schema";
 import { IStorage } from "./storage";
 import {
@@ -23,13 +25,15 @@ import {
   OrderModel,
   AdminModel,
   BannerModel,
+  SettingModel,
   type ICategory,
   type ISubcategory,
   type IProduct,
   type IProductImage,
   type IOrder,
   type IAdmin,
-  type IBanner
+  type IBanner,
+  type ISetting
 } from "@shared/mongodb-schema";
 
 export class MongoDBStorage implements IStorage {
@@ -151,6 +155,16 @@ export class MongoDBStorage implements IStorage {
       imageBlob: doc.imageBlob ? doc.imageBlob.toString('base64') : null,
       isActive: doc.isActive,
       createdAt: doc.createdAt
+    };
+  }
+
+  private convertSetting(doc: ISetting): Setting {
+    return {
+      id: parseInt(doc._id.toString().slice(-8), 16),
+      key: doc.key,
+      value: doc.value,
+      description: doc.description || null,
+      updatedAt: doc.updatedAt,
     };
   }
 
