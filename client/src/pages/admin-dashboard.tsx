@@ -822,19 +822,19 @@ export default function AdminDashboard() {
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
       `}>
         {/* Sidebar Header */}
-        <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200 bg-gradient-to-r from-pink-700 to-pink-800 flex-shrink-0">
-          <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center">
+        <div className="flex items-center justify-between h-16 px-4 border-b border-gray-200 bg-gradient-to-r from-pink-700 to-pink-800 flex-shrink-0">
+          <div className="flex items-center space-x-3 min-w-0 flex-1">
+            <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center flex-shrink-0">
               <Package className="h-5 w-5 text-pink-700" />
             </div>
-            <div>
-              <h1 className="text-lg font-bold text-white">The Resin Studio</h1>
-              <p className="text-pink-100 text-xs">Admin Panel</p>
+            <div className="min-w-0 flex-1">
+              <h1 className="text-lg font-bold text-white truncate leading-tight">The Resin Studio</h1>
+              <p className="text-pink-100 text-xs leading-tight">Admin Panel</p>
             </div>
           </div>
           <button
             onClick={() => setSidebarOpen(false)}
-            className="lg:hidden p-1.5 rounded-md text-pink-100 hover:text-white hover:bg-pink-600"
+            className="lg:hidden p-1.5 rounded-md text-pink-100 hover:text-white hover:bg-pink-600 flex-shrink-0 ml-2"
           >
             <X className="h-4 w-4" />
           </button>
