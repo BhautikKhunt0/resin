@@ -2835,15 +2835,15 @@ export default function AdminDashboard() {
 
       {/* Settings Tab */}
       {activeTab === "settings" && (
-        <div className="space-y-8">
-          <div className="flex items-center justify-between">
+        <div className="space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Settings</h1>
-              <p className="text-gray-600 mt-2">Manage your store settings and configuration</p>
+              <h2 className="text-2xl font-bold text-gray-900">Settings</h2>
+              <p className="text-gray-600 mt-1">Manage your store settings and configuration</p>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-6xl">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* WhatsApp Configuration Card */}
             <Card className="border-0 shadow-lg">
               <CardHeader className="bg-gradient-to-r from-green-50 to-green-100 border-b border-green-200">
