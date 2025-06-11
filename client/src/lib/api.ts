@@ -214,7 +214,7 @@ export const api = {
         'Authorization': `Bearer ${token}`,
       },
       body: JSON.stringify(data),
-    }),
+    }).then(res => res.json()),
   updateSetting: (token: string, key: string, value: string) =>
     fetch(`/api/admin/settings/${key}`, {
       method: 'PUT',
@@ -223,7 +223,7 @@ export const api = {
         'Authorization': `Bearer ${token}`,
       },
       body: JSON.stringify({ value }),
-    }),
+    }).then(res => res.json()),
   deleteSetting: (token: string, key: string) =>
     fetch(`/api/admin/settings/${key}`, {
       method: 'DELETE',
