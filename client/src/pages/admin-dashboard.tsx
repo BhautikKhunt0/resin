@@ -2836,12 +2836,8 @@ export default function AdminDashboard() {
       {/* Settings Tab */}
       {activeTab === "settings" && (
         <div className="space-y-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">Settings</h1>
-              <p className="text-gray-600 mt-2">Manage your store settings and configuration</p>
-            </div>
-          </div>
+          <h1 className="text-3xl font-bold text-gray-900">Settings</h1>
+          <p className="text-gray-600 mt-2">Manage your store settings and configuration</p>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-6xl">
             {/* WhatsApp Configuration Card */}
@@ -2990,13 +2986,15 @@ export default function AdminDashboard() {
                   </p>
                   {isEditingTerms ? (
                     <div className="space-y-4">
-                      <Textarea
-                        value={termsOfService}
-                        onChange={(e) => setTermsOfService(e.target.value)}
-                        placeholder="Enter your Terms of Service content..."
-                        className="min-h-[400px] font-mono text-sm border-2 border-blue-200 focus:border-blue-400"
-                        rows={20}
-                      />
+                      <div className="w-full max-w-full">
+                        <Textarea
+                          value={termsOfService}
+                          onChange={(e) => setTermsOfService(e.target.value)}
+                          placeholder="Enter your Terms of Service content..."
+                          className="w-full h-80 resize-none font-mono text-sm border-2 border-blue-200 focus:border-blue-400 overflow-y-auto"
+                          rows={15}
+                        />
+                      </div>
                       <div className="flex space-x-3">
                         <Button
                           onClick={() => {
@@ -3078,6 +3076,84 @@ export default function AdminDashboard() {
           </div>
         </div>
       )}
+
+      {/* Order Details Dialog */}
+      <Dialog open={orderDetailsDialogOpen} onOpenChange={setOrderDetailsDialogOpen}>
+        <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+          <DialogTitle className="text-xl font-bold text-gray-900 mb-4">
+            Order Details #{selectedOrder?.id}
+          </DialogTitle>
+          {selectedOrder && (
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <h3 className="font-semibold text-gray-900 mb-3">Customer Information</h3>
+                  <div className="space-y-2 text-sm">
+                    <div><span className="font-medium">Name:</span> {selectedOrder.customerName}</div>
+                    <div><span className="font-medium">Email:</span> {selectedOrder.customerEmail}</div>
+                    <div><span className="font-medium">Phone:</span> {selectedOrder.customerPhone}</div>
+                    <div><span className="font-medium">Address:</span> {selectedOrder.shippingAddress}</div>
+                  </div>
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-900 mb-3">Order Information</h3>
+                  <div className="space-y-2 text-sm">
+                    <div><span className="font-medium">Status:</span> 
+                      <span className={`ml-2 px-2 py-1 rounded-full text-xs ${
+                        selectedOrder.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                        selectedOrder.status === 'confirmed' ? 'bg-blue-100 text-blue-800' :
+                        selectedOrder.status === 'processing' ? 'bg-purple-100 text-purple-800' :
+                        selectedOrder.status === 'shipped' ? 'bg-green-100 text-green-800' :
+                        selectedOrder.status === 'delivered' ? 'bg-emerald-100 text-emerald-800' :
+                        'bg-red-100 text-red-800'
+                      }`}>
+                        {selectedOrder.status}
+                      </span>
+                    </div>
+                    <div><span className="font-medium">Date:</span> {new Date(selectedOrder.createdAt).toLocaleDateString()}</div>
+                    <div><span className="font-medium">Total:</span> ₹{selectedOrder.totalAmount}</div>
+                  </div>
+                </div>
+              </div>
+              
+              <div>
+                <h3 className="font-semibold text-gray-900 mb-3">Order Items</h3>
+                <div className="border border-gray-200 rounded-lg overflow-hidden">
+                  <table className="w-full">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Product</th>
+                        <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Price</th>
+                        <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Quantity</th>
+                        <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Total</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {(() => {
+                        try {
+                          const items = typeof selectedOrder.orderItems === 'string' 
+                            ? JSON.parse(selectedOrder.orderItems) 
+                            : selectedOrder.orderItems;
+                          return Array.isArray(items) ? items.map((item: any, index: number) => (
+                            <tr key={index} className="border-t border-gray-200">
+                              <td className="px-4 py-2 text-sm">{item.name}</td>
+                              <td className="px-4 py-2 text-sm">₹{item.price}</td>
+                              <td className="px-4 py-2 text-sm">{item.quantity}</td>
+                              <td className="px-4 py-2 text-sm">₹{(parseFloat(item.price) * item.quantity).toFixed(2)}</td>
+                            </tr>
+                          )) : <tr><td colSpan={4} className="px-4 py-2 text-sm text-gray-500">No items found</td></tr>;
+                        } catch (e) {
+                          return <tr><td colSpan={4} className="px-4 py-2 text-sm text-gray-500">Error parsing order items</td></tr>;
+                        }
+                      })()}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
