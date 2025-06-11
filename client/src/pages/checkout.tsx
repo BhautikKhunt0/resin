@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { ArrowLeft, X, MapPin, User, Mail, Phone, Home, Package, ShoppingCart } from "lucide-react";
+import { ArrowLeft, X, MapPin, User, Mail, Phone, Home, Package, ShoppingCart, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -41,6 +41,12 @@ export default function Checkout() {
   const { toast } = useToast();
   const [, setLocation] = useLocation();
   const [isProcessing, setIsProcessing] = useState(false);
+
+  // Fetch WhatsApp number from settings
+  const { data: whatsappData } = useQuery({
+    queryKey: ["/api/settings/whatsapp"],
+    queryFn: () => api.getWhatsAppNumber(),
+  });
 
   const form = useForm<CheckoutFormData>({
     resolver: zodResolver(checkoutSchema),
@@ -112,18 +118,69 @@ export default function Checkout() {
   const subtotal = getTotalPrice();
   const total = subtotal + shipping;
 
+  // Generate WhatsApp message with order details
+  const generateWhatsAppMessage = (orderData: CheckoutFormData) => {
+    const orderItems = state.items.map(item => 
+      `• ${item.name}${item.weight ? ` (${item.weight})` : ''} - Qty: ${item.quantity} - ₹${(item.price * item.quantity).toFixed(2)}`
+    ).join('\n');
+
+    const message = `🛒 *NEW ORDER RECEIVED*
+
+👤 *Customer Details:*
+Name: ${orderData.customerName}
+Email: ${orderData.customerEmail}
+WhatsApp: ${orderData.customerPhone}
+
+📦 *Order Items:*
+${orderItems}
+
+📍 *Shipping Address:*
+${orderData.shippingAddress}
+${orderData.city}, ${orderData.state} - ${orderData.pincode}
+
+💰 *Order Summary:*
+Subtotal: ₹${subtotal.toFixed(2)}
+Shipping: ₹${shipping.toFixed(2)}
+*Total: ₹${total.toFixed(2)}*
+
+⚖️ Total Weight: ${totalWeight.toFixed(2)} kg
+
+Please confirm this order and provide delivery timeline.`;
+
+    return encodeURIComponent(message);
+  };
+
   const createOrderMutation = useMutation({
-    mutationFn: async (orderData: InsertOrder) => {
-      const response = await api.createOrder(orderData);
-      return response.json();
+    mutationFn: async (data: { orderData: InsertOrder; formData: CheckoutFormData }) => {
+      const response = await api.createOrder(data.orderData);
+      return { order: await response.json(), formData: data.formData };
     },
-    onSuccess: (order) => {
-      clearCart();
-      toast({
-        title: "Order placed successfully!",
-        description: `Order #${order.id} has been placed. Check your email for confirmation.`,
-      });
-      setLocation("/");
+    onSuccess: ({ order, formData }) => {
+      // Get WhatsApp number and redirect
+      const whatsappNumber = whatsappData?.whatsappNumber;
+      
+      if (whatsappNumber) {
+        const message = generateWhatsAppMessage(formData);
+        const whatsappUrl = `https://wa.me/${whatsappNumber.replace(/[^0-9]/g, '')}?text=${message}`;
+        
+        // Clear cart and redirect to WhatsApp
+        clearCart();
+        window.open(whatsappUrl, '_blank');
+        
+        toast({
+          title: "Order placed successfully!",
+          description: `Order #${order.id} has been placed. You're being redirected to WhatsApp to confirm the order.`,
+        });
+        setLocation("/");
+      } else {
+        // Fallback if no WhatsApp number is configured
+        clearCart();
+        toast({
+          title: "Order placed successfully!",
+          description: `Order #${order.id} has been placed. Check your email for confirmation.`,
+        });
+        setLocation("/");
+      }
     },
     onError: (error) => {
       toast({
@@ -166,7 +223,7 @@ export default function Checkout() {
       status: "Processing",
     };
 
-    createOrderMutation.mutate(orderData);
+    createOrderMutation.mutate({ orderData, formData: data });
     setIsProcessing(false);
   };
 
@@ -434,10 +491,17 @@ export default function Checkout() {
                       </Button>
                       <Button
                         type="submit"
-                        className="flex-1 bg-blue-600 hover:bg-blue-700"
+                        className="flex-1 bg-green-600 hover:bg-green-700"
                         disabled={isProcessing || createOrderMutation.isPending}
                       >
-                        {isProcessing ? "Processing..." : "Continue to Review"}
+                        {isProcessing ? (
+                          "Processing..."
+                        ) : (
+                          <div className="flex items-center">
+                            <MessageCircle className="h-4 w-4 mr-2" />
+                            {whatsappData?.whatsappNumber ? "Continue to WhatsApp" : "Continue to Review"}
+                          </div>
+                        )}
                       </Button>
                     </div>
                   </form>
