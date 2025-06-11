@@ -59,6 +59,10 @@ const productSchema = new Schema<IProduct>({
   description: { type: String, required: true },
   price: { type: String, required: true },
   weight: { type: String },
+  weightVariants: [{ 
+    weight: { type: String, required: true },
+    price: { type: Number, required: true }
+  }],
   imageUrl: { type: String },
   imageBlob: { type: Buffer },
   categoryId: { type: String, required: true },
