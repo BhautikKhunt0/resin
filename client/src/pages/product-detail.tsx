@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useRoute } from "wouter";
+import { useRoute, useLocation } from "wouter";
 import { useState } from "react";
 import { ArrowLeft, ShoppingCart, Package, Truck, Shield, ChevronLeft, ChevronRight, Minus, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -14,8 +14,9 @@ import type { Product, ProductImage, WeightVariant } from "@shared/schema";
 
 export default function ProductDetail() {
   const [, params] = useRoute("/products/:id");
+  const [, setLocation] = useLocation();
   const productId = params?.id ? parseInt(params.id) : null;
-  const { addItem } = useCart();
+  const { addItem, buyNow } = useCart();
   const { toast } = useToast();
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [selectedWeight, setSelectedWeight] = useState<string>("");

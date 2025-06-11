@@ -1,4 +1,4 @@
-import { createContext, useContext, useReducer, ReactNode } from 'react';
+import { createContext, useContext, useReducer, ReactNode, useEffect } from 'react';
 import type { CartItem } from '@shared/schema';
 
 interface CartState {
@@ -13,7 +13,8 @@ type CartAction =
   | { type: 'CLEAR_CART' }
   | { type: 'TOGGLE_CART' }
   | { type: 'OPEN_CART' }
-  | { type: 'CLOSE_CART' };
+  | { type: 'CLOSE_CART' }
+  | { type: 'LOAD_FROM_STORAGE'; payload: CartItem[] };
 
 const cartReducer = (state: CartState, action: CartAction): CartState => {
   switch (action.type) {
@@ -68,6 +69,11 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
         ...state,
         isOpen: false,
       };
+    case 'LOAD_FROM_STORAGE':
+      return {
+        ...state,
+        items: action.payload,
+      };
     default:
       return state;
   }
@@ -84,6 +90,7 @@ interface CartContextType {
   closeCart: () => void;
   getTotalItems: () => number;
   getTotalPrice: () => number;
+  buyNow: (item: CartItem) => void;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -93,6 +100,28 @@ export function CartProvider({ children }: { children: ReactNode }) {
     items: [],
     isOpen: false,
   });
+
+  // Load cart from localStorage on mount
+  useEffect(() => {
+    try {
+      const savedCart = localStorage.getItem('cart');
+      if (savedCart) {
+        const cartItems: CartItem[] = JSON.parse(savedCart);
+        dispatch({ type: 'LOAD_FROM_STORAGE', payload: cartItems });
+      }
+    } catch (error) {
+      console.error('Error loading cart from localStorage:', error);
+    }
+  }, []);
+
+  // Save cart to localStorage whenever it changes
+  useEffect(() => {
+    try {
+      localStorage.setItem('cart', JSON.stringify(state.items));
+    } catch (error) {
+      console.error('Error saving cart to localStorage:', error);
+    }
+  }, [state.items]);
 
   const addItem = (item: CartItem) => {
     dispatch({ type: 'ADD_ITEM', payload: item });
@@ -130,6 +159,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
     return state.items.reduce((total, item) => total + (item.price * item.quantity), 0);
   };
 
+  const buyNow = (item: CartItem) => {
+    // Clear current cart and add only this item
+    dispatch({ type: 'CLEAR_CART' });
+    dispatch({ type: 'ADD_ITEM', payload: item });
+    // Navigate to checkout will be handled in the component
+  };
+
   return (
     <CartContext.Provider
       value={{
@@ -143,6 +179,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         closeCart,
         getTotalItems,
         getTotalPrice,
+        buyNow,
       }}
     >
       {children}
