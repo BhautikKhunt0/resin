@@ -60,7 +60,7 @@ export default function CartSidebar() {
                           variant="outline"
                           size="sm"
                           onClick={() =>
-                            updateQuantity(item.productId, item.quantity - 1)
+                            updateQuantity(item.productId, item.weight, item.quantity - 1)
                           }
                           className="h-8 w-8 p-0"
                         >
@@ -73,7 +73,7 @@ export default function CartSidebar() {
                           variant="outline"
                           size="sm"
                           onClick={() =>
-                            updateQuantity(item.productId, item.quantity + 1)
+                            updateQuantity(item.productId, item.weight, item.quantity + 1)
                           }
                           className="h-8 w-8 p-0"
                         >

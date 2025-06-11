@@ -8,8 +8,8 @@ interface CartState {
 
 type CartAction =
   | { type: 'ADD_ITEM'; payload: CartItem }
-  | { type: 'REMOVE_ITEM'; payload: number }
-  | { type: 'UPDATE_QUANTITY'; payload: { productId: number; quantity: number } }
+  | { type: 'REMOVE_ITEM'; payload: { productId: number; weight?: string } }
+  | { type: 'UPDATE_QUANTITY'; payload: { productId: number; weight?: string; quantity: number } }
   | { type: 'CLEAR_CART' }
   | { type: 'TOGGLE_CART' }
   | { type: 'OPEN_CART' }
@@ -19,12 +19,15 @@ type CartAction =
 const cartReducer = (state: CartState, action: CartAction): CartState => {
   switch (action.type) {
     case 'ADD_ITEM': {
-      const existingItem = state.items.find(item => item.productId === action.payload.productId);
+      const existingItem = state.items.find(item => 
+        item.productId === action.payload.productId && 
+        item.weight === action.payload.weight
+      );
       if (existingItem) {
         return {
           ...state,
           items: state.items.map(item =>
-            item.productId === action.payload.productId
+            item.productId === action.payload.productId && item.weight === action.payload.weight
               ? { ...item, quantity: item.quantity + action.payload.quantity }
               : item
           ),
@@ -38,13 +41,15 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
     case 'REMOVE_ITEM':
       return {
         ...state,
-        items: state.items.filter(item => item.productId !== action.payload),
+        items: state.items.filter(item => 
+          !(item.productId === action.payload.productId && item.weight === action.payload.weight)
+        ),
       };
     case 'UPDATE_QUANTITY':
       return {
         ...state,
         items: state.items.map(item =>
-          item.productId === action.payload.productId
+          item.productId === action.payload.productId && item.weight === action.payload.weight
             ? { ...item, quantity: Math.max(0, action.payload.quantity) }
             : item
         ).filter(item => item.quantity > 0),
@@ -82,8 +87,8 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
 interface CartContextType {
   state: CartState;
   addItem: (item: CartItem) => void;
-  removeItem: (productId: number) => void;
-  updateQuantity: (productId: number, quantity: number) => void;
+  removeItem: (productId: number, weight?: string) => void;
+  updateQuantity: (productId: number, weight: string | undefined, quantity: number) => void;
   clearCart: () => void;
   toggleCart: () => void;
   openCart: () => void;
@@ -127,12 +132,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
     dispatch({ type: 'ADD_ITEM', payload: item });
   };
 
-  const removeItem = (productId: number) => {
-    dispatch({ type: 'REMOVE_ITEM', payload: productId });
+  const removeItem = (productId: number, weight?: string) => {
+    dispatch({ type: 'REMOVE_ITEM', payload: { productId, weight } });
   };
 
-  const updateQuantity = (productId: number, quantity: number) => {
-    dispatch({ type: 'UPDATE_QUANTITY', payload: { productId, quantity } });
+  const updateQuantity = (productId: number, weight: string | undefined, quantity: number) => {
+    dispatch({ type: 'UPDATE_QUANTITY', payload: { productId, weight, quantity } });
   };
 
   const clearCart = () => {
