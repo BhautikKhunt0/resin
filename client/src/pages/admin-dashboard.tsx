@@ -2943,35 +2943,39 @@ export default function AdminDashboard() {
 
       {/* Content Management Tab */}
       {activeTab === "content" && (
-        <div className="space-y-6">
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900">Content Management</h2>
-            <p className="text-gray-600 mt-1">Manage website content and legal pages</p>
+        <div className="max-w-4xl">
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold text-gray-900">Content Management</h1>
+            <p className="text-gray-600 mt-2">Manage website content and legal pages</p>
           </div>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Terms of Service</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="flex-1">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+          <div className="space-y-6">
+            <Card className="border-0 shadow-lg">
+              <CardHeader className="bg-gradient-to-r from-blue-50 to-blue-100 border-b border-blue-200">
+                <CardTitle className="flex items-center text-blue-800">
+                  <FileText className="h-5 w-5 mr-2" />
+                  Terms of Service
+                </CardTitle>
+                <p className="text-blue-600 text-sm mt-1">Manage your website's Terms of Service content</p>
+              </CardHeader>
+              <CardContent className="p-6 space-y-6">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-800 mb-2">
                     Terms of Service Content
                   </label>
-                  <p className="text-sm text-gray-500 mb-3">
+                  <p className="text-sm text-gray-600 mb-4">
                     This content will be displayed on the Terms of Service page
                   </p>
                   {isEditingTerms ? (
-                    <div className="space-y-3">
+                    <div className="space-y-4">
                       <Textarea
                         value={termsOfService}
                         onChange={(e) => setTermsOfService(e.target.value)}
                         placeholder="Enter your Terms of Service content..."
-                        className="min-h-[400px] font-mono text-sm"
+                        className="min-h-[400px] font-mono text-sm border-2 border-blue-200 focus:border-blue-400"
                         rows={20}
                       />
-                      <div className="flex space-x-2">
+                      <div className="flex space-x-3">
                         <Button
                           onClick={() => {
                             if (termsOfService.trim()) {
@@ -2979,9 +2983,9 @@ export default function AdminDashboard() {
                             }
                           }}
                           disabled={updateTermsMutation.isPending}
-                          size="sm"
+                          className="bg-blue-600 hover:bg-blue-700"
                         >
-                          {updateTermsMutation.isPending ? "Saving..." : "Save"}
+                          {updateTermsMutation.isPending ? "Saving..." : "Save Changes"}
                         </Button>
                         <Button
                           onClick={() => {
@@ -2989,16 +2993,15 @@ export default function AdminDashboard() {
                             setTermsOfService(termsSetting?.value || "");
                           }}
                           variant="outline"
-                          size="sm"
                         >
                           Cancel
                         </Button>
                       </div>
                     </div>
                   ) : (
-                    <div className="space-y-3">
-                      <div className="p-4 bg-gray-50 rounded-lg border max-h-60 overflow-y-auto">
-                        <div className="text-sm text-gray-700 whitespace-pre-wrap">
+                    <div className="space-y-4">
+                      <div className="border border-gray-200 rounded-lg bg-gray-50 p-4 max-h-80 overflow-y-auto">
+                        <div className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">
                           {termsSetting?.value || "No Terms of Service content configured"}
                         </div>
                       </div>
@@ -3009,48 +3012,48 @@ export default function AdminDashboard() {
                             setTermsOfService(termsSetting?.value || "");
                           }}
                           variant="outline"
-                          size="sm"
+                          className="border-blue-300 text-blue-700 hover:bg-blue-50"
                         >
-                          <Edit className="h-4 w-4 mr-1" />
-                          Edit
+                          <Edit className="h-4 w-4 mr-2" />
+                          Edit Content
                         </Button>
                         <Button
                           onClick={() => window.open('/terms-of-service', '_blank')}
                           variant="outline"
-                          size="sm"
+                          className="border-gray-300 text-gray-700 hover:bg-gray-50"
                         >
-                          <Eye className="h-4 w-4 mr-1" />
-                          Preview
+                          <Eye className="h-4 w-4 mr-2" />
+                          Preview Page
                         </Button>
                       </div>
                     </div>
                   )}
                 </div>
-              </div>
-              
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <div className="flex">
-                  <div className="flex-shrink-0">
-                    <Settings className="h-5 w-5 text-blue-400" />
-                  </div>
-                  <div className="ml-3">
-                    <h3 className="text-sm font-medium text-blue-800">
-                      Formatting Tips
-                    </h3>
-                    <div className="mt-2 text-sm text-blue-700">
-                      <p>You can use simple formatting in your content:</p>
-                      <ul className="list-disc list-inside mt-2 space-y-1">
-                        <li><strong># Title</strong> for main headings</li>
-                        <li><strong>## Subtitle</strong> for section headings</li>
-                        <li><strong>**bold text**</strong> for emphasis</li>
-                        <li><strong>*italic text*</strong> for emphasis</li>
-                      </ul>
+                
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <div className="flex">
+                    <div className="flex-shrink-0">
+                      <FileText className="h-5 w-5 text-blue-500" />
+                    </div>
+                    <div className="ml-3">
+                      <h3 className="text-sm font-semibold text-blue-800 mb-2">
+                        Formatting Tips
+                      </h3>
+                      <div className="text-sm text-blue-700">
+                        <p className="mb-2">You can use simple formatting in your content:</p>
+                        <ul className="list-disc list-inside space-y-1">
+                          <li><strong># Title</strong> for main headings</li>
+                          <li><strong>## Subtitle</strong> for section headings</li>
+                          <li><strong>**bold text**</strong> for emphasis</li>
+                          <li><strong>*italic text*</strong> for emphasis</li>
+                        </ul>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       )}
     </div>
