@@ -1,4 +1,4 @@
-name = "your-worker-name"
+name = "resin"
 compatibility_date = "2025-06-12"
 
 main = "src/index.ts"
